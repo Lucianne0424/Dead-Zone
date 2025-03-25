@@ -17,6 +17,7 @@
 #include "SphereCollider.h"
 #include "MeshData.h"
 #include "TestDragon.h"
+#include "TestObjectScript.h"
 
 void SceneManager::Update()
 {
@@ -197,7 +198,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 #pragma region Object
-	/*{
+	{
 		shared_ptr<GameObject> obj = make_shared<GameObject>();
 		obj->SetName(L"OBJ");
 		obj->AddComponent(make_shared<Transform>());
@@ -217,12 +218,13 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetRadius(0.5f);
 		dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
 		obj->AddComponent(meshRenderer);
+		obj->AddComponent(make_shared<TestObjectScript>());
 		scene->AddGameObject(obj);
-	}*/
+	}
 #pragma endregion
 
 #pragma region Terrain
-	/*{
+	{
 		shared_ptr<GameObject> obj = make_shared<GameObject>();
 		obj->AddComponent(make_shared<Transform>());
 		obj->AddComponent(make_shared<Terrain>());
@@ -235,7 +237,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		obj->SetCheckFrustum(false);
 
 		scene->AddGameObject(obj);
-	}*/
+	}
 #pragma endregion
 
 #pragma region UI_Test
@@ -290,23 +292,23 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 
 
 #pragma region FBX
-	{
-		// FBX 출력 테스트
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\treasure_chest.fbx");
+	//{
+	//	// FBX 출력 테스트
+	//	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\treasure_chest.fbx");
 
-		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+	//	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
 
-		for (auto& gameObject : gameObjects)
-		{
-			gameObject->SetName(L"Dragon");
-			gameObject->SetCheckFrustum(false);
-			//gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 300.f));
-			//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
-			//gameObject->GetTransform()->SetLocalRotation(Vec3(-3.14 / 2, 0.f, 0.f));
-			scene->AddGameObject(gameObject);
-			gameObject->AddComponent(make_shared<TestDragon>());
-		}
-	}
+	//	for (auto& gameObject : gameObjects)
+	//	{
+	//		gameObject->SetName(L"Dragon");
+	//		gameObject->SetCheckFrustum(false);
+	//		//gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 300.f));
+	//		//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
+	//		//gameObject->GetTransform()->SetLocalRotation(Vec3(-3.14 / 2, 0.f, 0.f));
+	//		scene->AddGameObject(gameObject);
+	//		gameObject->AddComponent(make_shared<TestDragon>());
+	//	}
+	//}
 #pragma endregion
 
 	return scene;
