@@ -52,8 +52,8 @@ using namespace Microsoft::WRL;
 #pragma comment(lib, "FBX\\debug\\libxml2-md.lib")
 #pragma comment(lib, "FBX\\debug\\zlib-md.lib")
 #else
-#pragma comment(lib, "FBX\\release\libfbxsdk-md.lib")
-#pragma comment(lib, "FBX\\release\libxml2-md.lib")
+#pragma comment(lib, "FBX\\release\\libfbxsdk-md.lib")
+#pragma comment(lib, "FBX\\release\\libxml2-md.lib")
 #pragma comment(lib, "FBX\\release\\zlib-md.lib")
 #endif
 
@@ -192,3 +192,7 @@ extern unique_ptr<class Engine> GEngine;
 // Utils
 wstring s2ws(const string& s);
 string ws2s(const wstring& s);
+
+#define PI ((FLOAT) 3.141592654F)
+#define RadianToDegree(radian) ((radian) * (180.0f / PI))
+#define DegreeToRadian(degree) ((degree) * (PI / 180.0f))

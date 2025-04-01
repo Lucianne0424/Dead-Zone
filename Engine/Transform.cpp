@@ -16,9 +16,24 @@ Transform::~Transform()
 void Transform::FinalUpdate()
 {
 	Matrix matScale = Matrix::CreateScale(_localScale);
-	Matrix matRotation = Matrix::CreateRotationX(_localRotation.x);
-	matRotation *= Matrix::CreateRotationY(_localRotation.y);
-	matRotation *= Matrix::CreateRotationZ(_localRotation.z);
+
+	SimpleMath::Quaternion q;
+
+	float sp = sinf(DegreeToRadian(_localRotation.x) * 0.5f);
+	float cp = cosf(DegreeToRadian(_localRotation.x) * 0.5f);
+
+	float sy = sinf(DegreeToRadian(_localRotation.y) * 0.5f);
+	float cy = cosf(DegreeToRadian(_localRotation.y) * 0.5f);
+
+	float sr = sinf(DegreeToRadian(_localRotation.z) * 0.5f);
+	float cr = cosf(DegreeToRadian(_localRotation.z) * 0.5f);
+
+	q.w = cy * cp * cr + sy * sp * sr;
+	q.x = cy * sp * cr + sy * cp * sr;
+	q.y = sy * cp * cr - cy * sp * sr;
+	q.z = cy * cp * sr - sy * sp * cr;
+
+	Matrix matRotation = Matrix::CreateFromQuaternion(q);
 	Matrix matTranslation = Matrix::CreateTranslation(_localPosition);
 
 	_matLocal = matScale * matRotation * matTranslation;
