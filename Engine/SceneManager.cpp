@@ -219,7 +219,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetRadius(0.5f);
 		dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
 		obj->AddComponent(meshRenderer);
-		obj->AddComponent(make_shared<TestObjectScript>());
+		//obj->AddComponent(make_shared<TestObjectScript>());
 		scene->AddGameObject(obj);
 	}
 #pragma endregion

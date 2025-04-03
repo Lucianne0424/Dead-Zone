@@ -333,5 +333,8 @@
     <FxCompile Include="..\Resources\Shader\animation.fx">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="..\Resources\Shader\HUD.fx">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
