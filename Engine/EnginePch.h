@@ -35,12 +35,14 @@ using namespace Microsoft::WRL;
 
 #include "FBX/fbxsdk.h"
 
+#define DIRECTINPUT_VERSION 0x0800
+
 // °¢Á¾ lib
 #pragma comment(lib, "d3d12")
 #pragma comment(lib, "dxgi")
 #pragma comment(lib, "dxguid")
 #pragma comment(lib, "d3dcompiler")
-#pragma comment(lib, "dinput")
+#pragma comment(lib, "dinput8")
 
 #ifdef _DEBUG
 #pragma comment(lib, "DirectXTex\\DirectXTex_debug.lib")

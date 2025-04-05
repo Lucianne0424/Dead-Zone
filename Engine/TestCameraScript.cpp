@@ -59,20 +59,20 @@ void TestCameraScript::LateUpdate()
 		GetTransform()->SetLocalRotation(rotation);
 	}
 
-	if (INPUT->GetButtonDown(KEY_TYPE::RBUTTON))
+	if (INPUT->GetButtonDown(MOUSE_TYPE::RBUTTON))
 	{
 		const POINT& pos = INPUT->GetMousePos();
 		GET_SINGLE(SceneManager)->Pick(pos.x, pos.y);
 	}
 
-	if (INPUT->GetButtonDown(KEY_TYPE::LBUTTON))
+	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
 	{
 		const POINT& pos = INPUT->GetMousePos();
 		_mousePos.x = pos.x;
 		_mousePos.y = pos.y;
 	}
 
-	if (INPUT->GetButton(KEY_TYPE::LBUTTON))
+	if (INPUT->GetButton(MOUSE_TYPE::LBUTTON))
 	{
 		const POINT& pos = INPUT->GetMousePos();
 		Vec3 rotation = GetTransform()->GetLocalRotation();
