@@ -17,7 +17,9 @@
 #include "SphereCollider.h"
 #include "MeshData.h"
 #include "TestDragon.h"
+
 #include "TestObjectScript.h"
+#include "M91Script.h"
 
 void SceneManager::Update()
 {
@@ -298,6 +300,26 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		}
 		crosshair->AddComponent(meshRenderer);
 		scene->AddGameObject(crosshair);
+	}
+#pragma endregion
+
+#pragma region FirstPerspective
+	{
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\M91.fbx");
+
+		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+		
+		for (auto& gameObject : gameObjects)
+		{
+			gameObject->SetName(L"M91");
+			gameObject->SetCheckFrustum(false);
+			gameObject->GetTransform()->SetLocalPosition(Vec3(30.f, -20.f, 200.f));
+			gameObject->GetTransform()->SetLocalScale(Vec3(3.f, 3.f, 3.f));
+			gameObject->GetTransform()->SetLocalRotation(Vec3(0.f, 170.f, 0.f));
+
+			scene->AddGameObject(gameObject);
+			gameObject->AddComponent(make_shared<M91Script>());
+		}
 	}
 #pragma endregion
 
