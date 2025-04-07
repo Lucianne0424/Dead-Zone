@@ -28,6 +28,12 @@
     <Filter Include="Object\Component\Collider">
       <UniqueIdentifier>{28523ad1-ea9f-4f0b-a896-ddd4f60082df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Gun">
+      <UniqueIdentifier>{7577aad4-d437-42ef-ad66-ed43ba3e4596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Player">
+      <UniqueIdentifier>{ba960a0a-ee21-4513-aba9-3393eaa4ec83}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -158,6 +164,15 @@
     </ClCompile>
     <ClCompile Include="M91Script.cpp">
       <Filter>Object\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Gun.cpp">
+      <Filter>Object\Gun</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Object\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="M91.cpp">
+      <Filter>Object\Gun</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -292,6 +307,15 @@
     </ClInclude>
     <ClInclude Include="M91Script.h">
       <Filter>Object\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Gun.h">
+      <Filter>Object\Gun</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Object\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="M91.h">
+      <Filter>Object\Gun</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

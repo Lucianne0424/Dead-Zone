@@ -178,10 +178,12 @@
     <ClInclude Include="FBXLoader.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Gun.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingManager.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="M91.h" />
     <ClInclude Include="M91Script.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
@@ -191,6 +193,7 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="RenderTargetGroup.h" />
     <ClInclude Include="Resources.h" />
     <ClInclude Include="RootSignature.h" />
@@ -223,10 +226,12 @@
     <ClCompile Include="FBXLoader.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Gun.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingManager.cpp" />
     <ClCompile Include="Light.cpp" />
+    <ClCompile Include="M91.cpp" />
     <ClCompile Include="M91Script.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -241,6 +246,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderTargetGroup.cpp" />
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="RootSignature.cpp" />
