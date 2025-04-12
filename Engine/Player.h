@@ -1,29 +1,28 @@
 #pragma once
-
-class GameObject;
+#include "MonoBehaviour.h"
 
 struct PlayerInfo
 {
 	uint32 id;
 	string name;
 	uint32 level;
-	uint32 exp;
 	uint32 hp;
-	uint32 mp;
 	uint32 attack;
 	uint32 defense;
 };
 
-class Player
+class Player : public MonoBehaviour
 {
 public:
 	Player();
 	virtual ~Player();
+
+	virtual void Awake() override;
+	//virtual void Start() override;
+	virtual void Update() override;
+	virtual void LateUpdate() override;
 	
 private:
 	PlayerInfo info;
-
-	shared_ptr<GameObject> _player;
-	shared_ptr<GameObject> _gun;
 };
 

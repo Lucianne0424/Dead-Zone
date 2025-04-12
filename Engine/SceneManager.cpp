@@ -19,7 +19,7 @@
 #include "TestDragon.h"
 
 #include "TestObjectScript.h"
-#include "M91Script.h"
+#include "M91.h"
 
 void SceneManager::Update()
 {
@@ -313,12 +313,12 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		{
 			gameObject->SetName(L"M91");
 			gameObject->SetCheckFrustum(false);
-			gameObject->GetTransform()->SetLocalPosition(Vec3(30.f, -20.f, 200.f));
-			gameObject->GetTransform()->SetLocalScale(Vec3(3.f, 3.f, 3.f));
-			gameObject->GetTransform()->SetLocalRotation(Vec3(0.f, 170.f, 0.f));
+			//gameObject->GetTransform()->SetLocalPosition(Vec3(30.f, -20.f, 200.f));
+			//gameObject->GetTransform()->SetLocalScale(Vec3(3.f, 3.f, 3.f));
+			//gameObject->GetTransform()->SetLocalRotation(Vec3(0.f, 170.f, 0.f));
 
 			scene->AddGameObject(gameObject);
-			gameObject->AddComponent(make_shared<M91Script>());
+			gameObject->AddComponent(make_shared<M91>());
 		}
 	}
 #pragma endregion
