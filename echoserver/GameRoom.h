@@ -17,21 +17,18 @@ public:
     std::thread gameLoopThread;                // 게임 루프를 수행할 스레드
     std::vector<Zombie> zombies;               // 현재 게임룸 내의 좀비들
 
-    // 생성자: 매칭된 플레이어 리스트를 받아 게임 루프 시작
     GameRoom(const std::vector<PER_SOCKET_CONTEXT*>& playersInput)
         : players(playersInput), running(true)
     {
         gameLoopThread = std::thread(&GameRoom::GameLoop, this);
     }
 
-    // 소멸자: 게임 루프 종료 및 스레드 정리
     ~GameRoom() {
         running = false;
         if (gameLoopThread.joinable())
             gameLoopThread.join();
     }
 
-    // 게임 루프: 웨이브 진행, 좀비 스폰 및 업데이트, 플레이어 시간 기반 이동, 클라이언트 동기화 처리
     void GameLoop() {
         GameManager gameManager;  // 웨이브 진행 관리 객체
         auto lastSpawnTime = std::chrono::steady_clock::now();
@@ -44,10 +41,11 @@ public:
             // 1. 웨이브 상태 업데이트
             gameManager.Update();
 
-            // 2. 플레이어 이동 업데이트: 각 플레이어의 moveX, moveY에 따라 위치를 갱신
+            // 2. 플레이어 이동 업데이트: 각 플레이어의 moveX, moveY, moveZ에 따라 위치를 갱신
             for (auto player : players) {
                 player->posX += player->moveX * player->walkSpeed * dt;
                 player->posY += player->moveY * player->walkSpeed * dt;
+                player->posZ += player->moveZ * player->walkSpeed * dt;
             }
 
             // 3. 좀비 스폰 로직: 최대 10마리까지, spawnInterval마다 랜덤 타입의 좀비 생성
@@ -62,7 +60,7 @@ public:
                 lastSpawnTime = now;
             }
 
-            // 4. 좀비 업데이트: 각 좀비가 고정 타겟 (예 (100, 100)) 쪽으로 이동  --- 추후 플레이어를 향해
+            // 4. 좀비 업데이트: 각 좀비가 고정 타겟 (100, 100) 쪽으로 이동  
             float targetX = 100.0f;
             float targetY = 100.0f;
             for (auto& zombie : zombies) {

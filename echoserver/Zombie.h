@@ -36,10 +36,10 @@ public:
     BossState bossState;
 
     // 현재 위치
-    float x, y;
+    float x, y, z;
 
     // 생성자: 입력된 타입에 따라 스펙 초기화
-    Zombie(ZombieType t) : type(t), x(0.0f), y(0.0f) {
+    Zombie(ZombieType t) : type(t), x(0.0f), y(0.0f), z(0.0f) {
         if (t == BASIC) {
             health = 100;
             attack = 10;

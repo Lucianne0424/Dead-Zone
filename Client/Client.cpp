@@ -1,35 +1,32 @@
-﻿// Client.cpp : 애플리케이션에 대한 진입점을 정의합니다.
-#include "pch.h"
+﻿#include "pch.h"
 #include "framework.h"
 #include "Client.h"
 #include "Game.h"
+#include "protocol.h"     
 #include <iostream>
 #include <memory>
 #include <thread>
 #include <atomic>
 #include <limits>
-#include <windows.h>
+#include <sstream>
+#include <iomanip>
 
 #pragma comment(lib, "ws2_32.lib")
 
 #define MAX_LOADSTRING 100
 
-// 전역 변수:
 WindowInfo GWindowInfo;
 HINSTANCE hInst;
 WCHAR szTitle[MAX_LOADSTRING];
 WCHAR szWindowClass[MAX_LOADSTRING];
 
-// 글로벌 네트워크 소켓
 SOCKET g_clientSocket = INVALID_SOCKET;
 
-// 로그인 상태 플래그 (테스트용: 로그인 명령 자동 전송 후)
+// 로그인 상태 플래그 (테스트용: 로그인 후 설정)
 std::atomic<bool> g_loggedIn(false);
 
-// 게임 시작 플래그 (서버가 "GAME_START" 신호를 보내면 설정)
 std::atomic<bool> g_gameStarted(false);
 
-// 함수 선언:
 ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -63,23 +60,80 @@ bool InitNetwork() {
     return true;
 }
 
-// ReceiverThread: 서버 응답을 지속적으로 수신
 void ReceiverThread(SOCKET clientSocket) {
     char buffer[8192];
     while (true) {
-        int recvResult = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+        int recvResult = recv(clientSocket, buffer, sizeof(buffer), 0);
         if (recvResult > 0) {
-            buffer[recvResult] = '\0';
-            std::string msg(buffer);
-            std::cout << "\n[서버 응답] " << msg << std::endl;
-            // 로그인 응답 처리
-            if (msg.find("LOGIN_OK") != std::string::npos || msg.find("SIGNUP_OK") != std::string::npos) {
-                g_loggedIn = true;
-            }
-            // 게임 시작 신호 처리: "GAME_START"가 포함되면 "GameStart!" 창 표시
-            if (msg.find("GAME_START") != std::string::npos) {
-                g_gameStarted = true;
-                MessageBoxA(NULL, "GameStart!", "Notification", MB_OK);
+            if (recvResult >= 2) {
+                unsigned char pktSize = buffer[0];
+                char pktType = buffer[1];
+                std::ostringstream oss;
+                oss << "[서버 응답] Packet: Size=" << static_cast<int>(pktSize)
+                    << ", Type=" << static_cast<int>(pktType)
+                    << ", Raw Data: ";
+                for (int i = 0; i < recvResult; i++) {
+                    oss << std::hex << std::setw(2) << std::setfill('0')
+                        << (static_cast<int>(static_cast<unsigned char>(buffer[i]))) << " ";
+                }
+                std::cout << "\n" << oss.str() << std::endl;
+
+                switch (pktType) {
+                case S2C_P_PLAYER_INFO: {
+                  //  MessageBoxA(NULL, "로그인 성공 및 플레이어 정보 수신", "Debug - Player Info", MB_OK);  //블로킹 함수라 3번째 클라 게임 시작 안되서 주석 처리 
+                    g_loggedIn = true;
+                    /*
+                        sc_packet_login_ok* pLoginOk = reinterpret_cast<sc_packet_login_ok*>(buffer);
+                        Game::GetInstance()->OnPlayerJoin(pLoginOk->playerId,
+                                                            pLoginOk->position,
+                                                            pLoginOk->health,
+                                                            pLoginOk->walkSpeed,
+                                                            pLoginOk->runSpeed);
+                    */
+                    break;
+                }
+                case S2C_P_MOVE: {
+                    MessageBoxA(NULL, "이동 업데이트 수신", "Debug - Move", MB_OK);
+                    /*
+                     sc_packet_move* pMove = reinterpret_cast<sc_packet_move*>(buffer);
+                        Game::GetInstance()->OnPlayerMove(pMove->playerId,
+                                                            pMove->position,
+                                                            pMove->yaw);
+                    */
+                    break;
+                }
+                case S2C_P_ATTACK: {
+                    MessageBoxA(NULL, "공격 이벤트 수신", "Debug - Attack", MB_OK);
+                    /*
+                     sc_packet_attack* pAttack = reinterpret_cast<sc_packet_attack*>(buffer);
+                        Game::GetInstance()->OnPlayerAttack(pAttack->playerId,
+                                                              pAttack->zombieId,
+                                                              pAttack->impactPoint);
+                    */
+                    break;
+                }
+                case S2C_P_PLAYER_LEAVE: {
+                    MessageBoxA(NULL, "플레이어 퇴장 이벤트 수신", "Debug - Player Leave", MB_OK);
+                    /*
+                     sc_packet_player_leave* pLeave = reinterpret_cast<sc_packet_player_leave*>(buffer);
+                        // 플레이어 퇴장 처리: 해당 플레이어가 게임 화면에서 제거되도록 업데이트
+                        Game::GetInstance()->OnPlayerLeave(pLeave->playerId);
+                    */
+                    break;
+                }
+                case S2C_P_GAME_START: {
+                    MessageBoxA(NULL, "게임 시작 신호 수신", "Debug - Game Start", MB_OK);
+                    g_gameStarted = true;
+                    /*
+                        Game::GetInstance()->OnGameStart();
+                        break;
+                    */
+                    break;
+                }
+                default:
+                    std::cout << "[클라이언트] 정의되지 않은 패킷 타입: " << static_cast<int>(pktType) << std::endl;
+                    break;
+                }
             }
         }
         else if (recvResult == 0) {
@@ -108,32 +162,26 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (!InitInstance(hInstance, nCmdShow))
         return FALSE;
 
-    // 네트워크 초기화 및 서버 연결
     if (!InitNetwork())
         return 1;
 
-    // ReceiverThread 시작
     std::thread recvThread(ReceiverThread, g_clientSocket);
 
-    // 자동으로 로그인 명령 전송 (클라이언트가 접속되면 즉시 로그인)
-    std::string loginCmd = "LOGIN TestPlayer 1234\n";
-    int sendResult = send(g_clientSocket, loginCmd.c_str(), static_cast<int>(loginCmd.size()), 0);
+    // 자동 로그인: cs_packet_login 패킷 전송
+    cs_packet_login loginPacket;
+    loginPacket.size = sizeof(cs_packet_login);
+    loginPacket.type = C2S_P_LOGIN;
+    int sendResult = send(g_clientSocket, reinterpret_cast<char*>(&loginPacket), sizeof(loginPacket), 0);
     if (sendResult == SOCKET_ERROR) {
-        std::cerr << "로그인 명령 전송 실패: " << WSAGetLastError() << std::endl;
+        std::cerr << "로그인 패킷 전송 실패: " << WSAGetLastError() << std::endl;
         closesocket(g_clientSocket);
         WSACleanup();
         if (recvThread.joinable())
             recvThread.join();
         return 1;
     }
-    std::cout << loginCmd << "명령 전송 완료\n";
+    std::cout << "자동 로그인 패킷 전송 완료: size=" << (int)loginPacket.size << ", type=" << (int)loginPacket.type << std::endl;
 
-    // 로그인 메뉴는 제거하고, 자동으로 g_loggedIn를 true로 처리하도록 설정 (만약 서버가 응답하지 않아도)
-    //g_loggedIn = true; // 만약 ReceiverThread에서 LOGIN_OK를 받지 못하면, 이 라인을 주석 해제해 테스트 가능
-
-    // 로그인 성공 후, 서버가 게임 시작 신호(GAME_START)를 보내면 g_gameStarted가 true가 됨.
-    // 여기서는 게임이 실행되는 창(DirectX 게임 화면)이 보이도록 Game 객체를 초기화합니다.
-    // 만약 게임 시작 전까지 대기하고 싶다면 아래처럼 g_gameStarted를 체크할 수 있습니다.
     while (!g_gameStarted.load()) {
         Sleep(100);
     }
@@ -144,7 +192,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     GWindowInfo.height = 600;
     GWindowInfo.windowed = true;
 
-    unique_ptr<Game> game = make_unique<Game>();
+    std::unique_ptr<Game> game = std::make_unique<Game>();
     game->Init(GWindowInfo);
 
     // 기본 메시지 루프:
@@ -159,7 +207,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 DispatchMessage(&msg);
             }
         }
-        // 게임 업데이트 (DirectX 렌더링, 입력 처리 등)
         game->Update();
     }
 

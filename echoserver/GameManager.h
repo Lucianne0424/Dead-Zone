@@ -18,14 +18,12 @@ public:
     std::chrono::steady_clock::time_point waveStartTime;
     int waveDuration; // 초 단위, 테스트용으로 짧게 설정
 
-    // 생성자: 초기 상태 설정
     GameManager()
-        : currentState(UG_WAVE1), waveDuration(10) // 예: UG 웨이브 1은 10초 동안 진행
+        : currentState(UG_WAVE1), waveDuration(10) 
     {
         waveStartTime = std::chrono::steady_clock::now();
     }
 
-    // 업데이트 함수: 경과 시간을 확인하고 상태 전환
     void Update() {
         auto now = std::chrono::steady_clock::now();
         int elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - waveStartTime).count();
@@ -34,7 +32,6 @@ public:
         }
     }
 
-    // 상태 전환 함수
     void TransitionState() {
         switch (currentState) {
         case UG_WAVE1:
@@ -57,13 +54,11 @@ public:
             currentState = GAME_OVER;
             break;
         case GAME_OVER:
-            // 더 이상 전환 없음
             break;
         }
         waveStartTime = std::chrono::steady_clock::now();
     }
 
-    // 현재 상태를 문자열로 반환 (클라이언트에 전송할 메시지로 사용)
     std::string GetStateString() {
         switch (currentState) {
         case UG_WAVE1: return "UNDERGROUND WAVE 1";

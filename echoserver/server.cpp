@@ -1,7 +1,8 @@
 #include "server.h"
-#include "GameRoom.h"         // 게임룸 모듈
-#include "GameManager.h"      // 웨이브 진행 관리 모듈
-#include "db_authentication.h"// 사용자 인증/회원가입 함수 선언 (authenticateUser, registerUser)
+#include "GameRoom.h"         
+#include "GameManager.h"      
+#include "db_authentication.h"
+#include "protocol.h"        
 #include <winsock2.h>
 #include <windows.h>
 #include <mswsock.h>
@@ -14,35 +15,59 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <cstring>    
+#include <algorithm>  
 
 #pragma comment(lib, "ws2_32.lib")
 
 #define DEFAULT_PORT 9000
 #define NUM_WORKER_THREADS 4
+#define NUM_POST_ACCEPTS 10  
 
 // 전역 변수
-HANDLE g_hIOCP = NULL;                           // IOCP 핸들
-std::mutex g_lobbyMutex;                         // 대기실 큐 보호용 뮤텍스
-std::queue<PER_SOCKET_CONTEXT*> g_lobbyQueue;      // 대기실(로비) 큐
-std::vector<GameRoom*> g_gameRooms;              // 생성된 게임룸들을 저장
+SOCKET g_listenSocket = INVALID_SOCKET;   // 리스닝 소켓 (AcceptEx 필요)
+HANDLE g_hIOCP = NULL;                    // IOCP 핸들
+std::mutex g_lobbyMutex;                  // 대기실 큐 보호용 뮤텍스
+std::queue<PER_SOCKET_CONTEXT*> g_lobbyQueue;  // 로비 큐
+std::vector<GameRoom*> g_gameRooms;       // 게임룸 목록
 
-// 헬퍼 함수: 해당 플레이어가 속한 GameRoom을 찾아 반환 (없으면 nullptr)
+std::mutex g_playersMutex;
+std::vector<PER_SOCKET_CONTEXT*> g_connectedPlayers;
+
+LPFN_ACCEPTEX lpfnAcceptEx = NULL;
+
 GameRoom* FindGameRoomForPlayer(PER_SOCKET_CONTEXT* player) {
     for (auto room : g_gameRooms) {
         for (auto p : room->players) {
-            if (p == player) {
+            if (p == player)
                 return room;
-            }
         }
     }
     return nullptr;
 }
 
-// 함수 선언
 void PostRecv(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData);
 void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, int bytesTransferred);
 void MatchmakingCheck();
 void WorkerThread(HANDLE hIOCP);
+
+void PostSendPacket(PER_SOCKET_CONTEXT* pContext, const void* packet, size_t packetSize) {
+    PER_IO_DATA* pIoData = new PER_IO_DATA;
+    memcpy(pIoData->buffer, packet, packetSize);
+    pIoData->wsabuf.buf = pIoData->buffer;
+    pIoData->wsabuf.len = static_cast<ULONG>(packetSize);
+    pIoData->operationType = IO_WRITE;
+    ZeroMemory(&pIoData->overlapped, sizeof(OVERLAPPED));
+
+    DWORD bytesSent = 0;
+    int result = WSASend(pContext->socket, &pIoData->wsabuf, 1, &bytesSent, 0, &pIoData->overlapped, NULL);
+    if (result == SOCKET_ERROR) {
+        int err = WSAGetLastError();
+        if (err != WSA_IO_PENDING) {
+            printf("WSASend error: %d\n", err);
+        }
+    }
+}
 
 void PostSend(PER_SOCKET_CONTEXT* pContext, const std::string& msg, PER_IO_DATA* pIoData) {
     strcpy_s(pIoData->buffer, MAX_BUFFER, msg.c_str());
@@ -57,6 +82,31 @@ void PostSend(PER_SOCKET_CONTEXT* pContext, const std::string& msg, PER_IO_DATA*
         int err = WSAGetLastError();
         if (err != WSA_IO_PENDING) {
             printf("WSASend 에러: %d\n", err);
+        }
+    }
+}
+
+void PostAccept(SOCKET listenSocket) {
+    PER_IO_DATA* pAcceptIoData = new PER_IO_DATA;
+    pAcceptIoData->operationType = IO_ACCEPT;
+    pAcceptIoData->acceptSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+    if (pAcceptIoData->acceptSocket == INVALID_SOCKET) {
+        printf("새 accept 소켓 생성 실패: %d\n", WSAGetLastError());
+        delete pAcceptIoData;
+        return;
+    }
+    ZeroMemory(&pAcceptIoData->overlapped, sizeof(OVERLAPPED));
+
+    DWORD bytesReceived = 0;
+    if (lpfnAcceptEx(listenSocket, pAcceptIoData->acceptSocket, pAcceptIoData->buffer, 0,
+        sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16,
+        &bytesReceived, &pAcceptIoData->overlapped) == FALSE) {
+        int err = WSAGetLastError();
+        if (err != ERROR_IO_PENDING) {
+            printf("AcceptEx 호출 실패: %d\n", err);
+            closesocket(pAcceptIoData->acceptSocket);
+            delete pAcceptIoData;
+            return;
         }
     }
 }
@@ -83,20 +133,78 @@ void WorkerThread(HANDLE hIOCP) {
     LPOVERLAPPED pOverlapped;
 
     while (true) {
-        BOOL result = GetQueuedCompletionStatus(hIOCP, &bytesTransferred, &completionKey, &pOverlapped, INFINITE);
+        BOOL result = GetQueuedCompletionStatus(g_hIOCP, &bytesTransferred, &completionKey, &pOverlapped, INFINITE);
         if (!result) {
             printf("GetQueuedCompletionStatus 에러: %d\n", GetLastError());
             continue;
         }
         if (pOverlapped == NULL)
-            break; // 종료 신호
+            break; 
 
         PER_IO_DATA* pIoData = (PER_IO_DATA*)pOverlapped;
         PER_SOCKET_CONTEXT* pContext = (PER_SOCKET_CONTEXT*)completionKey;
 
-        if (pIoData->operationType == IO_READ) {
+        if (pIoData->operationType == IO_ACCEPT) {
+            SOCKET acceptedSocket = pIoData->acceptSocket;
+            if (setsockopt(acceptedSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
+                (char*)&g_listenSocket, sizeof(g_listenSocket)) == SOCKET_ERROR) {
+                printf("SO_UPDATE_ACCEPT_CONTEXT 실패: %d\n", WSAGetLastError());
+                closesocket(acceptedSocket);
+                delete pIoData;
+                continue;
+            }
+            PER_SOCKET_CONTEXT* newContext = new PER_SOCKET_CONTEXT;
+            newContext->socket = acceptedSocket;
+            newContext->state = STATE_LOGIN;
+            newContext->username = "";
+            newContext->health = 100;
+            newContext->posX = 0.0f;
+            newContext->posY = 0.0f;
+            newContext->walkSpeed = 3.0f;
+            newContext->runSpeed = 5.0f;
+            newContext->faintCount = 0;
+            newContext->isFainted = false;
+            newContext->moveX = 0.0f;
+            newContext->moveY = 0.0f;
+
+            CreateIoCompletionPort((HANDLE)acceptedSocket, g_hIOCP, (ULONG_PTR)newContext, 0);
+            PER_IO_DATA* pRecvIoData = new PER_IO_DATA;
+            ZeroMemory(&pRecvIoData->overlapped, sizeof(OVERLAPPED));
+            pRecvIoData->operationType = IO_READ;
+            pRecvIoData->wsabuf.buf = pRecvIoData->buffer;
+            pRecvIoData->wsabuf.len = MAX_BUFFER;
+            PostRecv(newContext, pRecvIoData);
+
+            {
+                std::lock_guard<std::mutex> lock(g_playersMutex);
+                g_connectedPlayers.push_back(newContext);
+            }
+            printf("새 연결 수락: socket %d\n", acceptedSocket);
+
+            PostAccept(g_listenSocket);
+
+            delete pIoData;
+            continue;
+        }
+        else if (pIoData->operationType == IO_READ) {
             if (bytesTransferred == 0) {
                 printf("클라이언트 종료: socket %d\n", pContext->socket);
+                {
+                    std::lock_guard<std::mutex> lock(g_playersMutex);
+                    auto it = std::find(g_connectedPlayers.begin(), g_connectedPlayers.end(), pContext);
+                    if (it != g_connectedPlayers.end()) {
+                        sc_packet_player_leave leavePacket;
+                        leavePacket.size = sizeof(sc_packet_player_leave);
+                        leavePacket.type = S2C_P_PLAYER_LEAVE;
+                        leavePacket.playerId = pContext->socket;
+                        for (auto player : g_connectedPlayers) {
+                            if (player != pContext) {
+                                PostSendPacket(player, &leavePacket, leavePacket.size);
+                            }
+                        }
+                        g_connectedPlayers.erase(it);
+                    }
+                }
                 closesocket(pContext->socket);
                 delete pContext;
                 delete pIoData;
@@ -106,157 +214,132 @@ void WorkerThread(HANDLE hIOCP) {
             ZeroMemory(&pIoData->overlapped, sizeof(OVERLAPPED));
             PostRecv(pContext, pIoData);
         }
-        // IO_WRITE 완료 후 특별한 처리는 없음
     }
 }
 
 void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, int bytesTransferred) {
-    pIoData->buffer[bytesTransferred] = '\0';
-    std::string msg(pIoData->buffer);
-    printf("socket %d 로부터 받은 메시지: %s\n", pContext->socket, msg.c_str());
+    if (bytesTransferred < 2) return;
+    unsigned char packetSize = pIoData->buffer[0];
+    char packetType = pIoData->buffer[1];
+    printf("socket %d 로부터 받은 패킷: Size=%d, Type=%d\n", pContext->socket, packetSize, packetType);
 
-    std::istringstream iss(msg);
-    std::string command;
-    iss >> command;
+    switch (packetType) {
+    case C2S_P_LOGIN: {
+        pContext->username = "Player_" + std::to_string(pContext->socket);
+        pContext->state = STATE_LOBBY;
+        pContext->health = 100;
+        pContext->posX = 0.0f;
+        pContext->posY = 0.0f;
+        pContext->posZ = 0.0f;
+        pContext->walkSpeed = 3.0f;
+        pContext->runSpeed = 5.0f;
+        pContext->faintCount = 0;
+        pContext->isFainted = false;
+        pContext->moveX = 0.0f;
+        pContext->moveY = 0.0f;
+        pContext->moveZ = 0.0f;
 
-    if (pContext->state == STATE_GAME) {
-        if (command == "MOVE") {
-            float dx, dy;
-            iss >> dx >> dy;
-            pContext->moveX = dx;
-            pContext->moveY = dy;
-            std::string reply = "MOVE_DIRECTION_SET: (" + std::to_string(dx) + ", " + std::to_string(dy) + ")\n";
-            PER_IO_DATA* sendData = new PER_IO_DATA;
-            PostSend(pContext, reply, sendData);
-        }
-        else if (command == "ATTACK") {
-            std::string reply = "ATTACK_COMMAND_RECEIVED\n";
-            PER_IO_DATA* sendData = new PER_IO_DATA;
-            PostSend(pContext, reply, sendData);
-        }
-        else if (command == "STATUS") {
-            std::string reply = "STATUS: HP=" + std::to_string(pContext->health) +
-                ", Pos=(" + std::to_string(pContext->posX) + ", " + std::to_string(pContext->posY) + ")\n";
-            PER_IO_DATA* sendData = new PER_IO_DATA;
-            PostSend(pContext, reply, sendData);
-        }
-        else if (command == "REVIVE") {
-            if (pContext->isFainted && pContext->faintCount == 1) {
-                pContext->isFainted = false;
-                pContext->health = 100;
-                std::string reply = "PLAYER_REVIVED\n";
-                PER_IO_DATA* sendData = new PER_IO_DATA;
-                PostSend(pContext, reply, sendData);
-            }
-            else {
-                std::string reply = "REVIVE_FAILED\n";
-                PER_IO_DATA* sendData = new PER_IO_DATA;
-                PostSend(pContext, reply, sendData);
-            }
-        }
-        else if (command == "STATUS_ALL") {
-            GameRoom* room = FindGameRoomForPlayer(pContext);
-            if (room) {
-                std::ostringstream oss;
-                oss << "ALLIED STATUS:\n";
-                for (auto ally : room->players) {
-                    oss << ally->username << " - HP: " << ally->health
-                        << ", Pos: (" << ally->posX << ", " << ally->posY << ")\n";
+        sc_packet_login_ok loginOk;
+        loginOk.size = sizeof(sc_packet_login_ok);
+        loginOk.type = S2C_P_PLAYER_INFO;
+        loginOk.playerId = pContext->socket;
+        loginOk.position.x = pContext->posX;
+        loginOk.position.y = pContext->posY;
+        loginOk.position.z = pContext->posZ;
+        loginOk.health = pContext->health;
+        loginOk.walkSpeed = pContext->walkSpeed;
+        loginOk.runSpeed = pContext->runSpeed;
+        loginOk.faintCount = pContext->faintCount;
+        loginOk.isFainted = pContext->isFainted;
+
+        PostSendPacket(pContext, &loginOk, loginOk.size);
+
+        {
+            std::lock_guard<std::mutex> lock(g_playersMutex);
+            for (auto player : g_connectedPlayers) {
+                if (player != pContext) {
+                    sc_packet_login_ok existingInfo;
+                    existingInfo.size = sizeof(sc_packet_login_ok);
+                    existingInfo.type = S2C_P_PLAYER_INFO;
+                    existingInfo.playerId = player->socket;
+                    existingInfo.position.x = player->posX;
+                    existingInfo.position.y = player->posY;
+                    existingInfo.position.z = player->posZ;
+                    existingInfo.health = player->health;
+                    existingInfo.walkSpeed = player->walkSpeed;
+                    existingInfo.runSpeed = player->runSpeed;
+                    existingInfo.faintCount = player->faintCount;
+                    existingInfo.isFainted = player->isFainted;
+                    PostSendPacket(pContext, &existingInfo, existingInfo.size);
+
+                    PostSendPacket(player, &loginOk, loginOk.size);
                 }
-                std::string reply = oss.str();
-                PER_IO_DATA* sendData = new PER_IO_DATA;
-                PostSend(pContext, reply, sendData);
-            }
-            else {
-                std::string reply = "STATUS_ALL_FAILED: 게임룸 정보 없음\n";
-                PER_IO_DATA* sendData = new PER_IO_DATA;
-                PostSend(pContext, reply, sendData);
             }
         }
-        else {
-            std::string reply = "GAME: " + msg;
-            PER_IO_DATA* sendData = new PER_IO_DATA;
-            PostSend(pContext, reply, sendData);
+        {
+            std::lock_guard<std::mutex> lock(g_lobbyMutex);
+            g_lobbyQueue.push(pContext);
         }
+        MatchmakingCheck();
+        break;
     }
-    else if (pContext->state == STATE_LOGIN) {
-        if (command == "LOGIN") {
-            std::string username, password;
-            iss >> username >> password;
-            if (!username.empty() && !password.empty()) {
-                // MySQL 인증 부분을 주석 처리하고 항상 성공하도록 함.
-                // 실제 구현 시에는 해시 처리가 필요합니다.
-                bool authResult = true; // 임시: 항상 성공
+    case C2S_P_MOVE: {
+        if (bytesTransferred < sizeof(cs_packet_move)) break;
+        cs_packet_move* movePacket = (cs_packet_move*)pIoData->buffer;
+        Vector3 dir = movePacket->direction;
+        pContext->moveX = dir.x;
+        pContext->moveY = dir.y;
+        pContext->posX += pContext->moveX * pContext->walkSpeed * 0.05f;
+        pContext->posY += pContext->moveY * pContext->walkSpeed * 0.05f;
+        pContext->posZ += dir.z * pContext->walkSpeed * 0.05f;
 
-                if (authResult) {
-                    pContext->username = username;
-                    pContext->state = STATE_LOBBY;
-                    pContext->health = 100;
-                    pContext->posX = 0.0f;
-                    pContext->posY = 0.0f;
-                    pContext->walkSpeed = 3.0f;
-                    pContext->runSpeed = 5.0f;
-                    pContext->faintCount = 0;
-                    pContext->isFainted = false;
-                    pContext->moveX = 0.0f;
-                    pContext->moveY = 0.0f;
+        sc_packet_move moveUpdate;
+        moveUpdate.size = sizeof(sc_packet_move);
+        moveUpdate.type = S2C_P_MOVE;
+        moveUpdate.playerId = pContext->socket;
+        moveUpdate.position.x = pContext->posX;
+        moveUpdate.position.y = pContext->posY;
+        moveUpdate.position.z = pContext->posZ;
+        moveUpdate.yaw = movePacket->yaw;
 
-                    std::string reply = "LOGIN_OK\n";
-                    PER_IO_DATA* sendData = new PER_IO_DATA;
-                    PostSend(pContext, reply, sendData);
-
-                    {
-                        std::lock_guard<std::mutex> lock(g_lobbyMutex);
-                        g_lobbyQueue.push(pContext);
-                    }
-                    MatchmakingCheck();
+        {
+            std::lock_guard<std::mutex> lock(g_playersMutex);
+            for (auto player : g_connectedPlayers) {
+                if (player != pContext) {
+                    PostSendPacket(player, &moveUpdate, moveUpdate.size);
                 }
-                else {
-                    std::string reply = "LOGIN_FAIL: 인증 실패\n";
-                    PER_IO_DATA* sendData = new PER_IO_DATA;
-                    PostSend(pContext, reply, sendData);
-                }
-            }
-            else {
-                std::string reply = "LOGIN_FAIL: 올바른 형식: LOGIN <username> <password>\n";
-                PER_IO_DATA* sendData = new PER_IO_DATA;
-                PostSend(pContext, reply, sendData);
             }
         }
-        else if (command == "SIGNUP") {
-            std::string username, password;
-            iss >> username >> password;
-            if (!username.empty() && !password.empty()) {
-                // MySQL 회원가입 부분을 주석 처리하고 항상 성공하도록 함.
-                bool signupResult = true; // 임시: 항상 성공
-
-                if (signupResult) {
-                    std::string reply = "SIGNUP_OK\n";
-                    PER_IO_DATA* sendData = new PER_IO_DATA;
-                    PostSend(pContext, reply, sendData);
-                }
-                else {
-                    std::string reply = "SIGNUP_FAIL: 회원가입 실패\n";
-                    PER_IO_DATA* sendData = new PER_IO_DATA;
-                    PostSend(pContext, reply, sendData);
-                }
-            }
-            else {
-                std::string reply = "SIGNUP_FAIL: 올바른 형식: SIGNUP <username> <password>\n";
-                PER_IO_DATA* sendData = new PER_IO_DATA;
-                PostSend(pContext, reply, sendData);
-            }
-        }
-        else {
-            std::string reply = "로그인 상태에서 LOGIN/SIGNUP만 가능합니다.\n";
-            PER_IO_DATA* sendData = new PER_IO_DATA;
-            PostSend(pContext, reply, sendData);
-        }
+        break;
     }
-    else if (pContext->state == STATE_LOBBY) {
-        std::string reply = "LOBBY: " + msg;
-        PER_IO_DATA* sendData = new PER_IO_DATA;
-        PostSend(pContext, reply, sendData);
+    case C2S_P_ATTACK: {
+        if (bytesTransferred < sizeof(cs_packet_attack)) break;
+        cs_packet_attack* attackPacket = (cs_packet_attack*)pIoData->buffer;
+        Vector3 attackDir = attackPacket->attackDirection;
+
+        sc_packet_attack attackEvent;
+        attackEvent.size = sizeof(sc_packet_attack);
+        attackEvent.type = S2C_P_ATTACK;
+        attackEvent.playerId = pContext->socket;
+        attackEvent.zombieId = rand() % 100 + 1;
+        attackEvent.impactPoint.x = pContext->posX + attackDir.x * 10.0f;
+        attackEvent.impactPoint.y = pContext->posY + attackDir.y * 10.0f;
+        attackEvent.impactPoint.z = attackDir.z;
+
+        {
+            std::lock_guard<std::mutex> lock(g_playersMutex);
+            for (auto player : g_connectedPlayers) {
+                if (player != pContext) {
+                    PostSendPacket(player, &attackEvent, attackEvent.size);
+                }
+            }
+        }
+        break;
+    }
+    default: {
+        printf("정의되지 않은 패킷 타입: %d\n", packetType);
+        break;
+    }
     }
 }
 
@@ -275,14 +358,14 @@ void MatchmakingCheck() {
         GameRoom* newRoom = new GameRoom(roomPlayers);
         g_gameRooms.push_back(newRoom);
 
+        sc_packet_game_start gameStartPacket;
+        gameStartPacket.size = sizeof(sc_packet_game_start);
+        gameStartPacket.type = S2C_P_GAME_START;
         {
-            PER_IO_DATA* sendData1 = new PER_IO_DATA;
-            PER_IO_DATA* sendData2 = new PER_IO_DATA;
-            PER_IO_DATA* sendData3 = new PER_IO_DATA;
-            std::string startMsg = "GAME_START\n";
-            PostSend(player1, startMsg, sendData1);
-            PostSend(player2, startMsg, sendData2);
-            PostSend(player3, startMsg, sendData3);
+            std::lock_guard<std::mutex> lock(g_playersMutex);
+            for (auto player : roomPlayers) {
+                PostSendPacket(player, &gameStartPacket, gameStartPacket.size);
+            }
         }
         printf("게임룸 생성: %s, %s, %s\n",
             player1->username.c_str(),
@@ -299,9 +382,9 @@ int main() {
         return 1;
     }
 
-    SOCKET listenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-    if (listenSocket == INVALID_SOCKET) {
-        printf("리슨 소켓 생성 실패: %d\n", WSAGetLastError());
+    g_listenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+    if (g_listenSocket == INVALID_SOCKET) {
+        printf("리스닝 소켓 생성 실패: %d\n", WSAGetLastError());
         WSACleanup();
         return 1;
     }
@@ -310,16 +393,16 @@ int main() {
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
     serverAddr.sin_port = htons(DEFAULT_PORT);
-    if (bind(listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+    if (bind(g_listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
         printf("bind 실패: %d\n", WSAGetLastError());
-        closesocket(listenSocket);
+        closesocket(g_listenSocket);
         WSACleanup();
         return 1;
     }
 
-    if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+    if (listen(g_listenSocket, SOMAXCONN) == SOCKET_ERROR) {
         printf("listen 실패: %d\n", WSAGetLastError());
-        closesocket(listenSocket);
+        closesocket(g_listenSocket);
         WSACleanup();
         return 1;
     }
@@ -328,9 +411,26 @@ int main() {
     g_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
     if (g_hIOCP == NULL) {
         printf("IOCP 생성 실패: %d\n", GetLastError());
-        closesocket(listenSocket);
+        closesocket(g_listenSocket);
         WSACleanup();
         return 1;
+    }
+    CreateIoCompletionPort((HANDLE)g_listenSocket, g_hIOCP, 0, 0);
+
+    GUID guidAcceptEx = WSAID_ACCEPTEX;
+    DWORD bytes = 0;
+    if (WSAIoctl(g_listenSocket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+        &guidAcceptEx, sizeof(guidAcceptEx),
+        &lpfnAcceptEx, sizeof(lpfnAcceptEx),
+        &bytes, NULL, NULL) == SOCKET_ERROR) {
+        printf("AcceptEx 함수 포인터 획득 실패: %d\n", WSAGetLastError());
+        closesocket(g_listenSocket);
+        WSACleanup();
+        return 1;
+    }
+
+    for (int i = 0; i < NUM_POST_ACCEPTS; i++) {
+        PostAccept(g_listenSocket);
     }
 
     std::vector<std::thread> workerThreads;
@@ -338,37 +438,8 @@ int main() {
         workerThreads.push_back(std::thread(WorkerThread, g_hIOCP));
     }
 
-    while (true) {
-        SOCKET clientSocket = accept(listenSocket, NULL, NULL);
-        if (clientSocket == INVALID_SOCKET) {
-            printf("accept 실패: %d\n", WSAGetLastError());
-            continue;
-        }
-        printf("클라이언트 접속: socket %d\n", clientSocket);
-
-        PER_SOCKET_CONTEXT* pContext = new PER_SOCKET_CONTEXT;
-        pContext->socket = clientSocket;
-        pContext->state = STATE_LOGIN;
-        pContext->username = "";
-        pContext->health = 100;
-        pContext->posX = 0.0f;
-        pContext->posY = 0.0f;
-        pContext->walkSpeed = 3.0f;
-        pContext->runSpeed = 5.0f;
-        pContext->faintCount = 0;
-        pContext->isFainted = false;
-        pContext->moveX = 0.0f;
-        pContext->moveY = 0.0f;
-
-        CreateIoCompletionPort((HANDLE)clientSocket, g_hIOCP, (ULONG_PTR)pContext, 0);
-
-        PER_IO_DATA* pIoData = new PER_IO_DATA;
-        ZeroMemory(&pIoData->overlapped, sizeof(OVERLAPPED));
-        pIoData->operationType = IO_READ;
-        pIoData->wsabuf.buf = pIoData->buffer;
-        pIoData->wsabuf.len = MAX_BUFFER;
-        PostRecv(pContext, pIoData);
-    }
+    printf("종료하려면 엔터 키를 누르세요...\n");
+    getchar();
 
     for (int i = 0; i < NUM_WORKER_THREADS; i++) {
         PostQueuedCompletionStatus(g_hIOCP, 0, 0, NULL);
@@ -378,7 +449,7 @@ int main() {
     }
 
     CloseHandle(g_hIOCP);
-    closesocket(listenSocket);
+    closesocket(g_listenSocket);
     WSACleanup();
     return 0;
 }
