@@ -17,10 +17,10 @@ public:
 	Gun();
 	virtual ~Gun();
 
-	virtual void Awake() override;
-	//virtual void Start() override;
-	virtual void Update() override;
-	virtual void LateUpdate() override;
+	virtual void Awake() override {}
+	//virtual void Start() override {}
+	virtual void Update() override {}
+	virtual void LateUpdate() override {}
 
 	void Fire();
 	void Reload();

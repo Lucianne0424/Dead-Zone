@@ -340,24 +340,23 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 
-#pragma region FBX
-	//{
-	//	// FBX 출력 테스트
-	//	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\treasure_chest.fbx");
+#pragma region Zombie
+	{
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Walking.fbx");
 
-	//	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
 
-	//	for (auto& gameObject : gameObjects)
-	//	{
-	//		gameObject->SetName(L"Dragon");
-	//		gameObject->SetCheckFrustum(false);
-	//		//gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 300.f));
-	//		//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
-	//		//gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
-	//		scene->AddGameObject(gameObject);
-	//		gameObject->AddComponent(make_shared<TestDragon>());
-	//	}
-	//}
+		for (auto& gameObject : gameObjects)
+		{
+			gameObject->SetName(L"Zombie");
+			gameObject->SetCheckFrustum(false);
+			gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 300.f));
+			//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
+			gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+			scene->AddGameObject(gameObject);
+			gameObject->AddComponent(make_shared<TestDragon>());
+		}
+	}
 #pragma endregion
 
 	return scene;

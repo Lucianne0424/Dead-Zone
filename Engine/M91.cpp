@@ -6,9 +6,9 @@
 #include "Scene.h"
 #include "SceneManager.h"
 
-Vec3 M91::_basePosition = { 50.f, -30.f, 200.f };
+Vec3 M91::_basePosition = { 5.f, -3.f, 20.f };
 Vec3 M91::_baseRotation = { 0.f, 175.f, 0.f };
-Vec3 M91::_baseScale = { 3.f, 3.f, 3.f };
+Vec3 M91::_baseScale = { 0.3f, 0.3f, 0.3f };
 
 M91::M91()
 {

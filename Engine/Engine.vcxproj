@@ -184,7 +184,6 @@
     <ClInclude Include="InstancingManager.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="M91.h" />
-    <ClInclude Include="M91Script.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshData.h" />
@@ -212,6 +211,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="Zombie.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Animator.cpp" />
@@ -232,7 +232,6 @@
     <ClCompile Include="InstancingManager.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="M91.cpp" />
-    <ClCompile Include="M91Script.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshData.cpp" />
@@ -265,6 +264,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="Zombie.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl" />
