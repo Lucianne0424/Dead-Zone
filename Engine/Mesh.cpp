@@ -225,7 +225,7 @@ void Mesh::CreateBonesAndAnimations(class FBXLoader& loader)
 			for (int32 b = 0; b < boneCount; b++)
 			{
 				const int32 keyFrameCount = static_cast<int32>(animClip.keyFrames[b].size());
-				for (int32 f = 0; f < keyFrameCount; f++)
+				for (int32 f = 0; f < animClip.frameCount; f++)
 				{
 					int32 idx = static_cast<int32>(boneCount * f + b);
 
