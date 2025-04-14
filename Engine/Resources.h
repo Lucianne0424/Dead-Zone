@@ -20,7 +20,7 @@ public:
 	bool Add(const wstring& key, shared_ptr<T> object);
 
 	template<typename T>
-	shared_ptr<T> Get(const wstring& Key);
+	shared_ptr<T> Get(const wstring& key);
 
 	template<typename T>
 	OBJECT_TYPE GetObjectType();
