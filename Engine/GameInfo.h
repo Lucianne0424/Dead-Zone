@@ -5,6 +5,7 @@ enum class INFO_TYPE : uint8
 	NONE,
 	PLAYER,
 	ZOMBIE,
+	GUN,
 
 	END
 };
@@ -16,10 +17,19 @@ enum class ZOMBIE_TYPE : uint8
 	END
 };
 
+enum class GUN_TYPE : uint8
+{
+	M91,
+
+	END
+};
+
 enum
 {
 	INFO_TYPE_COUNT = static_cast<uint8>(INFO_TYPE::END),
-	ZOMBIE_TYPE_COUNT = static_cast<uint8>(ZOMBIE_TYPE::END)
+
+	ZOMBIE_TYPE_COUNT = static_cast<uint8>(ZOMBIE_TYPE::END),
+	GUN_TYPE_COUNT = static_cast<uint8>(GUN_TYPE::END)
 };
 
 struct BaseInfo
@@ -41,6 +51,16 @@ struct ZombieInfo : BaseInfo
 	uint32 attack;
 };
 
+struct GunInfo : BaseInfo
+{
+	GUN_TYPE gunType;
+	int32 damage;
+	float range;
+	float fireRate;
+	int32 ammoCapacity;
+};
+
+
 class GameInfo
 {
 	DECLARE_SINGLE(GameInfo);
@@ -60,6 +80,7 @@ public:
 private:
 	void CreateDefaultPlayerInfo();
 	void CreateDefaultZombieInfo();
+	void CreateDefaultGunInfo();
 
 private:
 	using KeyInfoMap = std::map<wstring/*key*/, shared_ptr<BaseInfo>>;

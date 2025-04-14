@@ -1,15 +1,6 @@
 #pragma once
 #include "MonoBehaviour.h"
-
-struct PlayerInfo
-{
-	uint32 id;
-	string name;
-	uint32 level;
-	uint32 hp;
-	uint32 attack;
-	uint32 defense;
-};
+#include "GameInfo.h"
 
 class Player : public MonoBehaviour
 {

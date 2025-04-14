@@ -1,15 +1,6 @@
 #pragma once
 #include "MonoBehaviour.h"
-
-struct GunInfo
-{
-	std::string name;
-	std::string type;
-	int damage;
-	float range;
-	float fireRate;
-	int ammoCapacity;
-};
+#include "GameInfo.h"
 
 class Gun : public MonoBehaviour
 {

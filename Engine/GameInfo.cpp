@@ -38,3 +38,19 @@ void GameInfo::CreateDefaultZombieInfo()
 	}
 }
 
+void GameInfo::CreateDefaultGunInfo()
+{
+	// M91 Info
+	{
+		GunInfo info =
+		{
+			INFO_TYPE::GUN,
+			L"M91",
+			GUN_TYPE::M91,
+		};
+
+		shared_ptr<GunInfo> gunInfo = make_shared<GunInfo>();
+		Add<GunInfo>(L"M91", gunInfo);
+	}
+}
+
