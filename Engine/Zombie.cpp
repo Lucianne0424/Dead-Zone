@@ -13,6 +13,7 @@ Zombie::~Zombie()
 
 void Zombie::Awake()
 {
+	_info = GAME_INFO->Get<ZombieInfo>(L"NormalZombie");
 }
 
 void Zombie::Update()

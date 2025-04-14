@@ -177,6 +177,7 @@
     <ClInclude Include="EnginePch.h" />
     <ClInclude Include="FBXLoader.h" />
     <ClInclude Include="Frustum.h" />
+    <ClInclude Include="GameInfo.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Gun.h" />
     <ClInclude Include="Input.h" />
@@ -225,6 +226,7 @@
     <ClCompile Include="EnginePch.cpp" />
     <ClCompile Include="FBXLoader.cpp" />
     <ClCompile Include="Frustum.cpp" />
+    <ClCompile Include="GameInfo.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Gun.cpp" />
     <ClCompile Include="Input.cpp" />

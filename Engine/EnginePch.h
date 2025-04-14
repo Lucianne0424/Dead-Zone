@@ -171,6 +171,9 @@ public:								\
 #define INPUT				GET_SINGLE(Input)
 #define DELTA_TIME			GET_SINGLE(Timer)->GetDeltaTime()
 
+#define RESOURCES			GET_SINGLE(Resources)
+#define GAME_INFO			GET_SINGLE(GameInfo)
+
 #define CONST_BUFFER(type)	GEngine->GetConstantBuffer(type)
 
 struct TransformParams

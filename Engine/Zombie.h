@@ -1,20 +1,6 @@
 #pragma once
 #include "MonoBehaviour.h"
-
-enum class ZOMBIE_TYPE : uint8
-{
-	NORMAL,
-
-	END
-};
-
-struct ZombieInfo
-{
-	uint32 level;
-	uint32 hp;
-	uint32 attack;
-	uint32 defense;
-};
+#include "GameInfo.h"
 
 class Zombie : public MonoBehaviour
 {
@@ -28,6 +14,6 @@ public:
 	virtual void LateUpdate() override;
 
 private:
-
+	ZombieInfo _info;
 };
 

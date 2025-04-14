@@ -69,10 +69,10 @@ public:
 	void Init();
 
 	template<typename T>
-	bool Add(const wstring& key, shared_ptr<T> info);
+	bool Add(const wstring& key, T info);
 
 	template<typename T>
-	shared_ptr<T> Get(const wstring& key);
+	T Get(const wstring& key);
 
 	template<typename T>
 	INFO_TYPE GetInfoType();
@@ -83,12 +83,12 @@ private:
 	void CreateDefaultGunInfo();
 
 private:
-	using KeyInfoMap = std::map<wstring/*key*/, shared_ptr<BaseInfo>>;
+	using KeyInfoMap = std::map<wstring/*key*/, BaseInfo>;
 	array<KeyInfoMap, INFO_TYPE_COUNT> _info;
 };
 
 template<typename T>
-inline bool GameInfo::Add(const wstring& key, shared_ptr<T> info)
+inline bool GameInfo::Add(const wstring& key, T info)
 {
 	INFO_TYPE infoType = GetInfoType<T>();
 	KeyInfoMap& keyInfoMap = _info[static_cast<uint8>(infoType)];
@@ -103,7 +103,7 @@ inline bool GameInfo::Add(const wstring& key, shared_ptr<T> info)
 }
 
 template<typename T>
-inline shared_ptr<T> GameInfo::Get(const wstring& key)
+inline T GameInfo::Get(const wstring& key)
 {
 	INFO_TYPE infoType = GetInfoType<T>();
 	KeyInfoMap& keyInfoMap = _info[static_cast<uint8>(infoType)];

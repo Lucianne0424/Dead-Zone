@@ -17,8 +17,7 @@ void GameInfo::CreateDefaultPlayerInfo()
 			L"Player",
 		};
 
-		shared_ptr<PlayerInfo> playerInfo = make_shared<PlayerInfo>();
-		Add<PlayerInfo>(L"Player", playerInfo);
+		Add<PlayerInfo>(L"Player", info);
 	}
 }
 
@@ -33,8 +32,7 @@ void GameInfo::CreateDefaultZombieInfo()
 			ZOMBIE_TYPE::NORMAL,
 		};
 
-		shared_ptr<ZombieInfo> zombieInfo = make_shared<ZombieInfo>();
-		Add<ZombieInfo>(L"NormalZombie", zombieInfo);
+		Add<ZombieInfo>(L"NormalZombie", info);
 	}
 }
 
@@ -49,8 +47,7 @@ void GameInfo::CreateDefaultGunInfo()
 			GUN_TYPE::M91,
 		};
 
-		shared_ptr<GunInfo> gunInfo = make_shared<GunInfo>();
-		Add<GunInfo>(L"M91", gunInfo);
+		Add<GunInfo>(L"M91", info);
 	}
 }
 

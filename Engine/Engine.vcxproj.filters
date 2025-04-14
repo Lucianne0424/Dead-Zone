@@ -177,6 +177,9 @@
     <ClCompile Include="Zombie.cpp">
       <Filter>Object\Zombie</Filter>
     </ClCompile>
+    <ClCompile Include="GameInfo.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -319,6 +322,9 @@
     </ClInclude>
     <ClInclude Include="Zombie.h">
       <Filter>Object\Zombie</Filter>
+    </ClInclude>
+    <ClInclude Include="GameInfo.h">
+      <Filter>Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
