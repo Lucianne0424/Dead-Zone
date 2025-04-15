@@ -28,6 +28,9 @@
     <Filter Include="Object\Component\Collider">
       <UniqueIdentifier>{28523ad1-ea9f-4f0b-a896-ddd4f60082df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\GameObject">
+      <UniqueIdentifier>{60ac5114-0020-4e06-b28d-e0c5af136c24}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -155,6 +158,9 @@
     </ClCompile>
     <ClCompile Include="TestObjectScript.cpp">
       <Filter>Object\Test</Filter>
+    </ClCompile>
+    <ClCompile Include="Container.cpp">
+      <Filter>Object\GameObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -286,6 +292,9 @@
     </ClInclude>
     <ClInclude Include="TestObjectScript.h">
       <Filter>Object\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="Container.h">
+      <Filter>Object\GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
