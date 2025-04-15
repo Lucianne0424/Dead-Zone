@@ -8,6 +8,7 @@ enum class ContainerType : uint8
 	Container4,
 	Container5,
 	Container6,
+	Container7,
 	End,
 };
 
@@ -24,7 +25,6 @@ public:
 private:
 	//vector<shared_ptr<class GameObject>> gameObjects;
 	static bool initialized;
-	static uint16 containerCount;
 	static shared_ptr<class MeshData> meshData[CONTAINER_TYPE_COUNT];
 
 	void meshLoad();
