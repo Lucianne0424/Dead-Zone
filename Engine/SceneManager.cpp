@@ -155,7 +155,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		camera->AddComponent(make_shared<Camera>()); // Near=1, Far=1000, FOV=45µµ
 		camera->AddComponent(make_shared<TestCameraScript>());
 		camera->GetCamera()->SetFar(10000.f);
-		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 0.f));
+		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 1000.f, 0.f));
 		uint8 layerIndex = GET_SINGLE(SceneManager)->LayerNameToIndex(L"UI");
 		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, true); // UI´Â ¾È ÂïÀ½
 		scene->AddGameObject(camera);
@@ -233,8 +233,8 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		obj->AddComponent(make_shared<Terrain>());
 		obj->AddComponent(make_shared<MeshRenderer>());
 
-		obj->GetTransform()->SetLocalScale(Vec3(50.f, 250.f, 50.f));
-		obj->GetTransform()->SetLocalPosition(Vec3(-100.f, -200.f, 300.f));
+		obj->GetTransform()->SetLocalScale(Vec3(300.f, 450.f, 300.f));
+		obj->GetTransform()->SetLocalPosition(Vec3(0.0f, 0.0f, 0.0f));
 		obj->SetStatic(true);
 		obj->GetTerrain()->Init(64, 64);
 		obj->SetCheckFrustum(false);
@@ -321,9 +321,10 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 
 
 #pragma region FBX
-	shared_ptr<Container> container = make_shared<Container>();
-	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-							Vec3(10.f, 0.f, 300.f), Vec3(1.f, 1.f, 1.f), Vec3(-90.f, 0.f, 0.f));
+	//shared_ptr<Container> container = make_shared<Container>();
+	//container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+	//						Vec3(10.f, 0.f, 300.f), Vec3(1.f, 1.f, 1.f), Vec3(-90.f, 0.f, 0.f));
+
 
 	//scene->AddGameObjects(container->getGameObjects());
 
