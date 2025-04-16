@@ -42,7 +42,7 @@ struct PlayerInfo : BaseInfo
 {
 	uint32			hp;
 	float			walkSppeed;	// °È±â (m/s)
-	float			moveSpeed;	// ¶Ù±â (m/s)
+	float			runSpeed;	// ¶Ù±â (m/s)
 };
 
 struct ZombieInfo : BaseInfo
@@ -52,7 +52,7 @@ struct ZombieInfo : BaseInfo
 	uint32			attackDamage;
 	float			attackSpeed;	// °ø°Ý ¼Óµµ (m/s)
 	float			walkSpeed;		// °È±â (m/s)
-	float			moveSpeed;		// ¶Ù±â (m/s)
+	float			runSpeed;		// ¶Ù±â (m/s)
 };
 
 struct GunInfo : BaseInfo

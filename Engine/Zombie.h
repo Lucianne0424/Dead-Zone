@@ -29,9 +29,14 @@ public:
 	virtual void LateUpdate() override;
 
 public:
-	void SetRandomPosition()
+	void SetRandomDirection();
 
 private:
 	ZombieInfo _info;
+
+private:
+	Vec3 _direction;
+	float _changeDirectionTime;
+	float _elaspedTime;
 };
 

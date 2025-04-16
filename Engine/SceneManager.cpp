@@ -377,6 +377,9 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 
 	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
 		Vec3(500, cy / 2, 5300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 120.f, 0.f));
+
+#pragma endregion
+
 #pragma region Zombie
 	{
 		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
