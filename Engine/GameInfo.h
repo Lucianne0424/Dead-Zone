@@ -34,30 +34,36 @@ enum
 
 struct BaseInfo
 {
-	INFO_TYPE type = INFO_TYPE::NONE;
-	wstring name = L"";
+	INFO_TYPE		type = INFO_TYPE::NONE;
+	wstring			name = L"";
 };
 
 struct PlayerInfo : BaseInfo
 {
-	uint32 hp;
-	uint32 attack;
+	uint32			hp;
+	float			walkSppeed;	// 걷기 (m/s)
+	float			moveSpeed;	// 뛰기 (m/s)
 };
 
 struct ZombieInfo : BaseInfo
 {
-	ZOMBIE_TYPE zombieType;
-	uint32 hp;
-	uint32 attack;
+	ZOMBIE_TYPE		zombieType;
+	uint32			hp;
+	uint32			attackDamage;
+	float			attackSpeed;	// 공격 속도 (m/s)
+	float			walkSpeed;		// 걷기 (m/s)
+	float			moveSpeed;		// 뛰기 (m/s)
 };
 
 struct GunInfo : BaseInfo
 {
-	GUN_TYPE gunType;
-	int32 damage;
-	float range;
-	float fireRate;
-	int32 ammoCapacity;
+	GUN_TYPE		gunType;
+	int32			damage;			// 공격력
+	float			fireRate;		// 발사 속도 (발/s)
+	float			range;			// 사거리 (m)
+	float			reloadSpeed;	// 재장전 속도 (s)
+	int32			ammoCapacity;	// 장탄수
+	int32			weight;			// 무게 (g)
 };
 
 

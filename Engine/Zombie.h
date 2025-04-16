@@ -28,6 +28,9 @@ public:
 	virtual void Update() override;
 	virtual void LateUpdate() override;
 
+public:
+	void SetRandomPosition()
+
 private:
 	ZombieInfo _info;
 };
