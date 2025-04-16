@@ -251,9 +251,9 @@ shared_ptr<Mesh> Resources::LoadTerrainMesh(int32 sizeX, int32 sizeZ)
 {
 	vector<Vertex> vec;
 
-	for (int32 z = 0; z < sizeZ + 1; z++)
+	for (int32 z = -sizeZ / 2; z < sizeZ / 2 + 1; z++)
 	{
-		for (int32 x = 0; x < sizeX + 1; x++)
+		for (int32 x = -sizeX / 2; x < sizeX / 2 + 1; x++)
 		{
 			Vertex vtx;
 			vtx.pos = Vec3(static_cast<float>(x), 0, static_cast<float>(z));

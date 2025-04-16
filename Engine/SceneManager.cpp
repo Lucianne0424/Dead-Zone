@@ -21,6 +21,8 @@
 #include "Zombie.h"
 #include "M91.h"
 
+#include "Container.h"
+
 void SceneManager::Update()
 {
 	if (_activeScene == nullptr)
@@ -155,7 +157,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		camera->AddComponent(make_shared<Camera>()); // Near=1, Far=1000, FOV=45도
 		camera->AddComponent(make_shared<TestCameraScript>());
 		camera->GetCamera()->SetFar(10000.f);
-		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 0.f));
+		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 500.f, 0.f));
 		uint8 layerIndex = GET_SINGLE(SceneManager)->LayerNameToIndex(L"UI");
 		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, true); // UI는 안 찍음
 		scene->AddGameObject(camera);
@@ -232,8 +234,8 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		obj->AddComponent(make_shared<Terrain>());
 		obj->AddComponent(make_shared<MeshRenderer>());
 
-		obj->GetTransform()->SetLocalScale(Vec3(50.f, 250.f, 50.f));
-		obj->GetTransform()->SetLocalPosition(Vec3(-100.f, -200.f, 300.f));
+		obj->GetTransform()->SetLocalScale(Vec3(300.f, 300.f, 300.f));
+		obj->GetTransform()->SetLocalPosition(Vec3(0.0f, 0.0f, 0.0f));
 		obj->SetStatic(true);
 		obj->GetTerrain()->Init(64, 64);
 		obj->SetCheckFrustum(false);
@@ -335,6 +337,46 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 
+#pragma region MAP
+	// 임시 맵 제작 ( 나중에 수정할 예정 )
+	shared_ptr<Container> container = make_shared<Container>();
+
+	const float cx = 806.f; // 컨테이너 크기
+	const float cy = 273.f;
+	const float cz = 298.f;
+
+	for (int y = 0; y < 2; ++y)
+	{
+		for (int x = 0; x < 1; ++x)
+		{
+			for (int z = -10; z < 20; ++z)
+			{
+				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+					Vec3(2000.f + cx*x, cy/2 +cy*y, cz*z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+
+				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+					Vec3(-2000.f + cx * x, cy / 2 + cy * y, cz* z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 180.f, 0.f));
+			}
+		}
+	}
+
+	for (int x = 1; x < 5; ++x)
+	{
+		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+			Vec3(-2000.f + cx * x , cy / 2, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+
+		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+			Vec3(-2000.f + cx * x, cy / 2 + cy, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+	}
+	
+	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+		Vec3(-500, cy / 2, 2300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
+
+	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+		Vec3(-500, cy / 2, -1800), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
+
+	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+		Vec3(500, cy / 2, 5300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 120.f, 0.f));
 #pragma region Zombie
 	{
 		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
