@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "Resources.h"
 #include "InstancingManager.h"
+#include "GameInfo.h"
 
 void Engine::Init(const WindowInfo& info)
 {
@@ -36,6 +37,7 @@ void Engine::Init(const WindowInfo& info)
 	GET_SINGLE(Input)->Init(info.hwnd);
 	GET_SINGLE(Timer)->Init();
 	GET_SINGLE(Resources)->Init();
+	GAME_INFO->Init();
 }
 
 void Engine::Update()

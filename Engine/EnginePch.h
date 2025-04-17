@@ -35,6 +35,8 @@ using namespace Microsoft::WRL;
 
 #include "FBX/fbxsdk.h"
 
+#define DIRECTINPUT_VERSION 0x0800
+
 // °¢Á¾ lib
 #pragma comment(lib, "d3d12")
 #pragma comment(lib, "dxgi")
@@ -169,6 +171,9 @@ public:								\
 #define INPUT				GET_SINGLE(Input)
 #define DELTA_TIME			GET_SINGLE(Timer)->GetDeltaTime()
 
+#define RESOURCES			GET_SINGLE(Resources)
+#define GAME_INFO			GET_SINGLE(GameInfo)
+
 #define CONST_BUFFER(type)	GEngine->GetConstantBuffer(type)
 
 struct TransformParams
@@ -194,6 +199,5 @@ extern unique_ptr<class Engine> GEngine;
 wstring s2ws(const string& s);
 string ws2s(const wstring& s);
 
-#define PI ((FLOAT) 3.141592654F)
-#define RadianToDegree(radian) ((radian) * (180.0f / PI))
-#define DegreeToRadian(degree) ((degree) * (PI / 180.0f))
+#define RadianToDegree(radian) ((radian) * (180.0f / XM_PI))
+#define DegreeToRadian(degree) ((degree) * (XM_PI / 180.0f))
