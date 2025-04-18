@@ -49,7 +49,12 @@ bool InitNetwork() {
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(9000);
-    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    if (InetPtonA(AF_INET, "127.0.0.1", &serverAddr.sin_addr) != 1) {
+        std::wcerr << L"IP 주소 변환 실패" << std::endl;
+        closesocket(g_clientSocket);
+        WSACleanup();
+        return false;
+    }
     if (connect(g_clientSocket, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
         std::wcerr << L"서버 연결 실패: " << WSAGetLastError() << std::endl;
         closesocket(g_clientSocket);
@@ -122,7 +127,7 @@ void ReceiverThread(SOCKET clientSocket) {
                     break;
                 }
                 case S2C_P_GAME_START: {
-                    MessageBoxA(NULL, "게임 시작 신호 수신", "Debug - Game Start", MB_OK);
+                  //  MessageBoxA(NULL, "게임 시작 신호 수신", "Debug - Game Start", MB_OK);
                     g_gameStarted = true;
                     /*
                         Game::GetInstance()->OnGameStart();
@@ -181,16 +186,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return 1;
     }
     std::cout << "자동 로그인 패킷 전송 완료: size=" << (int)loginPacket.size << ", type=" << (int)loginPacket.type << std::endl;
-
+    /*
     while (!g_gameStarted.load()) {
         Sleep(100);
     }
-
-    std::cout << "\n게임 시작 신호 수신. 게임을 시작합니다." << std::endl;
-
+    */
     GWindowInfo.width = 800;
     GWindowInfo.height = 600;
     GWindowInfo.windowed = true;
+    GWindowInfo.sock = g_clientSocket;
 
     std::unique_ptr<Game> game = std::make_unique<Game>();
     game->Init(GWindowInfo);
@@ -280,7 +284,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
-    return 0;
+    return 0; 
 }
 
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)

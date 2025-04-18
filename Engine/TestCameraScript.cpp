@@ -6,7 +6,8 @@
 #include "Input.h"
 #include "Timer.h"
 #include "SceneManager.h"
-
+#include "protocol.h""
+extern WindowInfo GWindowInfo;
 TestCameraScript::TestCameraScript()
 {
 }
@@ -18,19 +19,40 @@ TestCameraScript::~TestCameraScript()
 void TestCameraScript::LateUpdate()
 {
 	Vec3 pos = GetTransform()->GetLocalPosition();
-
-	if (INPUT->GetButton(KEY_TYPE::W))
+	Vec3 moveDirection = { 0.f, 0.f, 0.f };
+	if (INPUT->GetButton(KEY_TYPE::W)) {
 		pos += GetTransform()->GetLook() * _speed * DELTA_TIME;
-
-	if (INPUT->GetButton(KEY_TYPE::S))
-		pos -= GetTransform()->GetLook() * _speed * DELTA_TIME;
-
-	if (INPUT->GetButton(KEY_TYPE::A))
+		moveDirection += GetTransform()->GetLook() * _speed * DELTA_TIME;
+	}
+	if (INPUT->GetButton(KEY_TYPE::S)) {
+		pos += GetTransform()->GetLook() * _speed * DELTA_TIME;
+		moveDirection += GetTransform()->GetLook() * _speed * DELTA_TIME;
+	}
+	if (INPUT->GetButton(KEY_TYPE::A)) {
 		pos -= GetTransform()->GetRight() * _speed * DELTA_TIME;
-
-	if (INPUT->GetButton(KEY_TYPE::D))
+		moveDirection+= GetTransform()->GetRight() * _speed * DELTA_TIME;
+	}
+	if (INPUT->GetButton(KEY_TYPE::D)) {
 		pos += GetTransform()->GetRight() * _speed * DELTA_TIME;
+		moveDirection += GetTransform()->GetRight() * _speed * DELTA_TIME;
+	}
+	if (moveDirection.x != 0.f || moveDirection.y != 0.f || moveDirection.z != 0.f)
+	{
+		cs_packet_move movePacket;
+		movePacket.size = sizeof(cs_packet_move);
+		movePacket.type = C2S_P_MOVE;
+		movePacket.direction.x = pos.x;
+		movePacket.direction.y = pos.y;
+		movePacket.direction.z = pos.z;
+		movePacket.yaw = 0.0f;  
 
+		int sendResult = send(
+			GWindowInfo.sock,
+			reinterpret_cast<char*>(&movePacket),
+			sizeof(movePacket),
+			0
+		);
+	}
 	if (INPUT->GetButton(KEY_TYPE::Q))
 	{
 		Vec3 rotation = GetTransform()->GetLocalRotation();

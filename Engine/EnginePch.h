@@ -4,6 +4,8 @@
 #define _HAS_STD_BYTE 0
 
 // 각종 include
+#include <winsock2.h>
+#include <ws2tcpip.h>
 #include <windows.h>
 #include <tchar.h>
 #include <memory>
@@ -128,6 +130,7 @@ struct WindowInfo
 	int32	width; // 너비
 	int32	height; // 높이
 	bool	windowed; // 창모드 or 전체화면
+	SOCKET  sock;       // WinSock 소켓 핸들
 };
 
 struct Vertex
