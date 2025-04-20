@@ -14,6 +14,7 @@ class SceneManager
 public:
 	void Update();
 	void Render();
+	void RenderUI();
 	void LoadScene(wstring sceneName);
 
 	void SetLayerName(uint8 index, const wstring& name);

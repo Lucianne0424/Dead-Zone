@@ -28,6 +28,10 @@ namespace fs = std::filesystem;
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
+#include <d2d1_3.h>
+#include <dwrite.h>
+#include <d3d11on12.h>
+
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 using namespace Microsoft::WRL;
@@ -45,6 +49,9 @@ using namespace Microsoft::WRL;
 #pragma comment(lib, "dxguid")
 #pragma comment(lib, "d3dcompiler")
 #pragma comment(lib, "dinput8")
+#pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "dwrite.lib")
+#pragma comment(lib, "d3d11.lib")
 
 #ifdef _DEBUG
 #pragma comment(lib, "DirectXTex\\DirectXTex_debug.lib")
@@ -172,9 +179,6 @@ public:								\
 
 #define INPUT				GET_SINGLE(Input)
 #define DELTA_TIME			GET_SINGLE(Timer)->GetDeltaTime()
-
-#define RESOURCES			GET_SINGLE(Resources)
-#define GAME_INFO			GET_SINGLE(GameInfo)
 
 #define CONST_BUFFER(type)	GEngine->GetConstantBuffer(type)
 

@@ -15,6 +15,7 @@ public:
 	shared_ptr<class Camera> GetMainCamera();
 
 	void Render();
+	void RenderUI();
 
 	void ClearRTV();
 

@@ -40,6 +40,45 @@ void SceneManager::Render()
 		_activeScene->Render();
 }
 
+void SceneManager::RenderUI()
+{
+	uint8 backbufferindex = GEngine->GetSwapChain()->GetBackBufferIndex();
+	shared_ptr<D3D11On12Device> device = GEngine->GetD3D11on12Device();
+	D2D1_SIZE_F rtSize = device->GetD3D11On12RT(backbufferindex)->GetSize();
+	//D2D1_RECT_F textRect = D2D1::RectF(0, 0, rtSize.width, rtSize.height);
+	D2D1_RECT_F textRect = D2D1::RectF(0, 0, 600, 600);
+
+	// Acquire our wrapped render target resource for the current back buffer.
+	device->GetD3D11on12Device()->AcquireWrappedResources(device->GetWrappedBackBuffer(backbufferindex).GetAddressOf(), 1);
+	// Render text directly to the back buffer.
+	device->GetD2DDeviceContext()->SetTarget(device->GetD3D11On12RT(backbufferindex).Get());
+	device->GetD2DDeviceContext()->BeginDraw();
+
+	// TODO: UI 렌더링
+	//if (_activeScene)
+	//	_activeScene->RenderUI();
+
+	if (_activeScene)
+	{
+		static const wstring text = L"123123123";
+		device->GetD2DDeviceContext()->DrawTextW(
+			text.c_str(),
+			static_cast<uint32>(text.size()),
+			device->GetTextFormat().Get(),
+			&textRect,
+			device->GetSolidColorBrush().Get());
+	}
+
+	device->GetD2DDeviceContext()->EndDraw();
+	// Release our wrapped render target resource. Releasing 
+	// transitions the back buffer resource to the state specified
+	// as the OutState when the wrapped resource was created.
+	device->GetD3D11on12Device()->ReleaseWrappedResources(device->GetWrappedBackBuffer(backbufferindex).GetAddressOf(), 1);
+
+	// Flush to submit the 11 command list to the shared command queue.
+	device->GetD3D11DeviceContext()->Flush();
+}
+
 void SceneManager::LoadScene(wstring sceneName)
 {
 	// TODO : 기존 Scene 정리
@@ -381,22 +420,22 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 #pragma region Zombie
-	{
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
+	//{
+	//	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
 
-		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+	//	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
 
-		for (auto& gameObject : gameObjects)
-		{
-			gameObject->SetName(L"Zombie");
-			gameObject->SetCheckFrustum(false);
-			gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 500.f, 0.f));
-			//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
-			gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
-			scene->AddGameObject(gameObject);
-			gameObject->AddComponent(make_shared<Zombie>());
-		}
-	}
+	//	for (auto& gameObject : gameObjects)
+	//	{
+	//		gameObject->SetName(L"Zombie");
+	//		gameObject->SetCheckFrustum(false);
+	//		gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 500.f, 0.f));
+	//		//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
+	//		gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+	//		scene->AddGameObject(gameObject);
+	//		gameObject->AddComponent(make_shared<Zombie>());
+	//	}
+	//}
 #pragma endregion
 
 	return scene;

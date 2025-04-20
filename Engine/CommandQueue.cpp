@@ -97,11 +97,11 @@ void GraphicsCommandQueue::RenderEnd()
 	ID3D12CommandList* cmdListArr[] = { _cmdList.Get() };
 	_cmdQueue->ExecuteCommandLists(_countof(cmdListArr), cmdListArr);
 
-	_swapChain->Present();
+	//_swapChain->Present();
 
-	WaitSync();
+	//WaitSync();
 
-	_swapChain->SwapIndex();
+	//_swapChain->SwapIndex();
 }
 
 void GraphicsCommandQueue::FlushResourceCommandQueue()

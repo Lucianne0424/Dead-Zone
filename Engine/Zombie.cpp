@@ -7,7 +7,7 @@
 
 Zombie::Zombie()
 {
-	shared_ptr<ZombieInfo> info = GAME_INFO->Get<ZombieInfo>(L"NormalZombie");
+	shared_ptr<ZombieInfo> info = GET_SINGLE(GameInfo)->Get<ZombieInfo>(L"NormalZombie");
 	_info = *info;
 
 	SetRandomDirection();
