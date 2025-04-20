@@ -20,7 +20,7 @@ void Input::Init(HWND hwnd)
 		return;
 	}
 
-	// 키보드 Direct INput 설정
+	// 키보드 Direct Input 설정
 	if (FAILED(hr = _directInput->CreateDevice(GUID_SysKeyboard,
 		&_keyboard,
 		nullptr)))
