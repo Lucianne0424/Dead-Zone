@@ -37,6 +37,12 @@
     <Filter Include="Object\Zombie">
       <UniqueIdentifier>{4d4a06fc-4125-40a8-ab64-1ac88b1c62ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{8e22da98-1ab2-45b6-8287-eafe93b8d798}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\UI">
+      <UniqueIdentifier>{6dd3ea3e-55c8-4699-9277-515340a4ee16}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -184,6 +190,10 @@
     <ClCompile Include="D3D11On12Device.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="Stage01.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="TextUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -334,6 +344,10 @@
     <ClInclude Include="D3D11On12Device.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Stage01.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="TextUI.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl">
