@@ -30,6 +30,8 @@ public:
 
 public:
 	void SetRandomDirection();
+	void SetPauseDuration();
+	void Move();
 
 private:
 	ZombieInfo _info;
@@ -37,6 +39,8 @@ private:
 private:
 	Vec3 _direction;
 	float _changeDirectionTime;
-	float _elaspedTime;
+	float _elapsedTime;
+	bool _moving;
+	float _pauseDuration{};
 };
 

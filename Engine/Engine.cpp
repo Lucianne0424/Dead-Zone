@@ -32,12 +32,18 @@ void Engine::Init(const WindowInfo& info)
 
 	CreateRenderTargetGroups();
 
+	vector<ComPtr<ID3D12Resource>> rtVec = {
+		_rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)]->GetRTTexture(0)->GetTex2D(),
+		_rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)]->GetRTTexture(1)->GetTex2D()
+	};
+	_d3d11on12Device->Init(_device->GetDevice(), _device->GetDXGI(), rtVec, _graphicsCmdQueue->GetCmdQueue());
+
 	ResizeWindow(info.width, info.height);
 
 	GET_SINGLE(Input)->Init(info.hwnd);
 	GET_SINGLE(Timer)->Init();
 	GET_SINGLE(Resources)->Init();
-	GAME_INFO->Init();
+	GET_SINGLE(GameInfo)->Init();
 }
 
 void Engine::Update()
@@ -69,6 +75,14 @@ void Engine::RenderBegin()
 void Engine::RenderEnd()
 {
 	_graphicsCmdQueue->RenderEnd();
+
+	GET_SINGLE(SceneManager)->RenderUI();
+
+	_swapChain->Present();
+
+	_graphicsCmdQueue->WaitSync();
+
+	_swapChain->SwapIndex();
 }
 
 void Engine::ResizeWindow(int32 width, int32 height)

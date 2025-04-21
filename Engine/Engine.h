@@ -10,6 +10,7 @@
 #include "TableDescriptorHeap.h"
 #include "Texture.h"
 #include "RenderTargetGroup.h"
+#include "D3D11On12Device.h"
 
 class Engine
 {
@@ -26,6 +27,7 @@ public:
 	shared_ptr<RootSignature> GetRootSignature() { return _rootSignature; }
 	shared_ptr<GraphicsDescriptorHeap>	GetGraphicsDescHeap() { return _graphicsDescHeap; }
 	shared_ptr<ComputeDescriptorHeap>	GetComputeDescHeap() { return _computeDescHeap; }
+	shared_ptr<D3D11On12Device> GetD3D11on12Device() { return _d3d11on12Device; }
 
 	shared_ptr<ConstantBuffer> GetConstantBuffer(CONSTANT_BUFFER_TYPE type) { return _constantBuffers[static_cast<uint8>(type)]; }
 	shared_ptr<RenderTargetGroup> GetRTGroup(RENDER_TARGET_GROUP_TYPE type) { return _rtGroups[static_cast<uint8>(type)]; }
@@ -55,6 +57,7 @@ private:
 	shared_ptr<RootSignature>	_rootSignature = make_shared<RootSignature>();
 	shared_ptr<GraphicsDescriptorHeap>	_graphicsDescHeap = make_shared<GraphicsDescriptorHeap>();
 	shared_ptr<ComputeDescriptorHeap>	_computeDescHeap = make_shared<ComputeDescriptorHeap>();
+	shared_ptr<D3D11On12Device>	_d3d11on12Device = make_shared<D3D11On12Device>();
 	
 	vector<shared_ptr<ConstantBuffer>> _constantBuffers;
 	array<shared_ptr<RenderTargetGroup>, RENDER_TARGET_GROUP_COUNT> _rtGroups;

@@ -73,6 +73,11 @@ void Scene::Render()
 	RenderForward();
 }
 
+void Scene::RenderUI()
+{
+
+}
+
 void Scene::ClearRTV()
 {
 	// SwapChain Group √ ±‚»≠
