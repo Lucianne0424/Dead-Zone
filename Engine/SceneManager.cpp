@@ -23,6 +23,10 @@
 
 #include "Container.h"
 
+// TODO: 나중에 삭제
+#include "Timer.h"
+#include <sstream>
+
 void SceneManager::Update()
 {
 	if (_activeScene == nullptr)
@@ -46,7 +50,6 @@ void SceneManager::RenderUI()
 	shared_ptr<D3D11On12Device> device = GEngine->GetD3D11on12Device();
 	D2D1_SIZE_F rtSize = device->GetD3D11On12RT(backbufferindex)->GetSize();
 	//D2D1_RECT_F textRect = D2D1::RectF(0, 0, rtSize.width, rtSize.height);
-	D2D1_RECT_F textRect = D2D1::RectF(0, 0, 600, 600);
 
 	// Acquire our wrapped render target resource for the current back buffer.
 	device->GetD3D11on12Device()->AcquireWrappedResources(device->GetWrappedBackBuffer(backbufferindex).GetAddressOf(), 1);
@@ -58,14 +61,49 @@ void SceneManager::RenderUI()
 	//if (_activeScene)
 	//	_activeScene->RenderUI();
 
+	static float elapsedTime = 0.f;
+	elapsedTime += DELTA_TIME;
 	if (_activeScene)
 	{
-		static const wstring text = L"123123123";
+		// 총알 UI
+		Vec2 pivot = {
+			static_cast<float>(GEngine->GetWindow().width - 100),
+			static_cast<float>(GEngine->GetWindow().height - 50) };
+		D2D1_RECT_F textRect = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
+
+		wstring text = L"5 / 50";
 		device->GetD2DDeviceContext()->DrawTextW(
 			text.c_str(),
 			static_cast<uint32>(text.size()),
 			device->GetTextFormat().Get(),
 			&textRect,
+			device->GetSolidColorBrush().Get());
+
+		// 타이머 UI
+		pivot = { static_cast<float>(GEngine->GetWindow().width / 2), 50.f };
+		D2D1_RECT_F textRect2 = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
+
+		wstring text2 = L"시간 : ";
+		std::wstringstream wss;
+		wss << std::fixed << std::setprecision(2) << elapsedTime;
+		text2 += wss.str();
+		device->GetD2DDeviceContext()->DrawTextW(
+			text2.c_str(),
+			static_cast<uint32>(text2.size()),
+			device->GetTextFormat().Get(),
+			&textRect2,
+			device->GetSolidColorBrush().Get());
+
+		// 체력 UI
+		pivot = { 100.f, static_cast<float>(GEngine->GetWindow().height - 50) };
+		D2D1_RECT_F textRect3 = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
+
+		wstring text3 = L"HP : 100";
+		device->GetD2DDeviceContext()->DrawTextW(
+			text3.c_str(),
+			static_cast<uint32>(text3.size()),
+			device->GetTextFormat().Get(),
+			&textRect3,
 			device->GetSolidColorBrush().Get());
 	}
 
@@ -196,7 +234,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		camera->AddComponent(make_shared<Camera>()); // Near=1, Far=1000, FOV=45도
 		camera->AddComponent(make_shared<TestCameraScript>());
 		camera->GetCamera()->SetFar(10000.f);
-		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 500.f, 0.f));
+		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 180.f, 0.f));
 		uint8 layerIndex = GET_SINGLE(SceneManager)->LayerNameToIndex(L"UI");
 		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, true); // UI는 안 찍음
 		scene->AddGameObject(camera);
@@ -420,22 +458,22 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 #pragma region Zombie
-	{
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
+	//{
+	//	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
 
-		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+	//	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
 
-		for (auto& gameObject : gameObjects)
-		{
-			gameObject->SetName(L"Zombie");
-			gameObject->SetCheckFrustum(false);
-			gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 300.f));
-			//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
-			gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
-			scene->AddGameObject(gameObject);
-			gameObject->AddComponent(make_shared<Zombie>());
-		}
-	}
+	//	for (auto& gameObject : gameObjects)
+	//	{
+	//		gameObject->SetName(L"Zombie");
+	//		gameObject->SetCheckFrustum(false);
+	//		gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 70.f, 800.f));
+	//		//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
+	//		gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+	//		scene->AddGameObject(gameObject);
+	//		gameObject->AddComponent(make_shared<Zombie>());
+	//	}
+	//}
 #pragma endregion
 
 	return scene;
