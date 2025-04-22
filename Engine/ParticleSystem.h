@@ -1,9 +1,11 @@
 #pragma once
 #include "Component.h"
+#include "Material.h"
 
 class Material;
 class Mesh;
 class StructuredBuffer;
+class Texture;
 
 struct ParticleInfo
 {
@@ -35,6 +37,15 @@ public:
 	virtual void Load(const wstring& path) override { }
 	virtual void Save(const wstring& path) override { }
 
+	void SetMaxParticle(uint32 max) { _maxParticle = max; }
+	void SetLifeTime(float min, float max) { _minLifeTime = min; _maxLifeTime = max; }
+	void SetSpeed(float min, float max) { _minSpeed = min; _maxSpeed = max; }
+	void SetScale(float start, float end) { _startScale = start; _endScale = end; }
+	void SetCreateInterval(float interval) { _createInterval = interval; }
+	void SetTexture(shared_ptr<Texture> tex) { _material->SetTexture(0, tex); }
+
+	void EmitOnce();
+
 private:
 	shared_ptr<StructuredBuffer>	_particleBuffer;
 	shared_ptr<StructuredBuffer>	_computeSharedBuffer;
@@ -53,4 +64,9 @@ private:
 	float				_maxSpeed = 50;
 	float				_startScale = 10.f;
 	float				_endScale = 5.f;
+
+	bool _emitRequested = false;
+	bool _autoDestruct = false;
+
+
 };

@@ -180,6 +180,8 @@
     <ClCompile Include="GameInfo.cpp">
       <Filter>Manager</Filter>
     </ClCompile>
+    <ClCompile Include="Container.cpp" />
+    <ClCompile Include="MuzzleFlashParticle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -326,6 +328,8 @@
     <ClInclude Include="GameInfo.h">
       <Filter>Manager</Filter>
     </ClInclude>
+    <ClInclude Include="Container.h" />
+    <ClInclude Include="MuzzleFlashParticle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl">

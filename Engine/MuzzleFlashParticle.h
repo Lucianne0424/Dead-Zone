@@ -1,0 +1,9 @@
+#pragma once
+#include "ParticleSystem.h"
+
+class MuzzleFlashParticle : public ParticleSystem
+{
+public:
+	MuzzleFlashParticle();
+	virtual ~MuzzleFlashParticle() = default;
+};
