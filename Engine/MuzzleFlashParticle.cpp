@@ -2,7 +2,28 @@
 #include "MuzzleFlashParticle.h"
 #include "Resources.h"
 #include "Timer.h"
+#include "StructuredBuffer.h"
 
+MuzzleFlashParticle::MuzzleFlashParticle()
+{
+	_particleBuffer = make_shared<StructuredBuffer>();
+	_particleBuffer->Init(sizeof(ParticleInfo), _maxParticle);
+
+	_computeSharedBuffer = make_shared<StructuredBuffer>();
+	_computeSharedBuffer->Init(sizeof(ComputeSharedInfo), 1);
+
+	// 파라미터 설정
+	SetMaxParticle(50);
+	SetLifeTime(0.05f, 0.15f);
+	SetSpeed(0.f, 0.f);
+	SetScale(5.f, 3.f);
+	//SetCreateInterval(0.001f);  
+
+	// 텍스처 설정
+	shared_ptr<Texture> tex = GET_SINGLE(Resources)->Load<Texture>(
+		L"Fire", L"..\\Resources\\Texture\\Particle\\Fire.png");
+	SetTexture(tex);
+}
 
 void MuzzleFlashParticle::FinalUpdate()
 {
@@ -28,23 +49,7 @@ void MuzzleFlashParticle::FinalUpdate()
 	_computeMaterial->Dispatch(1, 1, 1);
 }
 
-MuzzleFlashParticle::MuzzleFlashParticle()
+void MuzzleFlashParticle::EmitOnce()
 {
-	_particleBuffer = make_shared<StructuredBuffer>();
-	_particleBuffer->Init(sizeof(ParticleInfo), _maxParticle);
-
-	_computeSharedBuffer = make_shared<StructuredBuffer>();
-	_computeSharedBuffer->Init(sizeof(ComputeSharedInfo), 1);
-
-	// 파라미터 설정
-	SetMaxParticle(50);                
-	SetLifeTime(0.05f, 0.15f);         
-	SetSpeed(0.f, 0.f);             
-	SetScale(5.f, 3.f);          
-	//SetCreateInterval(0.001f);  
-
-	// 텍스처 설정
-	shared_ptr<Texture> tex = GET_SINGLE(Resources)->Load<Texture>(
-		L"Fire", L"..\\Resources\\Texture\\Particle\\Fire.png");
-	SetTexture(tex);
+	_emitRequested = true;
 }

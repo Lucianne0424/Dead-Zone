@@ -46,7 +46,7 @@ public:
 
 	void EmitOnce();
 
-private:
+protected:
 	shared_ptr<StructuredBuffer>	_particleBuffer;
 	shared_ptr<StructuredBuffer>	_computeSharedBuffer;
 	uint32							_maxParticle = 1000;
