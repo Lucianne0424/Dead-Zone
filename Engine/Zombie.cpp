@@ -10,8 +10,8 @@ Zombie::Zombie()
 	shared_ptr<ZombieInfo> info = GET_SINGLE(GameInfo)->Get<ZombieInfo>(L"NormalZombie");
 	_info = *info;
 
-	SetRandomDirection();
-	SetPauseDuration();
+	//SetRandomDirection();
+	//SetPauseDuration();
 
 	_moving = false;
 	_elapsedTime = 0.0f;
@@ -27,16 +27,17 @@ void Zombie::Awake()
 
 void Zombie::Update()
 {
-	_elapsedTime += DELTA_TIME;
+	if (DELTA_TIME < 1.f)
+		_elapsedTime += DELTA_TIME;
 
-	if (_moving && _elapsedTime >= 3.0f)
+	if (_moving && _elapsedTime >= 5.0f)
 	{
 		_moving = false;
 		_elapsedTime = 0.0f;
 
 		SetPauseDuration();
 
-		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::WALK);
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::IDLE1);
 		GetAnimator()->Play(index);
 	}
 
@@ -45,18 +46,17 @@ void Zombie::Update()
 		_moving = true;
 		_elapsedTime = 0.0f;
 
-		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::IDLE1);
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::WALK);
 		GetAnimator()->Play(index);
-	}
-
-	if (_moving)
-	{
-		Move();
 	}
 }
 
 void Zombie::LateUpdate()
 {
+	if (_moving)
+	{
+		Move();
+	}
 }
 
 void Zombie::SetRandomDirection()
@@ -66,9 +66,10 @@ void Zombie::SetRandomDirection()
 	std::uniform_real_distribution<float> angleDis(0.f, 360.f);
 
 	float angle = angleDis(gen) * (3.141592f / 180.0f);
-	_direction.x = cos(angle);
-	_direction.z = sin(angle);
-	_direction.y = 0.0f;
+	Vec3 direction;
+	direction.x = cos(angle);
+	direction.z = sin(angle);
+	direction.y = 0.0f;
 }
 
 void Zombie::SetPauseDuration()
@@ -81,7 +82,10 @@ void Zombie::SetPauseDuration()
 
 void Zombie::Move()
 {
+	if (DELTA_TIME > 1.f)
+		return;
 	Vec3 pos = GetTransform()->GetLocalPosition();
-	pos += _direction * _info.walkSpeed * DELTA_TIME;
+	Vec3 direction = { 0.f, 0.f, -1.f };
+	pos += direction * _info.walkSpeed * DELTA_TIME;
 	GetTransform()->SetLocalPosition(pos);
 }

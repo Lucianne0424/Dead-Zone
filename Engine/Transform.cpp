@@ -78,7 +78,12 @@ void Transform::LookAt(const Vec3& dir)
 	matrix.Up(up);
 	matrix.Backward(front);
 
-	_localRotation = DecomposeRotationMatrix(matrix);
+	Vec3 rotation = DecomposeRotationMatrix(matrix);
+	_localRotation = {
+		RadianToDegree(rotation.x),
+		RadianToDegree(rotation.y),
+		RadianToDegree(rotation.z)
+	};
 }
 
 bool Transform::CloseEnough(const float& a, const float& b, const float& epsilon)
