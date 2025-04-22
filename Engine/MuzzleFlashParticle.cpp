@@ -17,7 +17,7 @@ MuzzleFlashParticle::MuzzleFlashParticle()
 	SetLifeTime(0.05f, 0.15f);
 	SetSpeed(0.f, 0.f);
 	SetScale(5.f, 3.f);
-	//SetCreateInterval(0.001f);  
+	//SetCreateInterval(0.001f);
 
 	// 텍스처 설정
 	shared_ptr<Texture> tex = GET_SINGLE(Resources)->Load<Texture>(

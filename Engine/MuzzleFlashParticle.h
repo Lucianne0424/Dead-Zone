@@ -5,7 +5,7 @@ class MuzzleFlashParticle : public ParticleSystem
 {
 public:
 	MuzzleFlashParticle();
-	virtual ~MuzzleFlashParticle();
+	virtual ~MuzzleFlashParticle() = default;
 
 	virtual void FinalUpdate() override;
 
