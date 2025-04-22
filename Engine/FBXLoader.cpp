@@ -75,7 +75,11 @@ void FBXLoader::ParseNode(FbxNode* node)
 		switch (attribute->GetAttributeType())
 		{
 		case FbxNodeAttribute::eMesh:
-			LoadMesh(node->GetMesh());
+			if (_animClips.empty())
+				LoadMeshNotWithAnimation(node->GetMesh());
+			else
+				LoadMesh(node->GetMesh());;
+			//LoadMesh(node->GetMesh());
 			break;
 		}
 	}
@@ -148,6 +152,123 @@ void FBXLoader::LoadMesh(FbxMesh* mesh)
 
 	// Animation
 	LoadAnimationData(mesh, &meshInfo);
+}
+
+void FBXLoader::LoadMeshNotWithAnimation(FbxMesh* mesh)
+{
+	_meshes.push_back(FbxMeshInfo());
+	FbxMeshInfo& meshInfo = _meshes.back();
+
+	meshInfo.name = s2ws(mesh->GetName());
+
+	const int32 vertexCount = mesh->GetControlPointsCount();
+	meshInfo.vertices.resize(vertexCount);
+	meshInfo.boneWeights.resize(vertexCount);
+
+	// Position
+	FbxVector4* controlPoints = mesh->GetControlPoints();
+	for (int32 i = 0; i < vertexCount; ++i)
+	{
+		meshInfo.vertices[i].pos.x = static_cast<float>(controlPoints[i].mData[0]);
+		meshInfo.vertices[i].pos.y = static_cast<float>(controlPoints[i].mData[2]);
+		meshInfo.vertices[i].pos.z = static_cast<float>(controlPoints[i].mData[1]);
+	}
+
+	const int32 materialCount = mesh->GetNode()->GetMaterialCount();
+	meshInfo.indices.resize(materialCount);
+
+	FbxGeometryElementMaterial* geometryElementMaterial = mesh->GetElementMaterial();
+
+	const int32 polygonSize = mesh->GetPolygonSize(0);
+	assert(polygonSize == 3);
+
+	uint32 arrIdx[3];
+	uint32 vertexCounter = 0; // 정점의 개수
+
+	const int32 triCount = mesh->GetPolygonCount(); // 메쉬의 삼각형 개수를 가져온다
+	//for (int32 i = 0; i < triCount; i++) // 삼각형의 개수
+	//{
+	//	for (int32 j = 0; j < 3; j++) // 삼각형은 세 개의 정점으로 구성
+	//	{
+	//		int32 controlPointIndex = mesh->GetPolygonVertex(i, j); // 제어점의 인덱스 추출
+	//		arrIdx[j] = controlPointIndex;
+
+	//		GetNormal(mesh, &meshInfo, controlPointIndex, vertexCounter);
+	//		GetTangent(mesh, &meshInfo, controlPointIndex, vertexCounter);
+	//		GetUV(mesh, &meshInfo, controlPointIndex, mesh->GetTextureUVIndex(i, j));
+
+	//		vertexCounter++;
+	//	}
+
+	//	const uint32 subsetIdx = geometryElementMaterial->GetIndexArray().GetAt(i);
+	//	meshInfo.indices[subsetIdx].push_back(arrIdx[0]);
+	//	meshInfo.indices[subsetIdx].push_back(arrIdx[2]);
+	//	meshInfo.indices[subsetIdx].push_back(arrIdx[1]);
+	//}
+
+#pragma region test
+	meshInfo.vertices.resize(triCount * 3);
+	meshInfo.boneWeights.resize(triCount * 3);
+	for (int32 i = 0; i < triCount; i++) // 삼각형의 개수
+	{
+		for (int32 j = 0; j < 3; j++) // 삼각형은 세 개의 정점으로 구성
+		{
+			Vertex vertex = {};
+			int32 controlPointIndex = mesh->GetPolygonVertex(i, j); // 제어점의 인덱스 추출
+
+			vertex.pos.x = static_cast<float>(controlPoints[controlPointIndex].mData[0]);
+			vertex.pos.y = static_cast<float>(controlPoints[controlPointIndex].mData[2]);
+			vertex.pos.z = static_cast<float>(controlPoints[controlPointIndex].mData[1]);
+
+			if (mesh->GetElementNormalCount() == 0)
+				return;
+
+			FbxGeometryElementNormal* normal = mesh->GetElementNormal();
+			uint32 normalIdx = 0;
+
+			if (normal->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
+			{
+				if (normal->GetReferenceMode() == FbxGeometryElement::eDirect)
+					normalIdx = vertexCounter;
+				else
+					normalIdx = normal->GetIndexArray().GetAt(vertexCounter);
+			}
+			else if (normal->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+			{
+				if (normal->GetReferenceMode() == FbxGeometryElement::eDirect)
+					normalIdx = controlPointIndex;
+				else
+					normalIdx = normal->GetIndexArray().GetAt(controlPointIndex);
+			}
+
+			FbxVector4 vec = normal->GetDirectArray().GetAt(normalIdx);
+			vertex.normal.x = static_cast<float>(vec.mData[0]);
+			vertex.normal.y = static_cast<float>(vec.mData[2]);
+			vertex.normal.z = static_cast<float>(vec.mData[1]);
+
+			vertex.tangent.x = 1.f;
+			vertex.tangent.y = 0.f;
+			vertex.tangent.z = 0.f;
+
+			int32 uvIndex = mesh->GetTextureUVIndex(i, j);
+			FbxVector2 uv = mesh->GetElementUV()->GetDirectArray().GetAt(uvIndex);
+			vertex.uv.x = static_cast<float>(uv.mData[0]);
+			vertex.uv.y = 1.f - static_cast<float>(uv.mData[1]);
+
+			meshInfo.vertices[vertexCounter] = vertex;
+
+			vertexCounter++;
+		}
+
+		const uint32 subsetIdx = geometryElementMaterial->GetIndexArray().GetAt(i);
+		meshInfo.indices[subsetIdx].push_back(i * 3);
+		meshInfo.indices[subsetIdx].push_back(i * 3 + 2);
+		meshInfo.indices[subsetIdx].push_back(i * 3 + 1);
+	}
+#pragma endregion
+
+	// Animation
+	//LoadAnimationData(mesh, &meshInfo);
 }
 
 void FBXLoader::LoadMaterial(FbxSurfaceMaterial* surfaceMaterial)
