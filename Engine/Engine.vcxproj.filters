@@ -37,6 +37,12 @@
     <Filter Include="Object\Zombie">
       <UniqueIdentifier>{4d4a06fc-4125-40a8-ab64-1ac88b1c62ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Container">
+      <UniqueIdentifier>{cfec221c-7244-4119-9274-86ed0a2fc4a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Component\Particle">
+      <UniqueIdentifier>{92bfb076-62e5-4653-a917-06aeedad349d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -132,9 +138,6 @@
     <ClCompile Include="StructuredBuffer.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleSystem.cpp">
-      <Filter>Object\Component</Filter>
-    </ClCompile>
     <ClCompile Include="InstancingBuffer.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -179,6 +182,15 @@
     </ClCompile>
     <ClCompile Include="GameInfo.cpp">
       <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Container.cpp">
+      <Filter>Object\Container</Filter>
+    </ClCompile>
+    <ClCompile Include="MuzzleFlashParticle.cpp">
+      <Filter>Object\Component\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Object\Component\Particle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -278,9 +290,6 @@
     <ClInclude Include="StructuredBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleSystem.h">
-      <Filter>Object\Component</Filter>
-    </ClInclude>
     <ClInclude Include="InstancingBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -325,6 +334,15 @@
     </ClInclude>
     <ClInclude Include="GameInfo.h">
       <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Container.h">
+      <Filter>Object\Container</Filter>
+    </ClInclude>
+    <ClInclude Include="MuzzleFlashParticle.h">
+      <Filter>Object\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Object\Component\Particle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
