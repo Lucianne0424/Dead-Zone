@@ -23,6 +23,11 @@ void TestCameraScript::LateUpdate()
 	if (INPUT->GetButton(KEY_TYPE::W)) {
 		pos += GetTransform()->GetLook() * _speed * DELTA_TIME;
 		moveDirection += GetTransform()->GetLook() * _speed * DELTA_TIME;
+		// ¿¹½ÃEXAMPLE
+		//Vec3 _dir = GetTransform()->GetLook();
+		//movePacket.direction.x = _dir.x;
+		//movePacket.direction.y = _dir.y;
+		//movePacket.direcition.z = _dir.z;
 	}
 	if (INPUT->GetButton(KEY_TYPE::S)) {
 		pos += GetTransform()->GetLook() * _speed * DELTA_TIME;
