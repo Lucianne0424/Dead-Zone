@@ -218,6 +218,16 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 
 void Scene::AddPlayer(sc_packet_login_ok* packet)
 {
+	{
+		wchar_t buf[128];
+		swprintf_s(buf, 128,
+			L"[AddPlayer] ID=%lld  Pos=(%.1f, %.1f, %.1f)",
+			packet->playerId,
+			packet->position.x,
+			packet->position.y,
+			packet->position.z);
+		MessageBoxW(nullptr, buf, L"Debug - Spawn", MB_OK);
+	}
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
 
 	shared_ptr<GameObject> obj = make_shared<GameObject>();

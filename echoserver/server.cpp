@@ -229,7 +229,7 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, in
         pContext->state = STATE_LOBBY;
         pContext->health = 100;
         pContext->posX = 0.0f;
-        pContext->posY = 0.0f;
+        pContext->posY = 500.0f;
         pContext->posZ = 0.0f;
         pContext->walkSpeed = 3.0f;
         pContext->runSpeed = 5.0f;

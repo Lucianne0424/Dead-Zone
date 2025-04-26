@@ -90,15 +90,15 @@ void ReceiverThread(SOCKET clientSocket) {
                 case S2C_P_PLAYER_INFO: {
                   //  MessageBoxA(NULL, "로그인 성공 및 플레이어 정보 수신", "Debug - Player Info", MB_OK);  //블로킹 함수라 3번째 클라 게임 시작 안되서 주석 처리 
                     g_loggedIn = true;
-					    // 로그인 성공 및 플레이어 정보 처리: 플레이어 객체 생성 및 초기화
+					  // 로그인 성공 및 플레이어 정보 처리: 플레이어 객체 생성 및 초기화
                         sc_packet_login_ok* pLoginOk = reinterpret_cast<sc_packet_login_ok*>(buffer);
                         GET_SINGLE(SceneManager)->GetActiveScene()->AddPlayer(pLoginOk);
-
+                        
                     
                     break;
                 }
                 case S2C_P_MOVE: {
-                    MessageBoxA(NULL, "이동 업데이트 수신", "Debug - Move", MB_OK);
+                  //  MessageBoxA(NULL, "이동 업데이트 수신", "Debug - Move", MB_OK);
                     // 플레이어 이동 처리: 해당 플레이어의 위치와 회전 정보를 업데이트
 					sc_packet_move* pMove = reinterpret_cast<sc_packet_move*>(buffer);
 					GET_SINGLE(SceneManager)->GetActiveScene()->MovePlayer(pMove);
@@ -168,8 +168,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (!InitNetwork())
         return 1;
 
-    std::thread recvThread(ReceiverThread, g_clientSocket);
+    GWindowInfo.width = 800;
+    GWindowInfo.height = 600;
+    GWindowInfo.windowed = true;
+    GWindowInfo.sock = g_clientSocket;
 
+    std::unique_ptr<Game> game = std::make_unique<Game>();
+    game->Init(GWindowInfo);
+
+    std::thread recvThread(ReceiverThread, g_clientSocket);
     // 자동 로그인: cs_packet_login 패킷 전송
     cs_packet_login loginPacket;
     loginPacket.size = sizeof(cs_packet_login);
@@ -189,14 +196,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         Sleep(100);
     }
     */
-    GWindowInfo.width = 800;
-    GWindowInfo.height = 600;
-    GWindowInfo.windowed = true;
-    GWindowInfo.sock = g_clientSocket;
-
-    std::unique_ptr<Game> game = std::make_unique<Game>();
-    game->Init(GWindowInfo);
-
     // 기본 메시지 루프:
     MSG msg;
     HACCEL hAccelTable = LoadAccelerators(hInst, MAKEINTRESOURCE(IDC_CLIENT));
