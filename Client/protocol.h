@@ -50,7 +50,7 @@ struct cs_packet_move {
     unsigned char size;      // 전체 패킷 크기
     char type;               // 프로토콜 타입: C2S_P_MOVE
     Vector3 direction;       // 이동 방향
-    float yaw;               // 좌우 회전 각도 
+    float yaw;               // 좌우 회전 각도
 };
 
 // 서버 → 클라이언트 이동 업데이트 패킷

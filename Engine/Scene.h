@@ -35,9 +35,18 @@ public:
 
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
 
+public:
+	void AddPlayer(struct sc_packet_login_ok* packet);
+	//void AddZombie(struct sc_packet_login_ok* packet);
+
+	void MovePlayer(struct sc_packet_move* packet);
+
 private:
 	vector<shared_ptr<GameObject>>		_gameObjects;
 	vector<shared_ptr<class Camera>>	_cameras;
 	vector<shared_ptr<class Light>>		_lights;
+
+	vector<shared_ptr<GameObject>>		_players;
+	vector<shared_ptr<GameObject>>		_zombies;
 };
 

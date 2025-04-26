@@ -11,6 +11,9 @@
 #include <sstream>
 #include <iomanip>
 
+#include "Scene.h"
+#include "SceneManager.h"
+
 #pragma comment(lib, "ws2_32.lib")
 
 #define MAX_LOADSTRING 100
@@ -87,24 +90,19 @@ void ReceiverThread(SOCKET clientSocket) {
                 case S2C_P_PLAYER_INFO: {
                   //  MessageBoxA(NULL, "로그인 성공 및 플레이어 정보 수신", "Debug - Player Info", MB_OK);  //블로킹 함수라 3번째 클라 게임 시작 안되서 주석 처리 
                     g_loggedIn = true;
-                    /*
+					    // 로그인 성공 및 플레이어 정보 처리: 플레이어 객체 생성 및 초기화
                         sc_packet_login_ok* pLoginOk = reinterpret_cast<sc_packet_login_ok*>(buffer);
-                        Game::GetInstance()->OnPlayerJoin(pLoginOk->playerId,
-                                                            pLoginOk->position,
-                                                            pLoginOk->health,
-                                                            pLoginOk->walkSpeed,
-                                                            pLoginOk->runSpeed);
-                    */
+                        GET_SINGLE(SceneManager)->GetActiveScene()->AddPlayer(pLoginOk);
+
+                    
                     break;
                 }
                 case S2C_P_MOVE: {
                     MessageBoxA(NULL, "이동 업데이트 수신", "Debug - Move", MB_OK);
-                    /*
-                     sc_packet_move* pMove = reinterpret_cast<sc_packet_move*>(buffer);
-                        Game::GetInstance()->OnPlayerMove(pMove->playerId,
-                                                            pMove->position,
-                                                            pMove->yaw);
-                    */
+                    // 플레이어 이동 처리: 해당 플레이어의 위치와 회전 정보를 업데이트
+					sc_packet_move* pMove = reinterpret_cast<sc_packet_move*>(buffer);
+					GET_SINGLE(SceneManager)->GetActiveScene()->MovePlayer(pMove);
+                    
                     break;
                 }
                 case S2C_P_ATTACK: {

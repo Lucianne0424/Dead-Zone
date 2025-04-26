@@ -8,6 +8,11 @@
 #include "Engine.h"
 #include "Resources.h"
 
+#include "Transform.h"
+#include "MeshRenderer.h"
+#include "SphereCollider.h"
+#include "..//echoserver//protocol.h"
+
 void Scene::Awake()
 {
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
@@ -209,4 +214,42 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 	auto findIt = std::find(_gameObjects.begin(), _gameObjects.end(), gameObject);
 	if (findIt != _gameObjects.end())
 		_gameObjects.erase(findIt);
+}
+
+void Scene::AddPlayer(sc_packet_login_ok* packet)
+{
+	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
+
+	shared_ptr<GameObject> obj = make_shared<GameObject>();
+	obj->SetName(L"OBJ");
+	obj->AddComponent(make_shared<Transform>());
+	obj->AddComponent(make_shared<SphereCollider>());
+	obj->GetTransform()->SetLocalScale(Vec3(100.f, 100.f, 100.f));
+	obj->GetTransform()->SetLocalPosition(position);
+	obj->SetStatic(false);
+	shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+	{
+		shared_ptr<Mesh> sphereMesh = GET_SINGLE(Resources)->LoadSphereMesh();
+		meshRenderer->SetMesh(sphereMesh);
+	}
+	{
+		shared_ptr<Material> material = GET_SINGLE(Resources)->Get<Material>(L"GameObject");
+		meshRenderer->SetMaterial(material->Clone());
+	}
+	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetRadius(0.5f);
+	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
+	obj->AddComponent(meshRenderer);
+	AddGameObject(obj);
+}
+
+void Scene::MovePlayer(sc_packet_move* packet)
+{
+	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); // 패킷 위치 받아오기
+	
+	// 플레이어 ID로 플레이어 찾기
+	auto it = std::find_if(_players.begin(), _players.end(),
+		[=](const shared_ptr<GameObject>& player) { return player->GetID() == packet->playerId; });
+
+	// 위치 적용
+	(*it)->GetTransform()->SetLocalPosition(position);
 }
