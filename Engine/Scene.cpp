@@ -240,6 +240,8 @@ void Scene::AddPlayer(sc_packet_login_ok* packet)
 	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
 	obj->AddComponent(meshRenderer);
 	AddGameObject(obj);
+
+	_players.push_back(obj);
 }
 
 void Scene::MovePlayer(sc_packet_move* packet)
