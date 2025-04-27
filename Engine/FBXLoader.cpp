@@ -79,6 +79,7 @@ void FBXLoader::ParseNode(FbxNode* node)
 				LoadMeshNotWithAnimation(node->GetMesh());
 			else
 				LoadMesh(node->GetMesh());;
+
 			//LoadMesh(node->GetMesh());
 			break;
 		}
@@ -167,12 +168,6 @@ void FBXLoader::LoadMeshNotWithAnimation(FbxMesh* mesh)
 
 	// Position
 	FbxVector4* controlPoints = mesh->GetControlPoints();
-	for (int32 i = 0; i < vertexCount; ++i)
-	{
-		meshInfo.vertices[i].pos.x = static_cast<float>(controlPoints[i].mData[0]);
-		meshInfo.vertices[i].pos.y = static_cast<float>(controlPoints[i].mData[2]);
-		meshInfo.vertices[i].pos.z = static_cast<float>(controlPoints[i].mData[1]);
-	}
 
 	const int32 materialCount = mesh->GetNode()->GetMaterialCount();
 	meshInfo.indices.resize(materialCount);
@@ -186,27 +181,6 @@ void FBXLoader::LoadMeshNotWithAnimation(FbxMesh* mesh)
 	uint32 vertexCounter = 0; // 정점의 개수
 
 	const int32 triCount = mesh->GetPolygonCount(); // 메쉬의 삼각형 개수를 가져온다
-	//for (int32 i = 0; i < triCount; i++) // 삼각형의 개수
-	//{
-	//	for (int32 j = 0; j < 3; j++) // 삼각형은 세 개의 정점으로 구성
-	//	{
-	//		int32 controlPointIndex = mesh->GetPolygonVertex(i, j); // 제어점의 인덱스 추출
-	//		arrIdx[j] = controlPointIndex;
-
-	//		GetNormal(mesh, &meshInfo, controlPointIndex, vertexCounter);
-	//		GetTangent(mesh, &meshInfo, controlPointIndex, vertexCounter);
-	//		GetUV(mesh, &meshInfo, controlPointIndex, mesh->GetTextureUVIndex(i, j));
-
-	//		vertexCounter++;
-	//	}
-
-	//	const uint32 subsetIdx = geometryElementMaterial->GetIndexArray().GetAt(i);
-	//	meshInfo.indices[subsetIdx].push_back(arrIdx[0]);
-	//	meshInfo.indices[subsetIdx].push_back(arrIdx[2]);
-	//	meshInfo.indices[subsetIdx].push_back(arrIdx[1]);
-	//}
-
-#pragma region test
 	meshInfo.vertices.resize(triCount * 3);
 	meshInfo.boneWeights.resize(triCount * 3);
 	for (int32 i = 0; i < triCount; i++) // 삼각형의 개수
@@ -265,7 +239,6 @@ void FBXLoader::LoadMeshNotWithAnimation(FbxMesh* mesh)
 		meshInfo.indices[subsetIdx].push_back(i * 3 + 2);
 		meshInfo.indices[subsetIdx].push_back(i * 3 + 1);
 	}
-#pragma endregion
 
 	// Animation
 	//LoadAnimationData(mesh, &meshInfo);
