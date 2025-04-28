@@ -33,6 +33,9 @@ void Camera::FinalUpdate()
 	else
 		_matProjection = ::XMMatrixOrthographicLH(_width * _scale, _height * _scale, _near, _far);
 
+	Camera::S_MatView = _matView;
+	Camera::S_MatProjection = _matProjection;
+
 	_frustum.FinalUpdate();
 }
 
