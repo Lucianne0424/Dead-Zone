@@ -117,6 +117,10 @@ void FBXLoader::LoadMesh(FbxMesh* mesh)
 		meshInfo.vertices[i].pos.x = static_cast<float>(controlPoints[i].mData[0]);
 		meshInfo.vertices[i].pos.y = static_cast<float>(controlPoints[i].mData[2]);
 		meshInfo.vertices[i].pos.z = static_cast<float>(controlPoints[i].mData[1]);
+
+		meshInfo.maxPosition.x = max(meshInfo.maxPosition.x, abs(meshInfo.vertices[i].pos.x)); // 축 별 정점 최대값 저장
+		meshInfo.maxPosition.y = max(meshInfo.maxPosition.y, abs(meshInfo.vertices[i].pos.y));
+		meshInfo.maxPosition.z = max(meshInfo.maxPosition.z, abs(meshInfo.vertices[i].pos.z));
 	}
 
 	const int32 materialCount = mesh->GetNode()->GetMaterialCount();
@@ -193,6 +197,10 @@ void FBXLoader::LoadMeshNotWithAnimation(FbxMesh* mesh)
 			vertex.pos.x = static_cast<float>(controlPoints[controlPointIndex].mData[0]);
 			vertex.pos.y = static_cast<float>(controlPoints[controlPointIndex].mData[2]);
 			vertex.pos.z = static_cast<float>(controlPoints[controlPointIndex].mData[1]);
+
+			meshInfo.maxPosition.x = max(meshInfo.maxPosition.x, abs(meshInfo.vertices[i].pos.x)); // 축 별 정점 최대값 저장
+			meshInfo.maxPosition.y = max(meshInfo.maxPosition.y, abs(meshInfo.vertices[i].pos.y));
+			meshInfo.maxPosition.z = max(meshInfo.maxPosition.z, abs(meshInfo.vertices[i].pos.z));
 
 			if (mesh->GetElementNormalCount() == 0)
 				return;

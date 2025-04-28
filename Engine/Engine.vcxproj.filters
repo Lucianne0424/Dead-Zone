@@ -194,6 +194,9 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="TextUI.cpp" />
+    <ClCompile Include="OrientedBoxCollider.cpp">
+      <Filter>Object\Component\Collider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -348,6 +351,9 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="TextUI.h" />
+    <ClInclude Include="OrientedBoxCollider.h">
+      <Filter>Object\Component\Collider</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleMath.inl">

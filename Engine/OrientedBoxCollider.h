@@ -1,19 +1,19 @@
 #pragma once
 #include "BaseCollider.h"
 
-class SphereCollider : public BaseCollider
+class OrientedBoxCollider : public BaseCollider
 {
 public:
-	SphereCollider();
-	virtual ~SphereCollider();
+	OrientedBoxCollider();
+	virtual ~OrientedBoxCollider();
 
-	virtual void FinalUpdate() override;
-	virtual bool Intersects(Vec4 rayOrigin, Vec4 rayDir, OUT float& distance) override;
+	void FinalUpdate();
+	virtual bool Intersects(Vec4 rayOrigin, Vec4 rayDir, OUT float& distance);
 	virtual bool Intersects(shared_ptr<BoundingSphere> boundingSphere) override;
 	virtual bool Intersects(shared_ptr<BoundingBox> boundingBox) override;
 	virtual bool Intersects(shared_ptr<BoundingOrientedBox> boundingOrientedBox) override;
 
 private:
-	shared_ptr<BoundingSphere> _boundingSphere;
+	shared_ptr<BoundingOrientedBox> _boundingOrientedBox;
 };
 

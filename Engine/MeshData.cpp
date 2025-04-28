@@ -40,6 +40,8 @@ shared_ptr<MeshData> MeshData::LoadFromFBX(const wstring& path)
 		MeshRenderInfo info = {};
 		info.mesh = mesh;
 		info.materials = materials;
+
+		info.maxPosition = loader.GetMesh(i).maxPosition; // FBX에서 가져온 최대 위치값
 		meshData->_meshRenders.push_back(info);
 	}
 

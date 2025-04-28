@@ -11,3 +11,11 @@ BaseCollider::~BaseCollider()
 {
 
 }
+
+void BaseCollider::SetOrientation(Vec3 orientation)
+{
+	_orientation = SimpleMath::Quaternion::CreateFromYawPitchRoll(
+		XMConvertToRadians(orientation.x),
+		XMConvertToRadians(orientation.y),
+		XMConvertToRadians(orientation.z));
+}

@@ -9,6 +9,8 @@ struct MeshRenderInfo
 {
 	shared_ptr<Mesh>				mesh;
 	vector<shared_ptr<Material>>	materials;
+
+	Vec3							maxPosition = {};
 };
 
 class MeshData : public Object
