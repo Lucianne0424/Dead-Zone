@@ -61,7 +61,8 @@ private:
 	Matrix _matView = {};
 	Matrix _matProjection = {};
 
-	Frustum _frustum;
+	//Frustum _frustum;
+	BoundingFrustum _frustum;
 	uint32 _cullingMask = 0;
 
 private:

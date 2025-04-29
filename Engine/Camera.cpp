@@ -36,7 +36,11 @@ void Camera::FinalUpdate()
 	Camera::S_MatView = _matView;
 	Camera::S_MatProjection = _matProjection;
 
-	_frustum.FinalUpdate();
+	//_frustum.FinalUpdate();
+	BoundingFrustum frustum;
+	BoundingFrustum::CreateFromMatrix(frustum, Camera::S_MatProjection);
+	Matrix viewInv = Camera::S_MatView.Invert();
+	frustum.Transform(frustum, viewInv);
 }
 
 void Camera::SortGameObject()
@@ -58,9 +62,8 @@ void Camera::SortGameObject()
 
 		if (gameObject->GetCheckFrustum())
 		{
-			if (_frustum.ContainsSphere(
-				gameObject->GetTransform()->GetWorldPosition(),
-				gameObject->GetTransform()->GetBoundingSphereRadius()) == false)
+			if (_frustum.Contains(
+				gameObject->GetTransform()->GetWorldPosition()) == DISJOINT)
 			{
 				continue;
 			}
@@ -106,9 +109,8 @@ void Camera::SortShadowObject()
 
 		if (gameObject->GetCheckFrustum())
 		{
-			if (_frustum.ContainsSphere(
-				gameObject->GetTransform()->GetWorldPosition(),
-				gameObject->GetTransform()->GetBoundingSphereRadius()) == false)
+			if (_frustum.Contains(
+				gameObject->GetTransform()->GetWorldPosition()) == DISJOINT)
 			{
 				continue;
 			}
