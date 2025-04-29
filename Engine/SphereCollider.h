@@ -13,6 +13,8 @@ public:
 	virtual bool Intersects(shared_ptr<BoundingBox> boundingBox) override;
 	virtual bool Intersects(shared_ptr<BoundingOrientedBox> boundingOrientedBox) override;
 
+	shared_ptr<BoundingSphere> GetBoundingSphere() { return _boundingSphere; }
+
 private:
 	shared_ptr<BoundingSphere> _boundingSphere;
 };
