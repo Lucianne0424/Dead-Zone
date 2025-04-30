@@ -11,6 +11,10 @@
 #include "ParticleSystem.h"
 #include "InstancingManager.h"
 
+#include "BaseCollider.h"
+#include "SphereCollider.h"
+#include "OrientedBoxCollider.h"
+
 Matrix Camera::S_MatView;
 Matrix Camera::S_MatProjection;
 
@@ -62,8 +66,7 @@ void Camera::SortGameObject()
 
 		if (gameObject->GetCheckFrustum())
 		{
-			if (_frustum.Contains(
-				gameObject->GetTransform()->GetWorldPosition()) == DISJOINT)
+			if (FrustumCulling(gameObject) == DISJOINT)
 			{
 				continue;
 			}
@@ -109,8 +112,7 @@ void Camera::SortShadowObject()
 
 		if (gameObject->GetCheckFrustum())
 		{
-			if (_frustum.Contains(
-				gameObject->GetTransform()->GetWorldPosition()) == DISJOINT)
+			if (FrustumCulling(gameObject) == DISJOINT)
 			{
 				continue;
 			}
@@ -149,5 +151,24 @@ void Camera::Render_Shadow()
 	for (auto& gameObject : _vecShadow)
 	{
 		gameObject->GetMeshRenderer()->RenderShadow();
+	}
+}
+
+ContainmentType Camera::FrustumCulling(shared_ptr<GameObject> gameObject)
+{
+	ColliderType colliderType = gameObject->GetCollider()->GetColliderType();
+	if (colliderType == ColliderType::SPHERE)
+	{
+		shared_ptr<SphereCollider> sphere = static_pointer_cast<SphereCollider>(gameObject->GetCollider());
+		return _frustum.Contains(*sphere->GetBoundingSphere());
+	}
+	else if (colliderType == ColliderType::OBB)
+	{
+		shared_ptr<OrientedBoxCollider> obb = static_pointer_cast<OrientedBoxCollider>(gameObject->GetCollider());
+		return _frustum.Contains(*obb->GetBoundingOrientedBox());
+	}
+	else
+	{
+		return ContainmentType::CONTAINS;
 	}
 }
