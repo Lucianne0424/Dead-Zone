@@ -136,10 +136,18 @@ void WorkerThread(HANDLE) {
     LPOVERLAPPED pOverlapped;
 
     while (true) {
-        BOOL result = GetQueuedCompletionStatus(g_hIOCP, &bytesTransferred, &completionKey, &pOverlapped, INFINITE);
-        if (!result) {
-            printf("GetQueuedCompletionStatus 에러: %d\n", GetLastError());
+        BOOL result = GetQueuedCompletionStatus(
+            g_hIOCP, &bytesTransferred, &completionKey, &pOverlapped, INFINITE);
+        DWORD lastErr = result ? 0 : GetLastError();
+            if (!result && pOverlapped != nullptr &&
+                (lastErr == ERROR_NETNAME_DELETED || lastErr == ERROR_OPERATION_ABORTED)) {
+                bytesTransferred = 0;
+            
+        }
+         else if (!result) {
+            printf("GetQueuedCompletionStatus 에러: %d\n", lastErr);
             continue;
+            
         }
         if (pOverlapped == NULL)  
             break;
@@ -191,19 +199,25 @@ void WorkerThread(HANDLE) {
             if (bytesTransferred == 0) {
                 printf("클라이언트 종료: socket %d\n", pContext->socket);
                 {
+                {
                     std::lock_guard<std::mutex> lock(g_playersMutex);
                     auto it = std::find(g_connectedPlayers.begin(), g_connectedPlayers.end(), pContext);
-                    if (it != g_connectedPlayers.end()) {
-                        sc_packet_player_leave leavePacket;
-                        leavePacket.size = sizeof(sc_packet_player_leave);
-                        leavePacket.type = S2C_P_PLAYER_LEAVE;
-                        leavePacket.playerId = pContext->socket;
-                        for (auto* player : g_connectedPlayers) {
-                            if (player != pContext)
-                                PostSendPacket(player, &leavePacket, leavePacket.size);
-                        }
-                        g_connectedPlayers.erase(it);
+                    if (it != g_connectedPlayers.end())
+                         g_connectedPlayers.erase(it);
                     }
+                sc_packet_player_leave leavePacket{};
+                leavePacket.size = sizeof(sc_packet_player_leave);
+                leavePacket.type = S2C_P_PLAYER_LEAVE;
+                leavePacket.playerId = pContext->socket;
+                
+                    if (auto* room = FindGameRoomForPlayer(pContext)) {
+                    for (auto* peer : room->players) {
+                       if (peer != pContext)
+                             PostSendPacket(peer, &leavePacket, leavePacket.size);
+                        
+                    }
+                    
+                }
                 }
                 closesocket(pContext->socket);
                 delete pContext;

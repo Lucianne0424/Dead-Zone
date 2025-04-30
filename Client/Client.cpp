@@ -111,11 +111,10 @@ void ReceiverThread(SOCKET clientSocket) {
                     break;
                 }
                 case S2C_P_PLAYER_LEAVE: {
-                    MessageBoxA(NULL, "플레이어 퇴장 이벤트 수신", "Debug - Player Leave", MB_OK);
-                    /*
-                     sc_packet_player_leave* pLeave = reinterpret_cast<sc_packet_player_leave*>(buffer);
-                        Game::GetInstance()->OnPlayerLeave(pLeave->playerId);
-                    */
+                    sc_packet_player_leave* pLeave = reinterpret_cast<sc_packet_player_leave*>(buffer);
+                    GET_SINGLE(SceneManager)
+                        ->GetActiveScene()
+                        ->RemovePlayer(pLeave);
                     break;
                 }
                 case S2C_P_GAME_START: {
@@ -183,12 +182,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         return 1;
     }
     std::cout << "자동 로그인 패킷 전송 완료: size=" << (int)loginPacket.size << ", type=" << (int)loginPacket.type << std::endl;
-    /*
-    while (!g_gameStarted.load()) {
-        Sleep(100);
-    }
-    */
-    // 기본 메시지 루프:
+   
     MSG msg;
     HACCEL hAccelTable = LoadAccelerators(hInst, MAKEINTRESOURCE(IDC_CLIENT));
     while (true) {

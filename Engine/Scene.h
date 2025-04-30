@@ -37,6 +37,7 @@ public:
 
 public:
 	void AddPlayer(struct sc_packet_login_ok* packet);
+	void RemovePlayer(struct sc_packet_player_leave* packet);
 	//void AddZombie(struct sc_packet_login_ok* packet);
 
 	void MovePlayer(struct sc_packet_move* packet);

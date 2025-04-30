@@ -245,6 +245,21 @@ void Scene::AddPlayer(sc_packet_login_ok* packet)
 	_players.push_back(obj);
 }
 
+void Scene::RemovePlayer(sc_packet_player_leave* packet)
+{
+	uint32_t leftId = static_cast<uint32_t>(packet->playerId);
+
+	for (auto it = _players.begin(); it != _players.end(); ++it)
+	{
+		if ((*it)->GetID() == leftId)
+		{
+			RemoveGameObject(*it);
+			_players.erase(it);
+			break;
+		}
+	}
+}
+
 void Scene::MovePlayer(sc_packet_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); 
