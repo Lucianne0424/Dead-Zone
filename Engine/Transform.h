@@ -13,13 +13,24 @@ public:
 public:
 	// Parent 기준
 	const Vec3& GetLocalPosition() { return _localPosition; }
-	const Vec3& GetLocalRotation() { return _localRotation; }
+	const Vec3& GetLocalRotation()
+	{
+		// 라디안에서 Degree로 변환
+		Vec3 localRotation = _localRotation;
+
+		localRotation.x = RadianToDegree(localRotation.x);
+		localRotation.y = RadianToDegree(localRotation.y);
+		localRotation.z = RadianToDegree(localRotation.z);
+
+		return localRotation;
+	}
 	const Vec3& GetLocalScale() { return _localScale; }
 
 	// TEMP
 	float GetBoundingSphereRadius() { return max(max(_localScale.x, _localScale.y), _localScale.z); }
 
 	const Matrix& GetLocalToWorldMatrix() { return _matWorld; }
+	const Matrix& GetWorldMatrix() { return _matWorld; }
 	Vec3 GetWorldPosition() { return _matWorld.Translation(); }
 
 	Vec3 GetRight() { return _matWorld.Right(); }
@@ -27,7 +38,15 @@ public:
 	Vec3 GetLook() { return _matWorld.Backward(); }
 
 	void SetLocalPosition(const Vec3& position) { _localPosition = position; }
-	void SetLocalRotation(const Vec3& rotation) { _localRotation = rotation; }
+	void SetLocalRotation(const Vec3& rotation)
+	{
+		// Degree에서 Radian으로 변환
+		Vec3 localRotation = rotation;
+
+		_localRotation.x = DegreeToRadian(localRotation.x);
+		_localRotation.y = DegreeToRadian(localRotation.y);
+		_localRotation.z = DegreeToRadian(localRotation.z);
+	}
 	void SetLocalScale(const Vec3& scale) { _localScale = scale; }
 
 	void LookAt(const Vec3& dir);
