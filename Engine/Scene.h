@@ -40,7 +40,7 @@ public:
 	//void AddZombie(struct sc_packet_login_ok* packet);
 
 	void MovePlayer(struct sc_packet_move* packet);
-
+	void ClearPlayers();
 private:
 	vector<shared_ptr<GameObject>>		_gameObjects;
 	vector<shared_ptr<class Camera>>	_cameras;

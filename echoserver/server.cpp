@@ -1,8 +1,9 @@
 #include "server.h"
-#include "GameRoom.h"         
-#include "GameManager.h"      
+#include "GameRoom.h"
+#include "GameManager.h"
 //#include "db_authentication.h"
-#include "protocol.h"        
+#include "protocol.h"
+
 #include <winsock2.h>
 #include <windows.h>
 #include <mswsock.h>
@@ -15,30 +16,29 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
-#include <cstring>    
-#include <algorithm>  
+#include <cstring>
+#include <algorithm>
 
 #pragma comment(lib, "ws2_32.lib")
 
-#define DEFAULT_PORT 9000
+#define DEFAULT_PORT      9000
 #define NUM_WORKER_THREADS 4
-#define NUM_POST_ACCEPTS 10  
+#define NUM_POST_ACCEPTS   10
 
-// 전역 변수
-SOCKET g_listenSocket = INVALID_SOCKET;   // 리스닝 소켓 (AcceptEx 필요)
-HANDLE g_hIOCP = NULL;                    // IOCP 핸들
-std::mutex g_lobbyMutex;                  // 대기실 큐 보호용 뮤텍스
-std::queue<PER_SOCKET_CONTEXT*> g_lobbyQueue;  // 로비 큐
-std::vector<GameRoom*> g_gameRooms;       // 게임룸 목록
-
+SOCKET g_listenSocket = INVALID_SOCKET;
+HANDLE  g_hIOCP = NULL;
+std::mutex g_lobbyMutex;
+std::queue<PER_SOCKET_CONTEXT*> g_lobbyQueue;
 std::mutex g_playersMutex;
 std::vector<PER_SOCKET_CONTEXT*> g_connectedPlayers;
+
+std::vector<GameRoom*> g_gameRooms;
 
 LPFN_ACCEPTEX lpfnAcceptEx = NULL;
 
 GameRoom* FindGameRoomForPlayer(PER_SOCKET_CONTEXT* player) {
-    for (auto room : g_gameRooms) {
-        for (auto p : room->players) {
+    for (auto* room : g_gameRooms) {
+        for (auto* p : room->players) {
             if (p == player)
                 return room;
         }
@@ -46,6 +46,7 @@ GameRoom* FindGameRoomForPlayer(PER_SOCKET_CONTEXT* player) {
     return nullptr;
 }
 
+void PostAccept(SOCKET listenSocket);
 void PostRecv(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData);
 void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, int bytesTransferred);
 void MatchmakingCheck();
@@ -65,6 +66,7 @@ void PostSendPacket(PER_SOCKET_CONTEXT* pContext, const void* packet, size_t pac
         int err = WSAGetLastError();
         if (err != WSA_IO_PENDING) {
             printf("WSASend error: %d\n", err);
+            delete pIoData;
         }
     }
 }
@@ -82,6 +84,7 @@ void PostSend(PER_SOCKET_CONTEXT* pContext, const std::string& msg, PER_IO_DATA*
         int err = WSAGetLastError();
         if (err != WSA_IO_PENDING) {
             printf("WSASend 에러: %d\n", err);
+            delete pIoData;
         }
     }
 }
@@ -106,7 +109,6 @@ void PostAccept(SOCKET listenSocket) {
             printf("AcceptEx 호출 실패: %d\n", err);
             closesocket(pAcceptIoData->acceptSocket);
             delete pAcceptIoData;
-            return;
         }
     }
 }
@@ -123,11 +125,12 @@ void PostRecv(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData) {
         int err = WSAGetLastError();
         if (err != WSA_IO_PENDING) {
             printf("WSARecv 에러: %d\n", err);
+            delete pIoData;
         }
     }
 }
 
-void WorkerThread(HANDLE hIOCP) {
+void WorkerThread(HANDLE) {
     DWORD bytesTransferred;
     ULONG_PTR completionKey;
     LPOVERLAPPED pOverlapped;
@@ -138,13 +141,14 @@ void WorkerThread(HANDLE hIOCP) {
             printf("GetQueuedCompletionStatus 에러: %d\n", GetLastError());
             continue;
         }
-        if (pOverlapped == NULL)
-            break; 
+        if (pOverlapped == NULL)  
+            break;
 
-        PER_IO_DATA* pIoData = (PER_IO_DATA*)pOverlapped;
-        PER_SOCKET_CONTEXT* pContext = (PER_SOCKET_CONTEXT*)completionKey;
+        auto* pIoData = (PER_IO_DATA*)pOverlapped;
+        auto* pContext = (PER_SOCKET_CONTEXT*)completionKey;
 
         if (pIoData->operationType == IO_ACCEPT) {
+            
             SOCKET acceptedSocket = pIoData->acceptSocket;
             if (setsockopt(acceptedSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
                 (char*)&g_listenSocket, sizeof(g_listenSocket)) == SOCKET_ERROR) {
@@ -153,26 +157,25 @@ void WorkerThread(HANDLE hIOCP) {
                 delete pIoData;
                 continue;
             }
+
             PER_SOCKET_CONTEXT* newContext = new PER_SOCKET_CONTEXT;
             newContext->socket = acceptedSocket;
             newContext->state = STATE_LOGIN;
-            newContext->username = "";
+            newContext->username.clear();
             newContext->health = 100;
-            newContext->posX = 0.0f;
-            newContext->posY = 0.0f;
+            newContext->posX = newContext->posY = newContext->posZ = 0.0f;
             newContext->walkSpeed = 3.0f;
             newContext->runSpeed = 5.0f;
             newContext->faintCount = 0;
             newContext->isFainted = false;
-            newContext->moveX = 0.0f;
-            newContext->moveY = 0.0f;
+            newContext->moveX = newContext->moveY = newContext->moveZ = 0.0f;
 
             CreateIoCompletionPort((HANDLE)acceptedSocket, g_hIOCP, (ULONG_PTR)newContext, 0);
             PER_IO_DATA* pRecvIoData = new PER_IO_DATA;
-            ZeroMemory(&pRecvIoData->overlapped, sizeof(OVERLAPPED));
             pRecvIoData->operationType = IO_READ;
             pRecvIoData->wsabuf.buf = pRecvIoData->buffer;
             pRecvIoData->wsabuf.len = MAX_BUFFER;
+            ZeroMemory(&pRecvIoData->overlapped, sizeof(OVERLAPPED));
             PostRecv(newContext, pRecvIoData);
 
             {
@@ -182,9 +185,7 @@ void WorkerThread(HANDLE hIOCP) {
             printf("새 연결 수락: socket %d\n", acceptedSocket);
 
             PostAccept(g_listenSocket);
-
             delete pIoData;
-            continue;
         }
         else if (pIoData->operationType == IO_READ) {
             if (bytesTransferred == 0) {
@@ -197,10 +198,9 @@ void WorkerThread(HANDLE hIOCP) {
                         leavePacket.size = sizeof(sc_packet_player_leave);
                         leavePacket.type = S2C_P_PLAYER_LEAVE;
                         leavePacket.playerId = pContext->socket;
-                        for (auto player : g_connectedPlayers) {
-                            if (player != pContext) {
+                        for (auto* player : g_connectedPlayers) {
+                            if (player != pContext)
                                 PostSendPacket(player, &leavePacket, leavePacket.size);
-                            }
                         }
                         g_connectedPlayers.erase(it);
                     }
@@ -211,17 +211,21 @@ void WorkerThread(HANDLE hIOCP) {
                 continue;
             }
             ProcessClientMessage(pContext, pIoData, bytesTransferred);
+
             ZeroMemory(&pIoData->overlapped, sizeof(OVERLAPPED));
             PostRecv(pContext, pIoData);
         }
     }
 }
 
-void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, int bytesTransferred) {
+void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
+    PER_IO_DATA* pIoData,
+    int                 bytesTransferred)
+{
     if (bytesTransferred < 2) return;
     unsigned char packetSize = pIoData->buffer[0];
-    char packetType = pIoData->buffer[1];
-    printf("socket %d 로부터 받은 패킷: Size=%d, Type=%d\n", pContext->socket, packetSize, packetType);
+    char          packetType = pIoData->buffer[1];
+    printf("socket %d → Size=%d, Type=%d\n", pContext->socket, packetSize, packetType);
 
     switch (packetType) {
     case C2S_P_LOGIN: {
@@ -229,7 +233,7 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, in
         pContext->state = STATE_LOBBY;
         pContext->health = 100;
         pContext->posX = 0.0f;
-        pContext->posY = 500.0f;
+        pContext->posY = 0.0f;
         pContext->posZ = 0.0f;
         pContext->walkSpeed = 3.0f;
         pContext->runSpeed = 5.0f;
@@ -243,9 +247,7 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, in
         loginOk.size = sizeof(sc_packet_login_ok);
         loginOk.type = S2C_P_PLAYER_INFO;
         loginOk.playerId = pContext->socket;
-        loginOk.position.x = pContext->posX;
-        loginOk.position.y = pContext->posY;
-        loginOk.position.z = pContext->posZ;
+        loginOk.position = { pContext->posX, pContext->posY, pContext->posZ };
         loginOk.health = pContext->health;
         loginOk.walkSpeed = pContext->walkSpeed;
         loginOk.runSpeed = pContext->runSpeed;
@@ -255,87 +257,61 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, in
         PostSendPacket(pContext, &loginOk, loginOk.size);
 
         {
-            std::lock_guard<std::mutex> lock(g_playersMutex);
-            for (auto player : g_connectedPlayers) {
-                if (player != pContext) {
-                    sc_packet_login_ok existingInfo;
-                    existingInfo.size = sizeof(sc_packet_login_ok);
-                    existingInfo.type = S2C_P_PLAYER_INFO;
-                    existingInfo.playerId = player->socket;
-                    existingInfo.position.x = player->posX;
-                    existingInfo.position.y = player->posY;
-                    existingInfo.position.z = player->posZ;
-                    existingInfo.health = player->health;
-                    existingInfo.walkSpeed = player->walkSpeed;
-                    existingInfo.runSpeed = player->runSpeed;
-                    existingInfo.faintCount = player->faintCount;
-                    existingInfo.isFainted = player->isFainted;
-                    PostSendPacket(pContext, &existingInfo, existingInfo.size);
-
-                    PostSendPacket(player, &loginOk, loginOk.size);
-                }
-            }
-        }
-        {
             std::lock_guard<std::mutex> lock(g_lobbyMutex);
             g_lobbyQueue.push(pContext);
         }
+
         MatchmakingCheck();
         break;
     }
+
     case C2S_P_MOVE: {
         if (bytesTransferred < sizeof(cs_packet_move)) break;
-        cs_packet_move* movePacket = (cs_packet_move*)pIoData->buffer;
-        Vector3 dir = movePacket->direction;
+        auto* pkt = reinterpret_cast<cs_packet_move*>(pIoData->buffer);
+        Vector3 dir = pkt->direction;
+
+        // 서버 권한 위치 갱신
         pContext->moveX = dir.x;
         pContext->moveY = dir.y;
-        pContext->posX += pContext->moveX * pContext->walkSpeed * 0.05f;
-        pContext->posY += pContext->moveY * pContext->walkSpeed * 0.05f;
+        pContext->moveZ = dir.z;
+        pContext->posX += dir.x * pContext->walkSpeed * 0.05f;
+        pContext->posY += dir.y * pContext->walkSpeed * 0.05f;
         pContext->posZ += dir.z * pContext->walkSpeed * 0.05f;
 
         sc_packet_move moveUpdate;
         moveUpdate.size = sizeof(sc_packet_move);
         moveUpdate.type = S2C_P_MOVE;
         moveUpdate.playerId = pContext->socket;
-        moveUpdate.position.x = pContext->posX;
-        moveUpdate.position.y = pContext->posY;
-        moveUpdate.position.z = pContext->posZ;
-        moveUpdate.yaw = movePacket->yaw;
+        moveUpdate.position = { pContext->posX, pContext->posY, pContext->posZ };
+        moveUpdate.yaw = pkt->yaw;
 
-        {
-            std::lock_guard<std::mutex> lock(g_playersMutex);
-            for (auto player : g_connectedPlayers) {
-                if (player != pContext) {
-                    PostSendPacket(player, &moveUpdate, moveUpdate.size);
-                }
+        if (auto* room = FindGameRoomForPlayer(pContext)) {
+            for (auto* peer : room->players) {
+                PostSendPacket(peer, &moveUpdate, moveUpdate.size);
             }
         }
         break;
     }
+
     case C2S_P_ATTACK: {
         if (bytesTransferred < sizeof(cs_packet_attack)) break;
-        cs_packet_attack* attackPacket = (cs_packet_attack*)pIoData->buffer;
-        Vector3 attackDir = attackPacket->attackDirection;
+        auto* pkt = reinterpret_cast<cs_packet_attack*>(pIoData->buffer);
 
         sc_packet_attack attackEvent;
         attackEvent.size = sizeof(sc_packet_attack);
         attackEvent.type = S2C_P_ATTACK;
         attackEvent.playerId = pContext->socket;
         attackEvent.zombieId = rand() % 100 + 1;
-        attackEvent.impactPoint.x = pContext->posX + attackDir.x * 10.0f;
-        attackEvent.impactPoint.y = pContext->posY + attackDir.y * 10.0f;
-        attackEvent.impactPoint.z = attackDir.z;
+        attackEvent.impactPoint = pkt->attackDirection;
 
-        {
-            std::lock_guard<std::mutex> lock(g_playersMutex);
-            for (auto player : g_connectedPlayers) {
-                if (player != pContext) {
-                    PostSendPacket(player, &attackEvent, attackEvent.size);
-                }
+        if (auto* room = FindGameRoomForPlayer(pContext)) {
+            for (auto* peer : room->players) {
+                PostSendPacket(peer, &attackEvent, attackEvent.size);
             }
         }
         break;
     }
+
     default: {
         printf("정의되지 않은 패킷 타입: %d\n", packetType);
         break;
@@ -343,65 +319,70 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, in
     }
 }
 
-void MatchmakingCheck() {
+    void MatchmakingCheck() {
     std::lock_guard<std::mutex> lock(g_lobbyMutex);
     while (g_lobbyQueue.size() >= 3) {
-        PER_SOCKET_CONTEXT* player1 = g_lobbyQueue.front(); g_lobbyQueue.pop();
-        PER_SOCKET_CONTEXT* player2 = g_lobbyQueue.front(); g_lobbyQueue.pop();
-        PER_SOCKET_CONTEXT* player3 = g_lobbyQueue.front(); g_lobbyQueue.pop();
+        PER_SOCKET_CONTEXT* p1 = g_lobbyQueue.front(); g_lobbyQueue.pop();
+        PER_SOCKET_CONTEXT* p2 = g_lobbyQueue.front(); g_lobbyQueue.pop();
+        PER_SOCKET_CONTEXT* p3 = g_lobbyQueue.front(); g_lobbyQueue.pop();
 
-        player1->state = STATE_GAME;
-        player2->state = STATE_GAME;
-        player3->state = STATE_GAME;
+        p1->state = p2->state = p3->state = STATE_GAME;
+        std::vector<PER_SOCKET_CONTEXT*> players = { p1, p2, p3 };
 
-        std::vector<PER_SOCKET_CONTEXT*> roomPlayers = { player1, player2, player3 };
-        GameRoom* newRoom = new GameRoom(roomPlayers);
+        sc_packet_game_start gameStart{};
+        gameStart.size = sizeof(sc_packet_game_start);
+        gameStart.type = S2C_P_GAME_START;
+        {
+            std::lock_guard<std::mutex> lock2(g_playersMutex);
+            for (auto* pl : players)
+                PostSendPacket(pl, &gameStart, gameStart.size);
+        }
+
+        for (auto* pl : players) {
+            sc_packet_login_ok info{};
+            info.size = sizeof(sc_packet_login_ok);
+            info.type = S2C_P_PLAYER_INFO;
+            info.playerId = pl->socket;
+            info.position = { pl->posX, pl->posY, pl->posZ };
+            info.health = pl->health;
+            info.walkSpeed = pl->walkSpeed;
+            info.runSpeed = pl->runSpeed;
+            info.faintCount = pl->faintCount;
+            info.isFainted = pl->isFainted;
+
+            for (auto* peer : players)
+                PostSendPacket(peer, &info, info.size);
+        }
+
+        GameRoom* newRoom = new GameRoom(players);
         g_gameRooms.push_back(newRoom);
 
-        sc_packet_game_start gameStartPacket;
-        gameStartPacket.size = sizeof(sc_packet_game_start);
-        gameStartPacket.type = S2C_P_GAME_START;
-        {
-            std::lock_guard<std::mutex> lock(g_playersMutex);
-            for (auto player : roomPlayers) {
-                PostSendPacket(player, &gameStartPacket, gameStartPacket.size);
-            }
-        }
         printf("게임룸 생성: %s, %s, %s\n",
-            player1->username.c_str(),
-            player2->username.c_str(),
-            player3->username.c_str());
+            p1->username.c_str(), p2->username.c_str(), p3->username.c_str());
     }
 }
 
 int main() {
     WSADATA wsaData;
-    int wsaResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (wsaResult != 0) {
-        printf("WSAStartup 실패: %d\n", wsaResult);
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        printf("WSAStartup 실패\n");
         return 1;
     }
 
-    g_listenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+    g_listenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP,
+        NULL, 0, WSA_FLAG_OVERLAPPED);
     if (g_listenSocket == INVALID_SOCKET) {
-        printf("리스닝 소켓 생성 실패: %d\n", WSAGetLastError());
+        printf("리스닝 소켓 생성 실패\n");
         WSACleanup();
         return 1;
     }
-
-    SOCKADDR_IN serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(DEFAULT_PORT);
-    if (bind(g_listenSocket, (SOCKADDR*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
-        printf("bind 실패: %d\n", WSAGetLastError());
-        closesocket(g_listenSocket);
-        WSACleanup();
-        return 1;
-    }
-
-    if (listen(g_listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-        printf("listen 실패: %d\n", WSAGetLastError());
+    SOCKADDR_IN sa = {};
+    sa.sin_family = AF_INET;
+    sa.sin_addr.s_addr = INADDR_ANY;
+    sa.sin_port = htons(DEFAULT_PORT);
+    if (bind(g_listenSocket, (SOCKADDR*)&sa, sizeof(sa)) == SOCKET_ERROR ||
+        listen(g_listenSocket, SOMAXCONN) == SOCKET_ERROR) {
+        printf("bind/listen 실패\n");
         closesocket(g_listenSocket);
         WSACleanup();
         return 1;
@@ -409,44 +390,29 @@ int main() {
     printf("서버 시작: 포트 %d\n", DEFAULT_PORT);
 
     g_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-    if (g_hIOCP == NULL) {
-        printf("IOCP 생성 실패: %d\n", GetLastError());
-        closesocket(g_listenSocket);
-        WSACleanup();
-        return 1;
-    }
     CreateIoCompletionPort((HANDLE)g_listenSocket, g_hIOCP, 0, 0);
 
     GUID guidAcceptEx = WSAID_ACCEPTEX;
     DWORD bytes = 0;
-    if (WSAIoctl(g_listenSocket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+    WSAIoctl(g_listenSocket, SIO_GET_EXTENSION_FUNCTION_POINTER,
         &guidAcceptEx, sizeof(guidAcceptEx),
         &lpfnAcceptEx, sizeof(lpfnAcceptEx),
-        &bytes, NULL, NULL) == SOCKET_ERROR) {
-        printf("AcceptEx 함수 포인터 획득 실패: %d\n", WSAGetLastError());
-        closesocket(g_listenSocket);
-        WSACleanup();
-        return 1;
-    }
+        &bytes, NULL, NULL);
 
-    for (int i = 0; i < NUM_POST_ACCEPTS; i++) {
+    for (int i = 0; i < NUM_POST_ACCEPTS; ++i)
         PostAccept(g_listenSocket);
-    }
 
-    std::vector<std::thread> workerThreads;
-    for (int i = 0; i < NUM_WORKER_THREADS; i++) {
-        workerThreads.push_back(std::thread(WorkerThread, g_hIOCP));
-    }
+    std::vector<std::thread> workers;
+    for (int i = 0; i < NUM_WORKER_THREADS; ++i)
+        workers.emplace_back(WorkerThread, g_hIOCP);
 
-    printf("종료하려면 엔터 키를 누르세요...\n");
+    printf("엔터 눌러서 종료...\n");
     getchar();
 
-    for (int i = 0; i < NUM_WORKER_THREADS; i++) {
-        PostQueuedCompletionStatus(g_hIOCP, 0, 0, NULL);
-    }
-    for (auto& th : workerThreads) {
+    for (int i = 0; i < NUM_WORKER_THREADS; ++i)
+        PostQueuedCompletionStatus(g_hIOCP, 0, 0, nullptr);
+    for (auto& th : workers)
         th.join();
-    }
 
     CloseHandle(g_hIOCP);
     closesocket(g_listenSocket);

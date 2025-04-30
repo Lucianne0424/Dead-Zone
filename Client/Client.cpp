@@ -35,6 +35,8 @@ BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
+static uint32_t g_localPlayerId = 0;
+
 // 네트워크 초기화 함수
 bool InitNetwork() {
     WSADATA wsaData;
@@ -88,18 +90,17 @@ void ReceiverThread(SOCKET clientSocket) {
 
                 switch (pktType) {
                 case S2C_P_PLAYER_INFO: {
-                  //  MessageBoxA(NULL, "로그인 성공 및 플레이어 정보 수신", "Debug - Player Info", MB_OK);  //블로킹 함수라 3번째 클라 게임 시작 안되서 주석 처리 
-                    g_loggedIn = true;
-					  // 로그인 성공 및 플레이어 정보 처리: 플레이어 객체 생성 및 초기화
-                        sc_packet_login_ok* pLoginOk = reinterpret_cast<sc_packet_login_ok*>(buffer);
+                    sc_packet_login_ok* pLoginOk = reinterpret_cast<sc_packet_login_ok*>(buffer);
+                        if (!g_loggedIn) {
+                        g_loggedIn = true;
+                        g_localPlayerId = static_cast<uint32_t>(pLoginOk->playerId);
+                    }
+                        if (static_cast<uint32_t>(pLoginOk->playerId) != g_localPlayerId) {
                         GET_SINGLE(SceneManager)->GetActiveScene()->AddPlayer(pLoginOk);
-                        
-                    
+                    }
                     break;
                 }
                 case S2C_P_MOVE: {
-                  //  MessageBoxA(NULL, "이동 업데이트 수신", "Debug - Move", MB_OK);
-                    // 플레이어 이동 처리: 해당 플레이어의 위치와 회전 정보를 업데이트
 					sc_packet_move* pMove = reinterpret_cast<sc_packet_move*>(buffer);
 					GET_SINGLE(SceneManager)->GetActiveScene()->MovePlayer(pMove);
                     
@@ -107,30 +108,21 @@ void ReceiverThread(SOCKET clientSocket) {
                 }
                 case S2C_P_ATTACK: {
                     MessageBoxA(NULL, "공격 이벤트 수신", "Debug - Attack", MB_OK);
-                    /*
-                     sc_packet_attack* pAttack = reinterpret_cast<sc_packet_attack*>(buffer);
-                        Game::GetInstance()->OnPlayerAttack(pAttack->playerId,
-                                                              pAttack->zombieId,
-                                                              pAttack->impactPoint);
-                    */
                     break;
                 }
                 case S2C_P_PLAYER_LEAVE: {
                     MessageBoxA(NULL, "플레이어 퇴장 이벤트 수신", "Debug - Player Leave", MB_OK);
                     /*
                      sc_packet_player_leave* pLeave = reinterpret_cast<sc_packet_player_leave*>(buffer);
-                        // 플레이어 퇴장 처리: 해당 플레이어가 게임 화면에서 제거되도록 업데이트
                         Game::GetInstance()->OnPlayerLeave(pLeave->playerId);
                     */
                     break;
                 }
                 case S2C_P_GAME_START: {
-                  //  MessageBoxA(NULL, "게임 시작 신호 수신", "Debug - Game Start", MB_OK);
-                    g_gameStarted = true;
-                    /*
-                        Game::GetInstance()->OnGameStart();
-                        break;
-                    */
+                    GET_SINGLE(SceneManager)
+                         ->GetActiveScene()
+                         ->ClearPlayers();
+                         g_gameStarted = true;
                     break;
                 }
                 default:

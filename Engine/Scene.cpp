@@ -218,19 +218,10 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 
 void Scene::AddPlayer(sc_packet_login_ok* packet)
 {
-	{
-		wchar_t buf[128];
-		swprintf_s(buf, 128,
-			L"[AddPlayer] ID=%lld  Pos=(%.1f, %.1f, %.1f)",
-			packet->playerId,
-			packet->position.x,
-			packet->position.y,
-			packet->position.z);
-		MessageBoxW(nullptr, buf, L"Debug - Spawn", MB_OK);
-	}
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
 
 	shared_ptr<GameObject> obj = make_shared<GameObject>();
+	obj->SetID(static_cast<uint32_t>(packet->playerId));
 	obj->SetName(L"OBJ");
 	obj->AddComponent(make_shared<Transform>());
 	obj->AddComponent(make_shared<SphereCollider>());
@@ -256,12 +247,22 @@ void Scene::AddPlayer(sc_packet_login_ok* packet)
 
 void Scene::MovePlayer(sc_packet_move* packet)
 {
-	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); // 패킷 위치 받아오기
+	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); 
 	
-	// 플레이어 ID로 플레이어 찾기
 	auto it = std::find_if(_players.begin(), _players.end(),
-		[=](const shared_ptr<GameObject>& player) { return player->GetID() == packet->playerId; });
+		[=](const shared_ptr<GameObject>& player) { return player->GetID() == static_cast<uint32_t>(packet->playerId);
+		});
 
-	// 위치 적용
+	if (it == _players.end()) {
+			return;
+	}
+
 	(*it)->GetTransform()->SetLocalPosition(position);
+}
+
+void Scene::ClearPlayers()
+{
+	for (auto& obj : _players)
+		RemoveGameObject(obj);
+	_players.clear();
 }

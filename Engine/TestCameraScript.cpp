@@ -7,6 +7,16 @@
 #include "Timer.h"
 #include "SceneManager.h"
 #include "protocol.h""
+
+static Vec3 Normalize(const Vec3& v)
+{
+	float len = std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+	if (len > 1e-6f)
+		return Vec3{ v.x / len, v.y / len, v.z / len };
+	else
+		return Vec3{ 0.f, 0.f, 0.f };
+}
+
 extern WindowInfo GWindowInfo;
 TestCameraScript::TestCameraScript()
 {
@@ -19,45 +29,37 @@ TestCameraScript::~TestCameraScript()
 void TestCameraScript::LateUpdate()
 {
 	Vec3 pos = GetTransform()->GetLocalPosition();
-	Vec3 moveDirection = { 0.f, 0.f, 0.f };
-	if (INPUT->GetButton(KEY_TYPE::W)) {
-		pos += GetTransform()->GetLook() * _speed * DELTA_TIME;
-		moveDirection += GetTransform()->GetLook() * _speed * DELTA_TIME;
-		// ¿¹½ÃEXAMPLE
-		//Vec3 _dir = GetTransform()->GetLook();
-		//movePacket.direction.x = _dir.x;
-		//movePacket.direction.y = _dir.y;
-		//movePacket.direcition.z = _dir.z;
-	}
-	if (INPUT->GetButton(KEY_TYPE::S)) {
-		pos += GetTransform()->GetLook() * _speed * DELTA_TIME;
-		moveDirection += GetTransform()->GetLook() * _speed * DELTA_TIME;
-	}
-	if (INPUT->GetButton(KEY_TYPE::A)) {
-		pos -= GetTransform()->GetRight() * _speed * DELTA_TIME;
-		moveDirection+= GetTransform()->GetRight() * _speed * DELTA_TIME;
-	}
-	if (INPUT->GetButton(KEY_TYPE::D)) {
-		pos += GetTransform()->GetRight() * _speed * DELTA_TIME;
-		moveDirection += GetTransform()->GetRight() * _speed * DELTA_TIME;
-	}
-	if (moveDirection.x != 0.f || moveDirection.y != 0.f || moveDirection.z != 0.f)
-	{
-		cs_packet_move movePacket;
-		movePacket.size = sizeof(cs_packet_move);
-		movePacket.type = C2S_P_MOVE;
-		movePacket.direction.x = pos.x;
-		movePacket.direction.y = pos.y;
-		movePacket.direction.z = pos.z;
-		movePacket.yaw = 0.0f;  
+	Vec3 moveDir = { 0.f, 0.f, 0.f };
 
-		int sendResult = send(
-			GWindowInfo.sock,
-			reinterpret_cast<char*>(&movePacket),
-			sizeof(movePacket),
-			0
-		);
+	if (INPUT->GetButton(KEY_TYPE::W))
+		moveDir += GetTransform()->GetLook();
+	if (INPUT->GetButton(KEY_TYPE::S))
+		moveDir -= GetTransform()->GetLook();
+	if (INPUT->GetButton(KEY_TYPE::A))
+		moveDir -= GetTransform()->GetRight();
+	if (INPUT->GetButton(KEY_TYPE::D))
+		moveDir += GetTransform()->GetRight();
+
+	if (moveDir.x != 0.f || moveDir.y != 0.f || moveDir.z != 0.f)
+	{
+		Vec3 dirNorm = Normalize(moveDir);
+
+		pos += dirNorm * _speed * DELTA_TIME;
+		GetTransform()->SetLocalPosition(pos);
+
+		cs_packet_move pkt;
+		pkt.size = sizeof(cs_packet_move);
+		pkt.type = C2S_P_MOVE;
+		pkt.direction.x = dirNorm.x;
+		pkt.direction.y = dirNorm.y;
+		pkt.direction.z = dirNorm.z;
+		pkt.yaw = GetTransform()->GetLocalRotation().y;
+
+		send(GWindowInfo.sock,
+			reinterpret_cast<char*>(&pkt),
+			sizeof(pkt), 0);
 	}
+
 	if (INPUT->GetButton(KEY_TYPE::Q))
 	{
 		Vec3 rotation = GetTransform()->GetLocalRotation();

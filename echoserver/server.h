@@ -1,47 +1,49 @@
-// server.h (수정된 부분)
 #pragma once
+
 #include <winsock2.h>
 #include <windows.h>
+#include <mswsock.h>
 #include <string>
+#include <vector>
+#include "protocol.h"
 
-#define MAX_BUFFER 8192  // 임시 버퍼 크기 확장 ---- 추후에 변경
+#define MAX_BUFFER 8192
 
-enum IO_OPERATION {
-    IO_READ,
-    IO_WRITE,
-    IO_ACCEPT   // AcceptEx 전용
-};
-
-enum SESSION_STATE {
-    STATE_LOGIN,  // 로그인 전
-    STATE_LOBBY,  // 대기실(로비) 상태
-    STATE_GAME    // 게임 상태 (플레이어 관련 명령 처리)
-};
+enum IO_OPERATION { IO_READ, IO_WRITE, IO_ACCEPT };
+enum SESSION_STATE { STATE_LOGIN, STATE_LOBBY, STATE_GAME };
 
 struct PER_IO_DATA {
-    OVERLAPPED overlapped;      // 비동기 I/O용
-    WSABUF wsabuf;              // 버퍼 정보
-    char buffer[MAX_BUFFER];    // 실제 데이터 저장 버퍼
-    IO_OPERATION operationType; // 현재 작업 종류
- 
-    SOCKET acceptSocket;
+    OVERLAPPED    overlapped;
+    WSABUF        wsabuf;
+    char          buffer[MAX_BUFFER];
+    IO_OPERATION  operationType;
+    SOCKET        acceptSocket;
 };
 
 struct PER_SOCKET_CONTEXT {
-    SOCKET socket;          // 클라이언트 소켓
-    SESSION_STATE state;    // 현재 세션 상태
-    std::string username;   // 로그인 시 입력한 사용자 이름
-
-    // 플레이어 기본 상태
-    int health;             // 체력 (초기 100)
-    float posX, posY, posZ; // 위치 (초기 (0,0))
-    float walkSpeed;        // 걷는 속도 (3 m/s)
-    float runSpeed;         // 뛰는 속도 (5 m/s)
-    int faintCount;         // 기절 횟수 (최대 1회 허용)
-    bool isFainted;         // 기절 상태 여부
-
-    // 이동 방향 (시간 기반 이동)
-    float moveX, moveY, moveZ;
+    SOCKET         socket;
+    SESSION_STATE  state;
+    std::string    username;
+    int            health;
+    float          posX, posY, posZ;
+    float          walkSpeed, runSpeed;
+    int            faintCount;
+    bool           isFainted;
+    float          moveX, moveY, moveZ;
 };
 
-void PostSend(PER_SOCKET_CONTEXT* pContext, const std::string& msg, PER_IO_DATA* pIoData);
+// AcceptEx 함수 포인터
+extern LPFN_ACCEPTEX lpfnAcceptEx;
+
+// 방 목록
+class GameRoom;
+extern std::vector<GameRoom*> activeRooms;
+
+// 네트워크 헬퍼
+void PostSend(PER_SOCKET_CONTEXT* ctx, const std::string& msg, PER_IO_DATA* io);
+void PostRecv(PER_SOCKET_CONTEXT* ctx, PER_IO_DATA* io);
+void PostAccept(SOCKET listenSocket);
+
+// 패킷 처리
+void ProcessClientMessage(PER_SOCKET_CONTEXT* ctx, PER_IO_DATA* io, int bytesTransferred);
+GameRoom* FindGameRoomForPlayer(PER_SOCKET_CONTEXT* player);
