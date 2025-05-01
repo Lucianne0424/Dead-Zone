@@ -42,6 +42,19 @@ shared_ptr<MeshData> MeshData::LoadFromFBX(const wstring& path)
 		info.materials = materials;
 
 		info.maxPosition = loader.GetMesh(i).maxPosition; // FBX에서 가져온 최대 위치값
+		
+		// 정점들로 바운딩 박스 만들기
+		BoundingBox boundingBox;
+		FbxMeshInfo meshInfo = loader.GetMesh(i);
+		BoundingBox::CreateFromPoints(
+			boundingBox,
+			meshInfo.vertices.size(),
+			&meshInfo.vertices[0].pos,
+			sizeof(Vertex));
+
+		info.center = boundingBox.Center;
+		info.extents = boundingBox.Extents;
+
 		meshData->_meshRenders.push_back(info);
 	}
 

@@ -26,6 +26,7 @@
 // TODO: 나중에 삭제
 #include "Timer.h"
 #include <sstream>
+#include "TestObjectScript.h"
 
 void SceneManager::Update()
 {
@@ -233,9 +234,9 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		camera->SetName(L"Main_Camera");
 		camera->AddComponent(make_shared<Transform>());
 		camera->AddComponent(make_shared<Camera>()); // Near=1, Far=1000, FOV=45도
-		camera->AddComponent(make_shared<TestCameraScript>());
+		//camera->AddComponent(make_shared<TestCameraScript>());
 		camera->GetCamera()->SetFar(10000.f);
-		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 180.f, 0.f));
+		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 0.f));
 		uint8 layerIndex = GET_SINGLE(SceneManager)->LayerNameToIndex(L"UI");
 		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, true); // UI는 안 찍음
 		scene->AddGameObject(camera);
@@ -281,46 +282,72 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 #pragma region Object
-	//{
-	//	shared_ptr<GameObject> obj = make_shared<GameObject>();
-	//	obj->SetName(L"OBJ");
-	//	obj->AddComponent(make_shared<Transform>());
-	//	obj->AddComponent(make_shared<SphereCollider>());
-	//	obj->GetTransform()->SetLocalScale(Vec3(100.f, 100.f, 100.f));
-	//	obj->GetTransform()->SetLocalPosition(Vec3(0, 0.f, 500.f));
-	//	obj->SetStatic(false);
-	//	shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-	//	{
-	//		shared_ptr<Mesh> sphereMesh = GET_SINGLE(Resources)->LoadSphereMesh();
-	//		meshRenderer->SetMesh(sphereMesh);
-	//	}
-	//	{
-	//		shared_ptr<Material> material = GET_SINGLE(Resources)->Get<Material>(L"GameObject");
-	//		meshRenderer->SetMaterial(material->Clone());
-	//	}
-	//	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetRadius(0.5f);
-	//	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
-	//	obj->AddComponent(meshRenderer);
-	//	scene->AddGameObject(obj);
-	//}
-#pragma endregion
-
-#pragma region Terrain
 	{
 		shared_ptr<GameObject> obj = make_shared<GameObject>();
+		obj->SetName(L"OBJ");
 		obj->AddComponent(make_shared<Transform>());
-		obj->AddComponent(make_shared<Terrain>());
-		obj->AddComponent(make_shared<MeshRenderer>());
-
-		obj->GetTransform()->SetLocalScale(Vec3(300.f, 300.f, 300.f));
-		obj->GetTransform()->SetLocalPosition(Vec3(0.0f, 0.0f, 0.0f));
-		obj->SetStatic(true);
-		obj->GetTerrain()->Init(64, 64);
-		obj->SetCheckFrustum(false);
-
+		obj->AddComponent(make_shared<SphereCollider>());
+		obj->GetTransform()->SetLocalScale(Vec3(100.f, 100.f, 100.f));
+		obj->GetTransform()->SetLocalRotation(Vec3(0.f, 0.f, 0.f));
+		obj->GetTransform()->SetLocalPosition(Vec3(0, 0.f, 500.f));
+		obj->SetStatic(false);
+		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+		{
+			shared_ptr<Mesh> sphereMesh = GET_SINGLE(Resources)->LoadSphereMesh();
+			meshRenderer->SetMesh(sphereMesh);
+		}
+		{
+			shared_ptr<Material> material = GET_SINGLE(Resources)->Get<Material>(L"GameObject");
+			meshRenderer->SetMaterial(material->Clone());
+		}
+		dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetRadius(0.5f);
+		dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
+		obj->AddComponent(meshRenderer);
+		obj->AddComponent(make_shared<TestObjectScript>());
 		scene->AddGameObject(obj);
 	}
 #pragma endregion
+
+//#pragma region TestCollider
+//	{
+//		shared_ptr<GameObject> obj = make_shared<GameObject>();
+//		obj->SetName(L"Test");
+//		obj->AddComponent(make_shared<Transform>());
+//		obj->GetTransform()->SetLocalScale(Vec3(100.f, 100.f, 100.f));
+//		obj->GetTransform()->SetLocalPosition(Vec3(0, 0.f, 500.f));
+//		obj->SetStatic(false);
+//		shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+//		{
+//			shared_ptr<Mesh> cubeMesh = GET_SINGLE(Resources)->LoadCubeMesh();
+//			meshRenderer->SetMesh(cubeMesh);
+//		}
+//		{
+//			shared_ptr<Shader> shader = GET_SINGLE(Resources)->Get<Shader>(L"WireFrame");
+//			shared_ptr<Material> material = make_shared<Material>();
+//			material->SetShader(shader);
+//			meshRenderer->SetMaterial(material);
+//		}
+//		obj->AddComponent(meshRenderer);
+//		scene->AddGameObject(obj);
+//	}
+//#pragma endregion
+
+//#pragma region Terrain
+//	{
+//		shared_ptr<GameObject> obj = make_shared<GameObject>();
+//		obj->AddComponent(make_shared<Transform>());
+//		obj->AddComponent(make_shared<Terrain>());
+//		obj->AddComponent(make_shared<MeshRenderer>());
+//
+//		obj->GetTransform()->SetLocalScale(Vec3(300.f, 300.f, 300.f));
+//		obj->GetTransform()->SetLocalPosition(Vec3(0.0f, 0.0f, 0.0f));
+//		obj->SetStatic(true);
+//		obj->GetTerrain()->Init(64, 64);
+//		obj->SetCheckFrustum(false);
+//
+//		scene->AddGameObject(obj);
+//	}
+//#pragma endregion
 
 #pragma region UI_Test
 	for (int32 i = 0; i < 6; i++)
@@ -370,7 +397,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 			meshRenderer->SetMesh(mesh);
 		}
 		{
-			shared_ptr<Shader> shader = GET_SINGLE(Resources)->Get<Shader>(L"HUD");
+			shared_ptr<Shader> shader = GET_SINGLE(Resources)->Get<Shader>(L"AlphaTexture");
 			shared_ptr<Texture> texture = GET_SINGLE(Resources)->Load<Texture>(L"Crosshair", L"..\\Resources\\Texture\\Crosshair\\crosshair01.png");
 			shared_ptr<Material> material = make_shared<Material>();
 			material->SetShader(shader);
@@ -415,69 +442,69 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 
-#pragma region MAP
-	// 임시 맵 제작 ( 나중에 수정할 예정 )
-	shared_ptr<Container> container = make_shared<Container>();
-
-	const float cx = 806.f; // 컨테이너 크기
-	const float cy = 273.f;
-	const float cz = 298.f;
-
-	for (int y = 0; y < 2; ++y)
-	{
-		for (int x = 0; x < 1; ++x)
-		{
-			for (int z = -10; z < 20; ++z)
-			{
-				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-					Vec3(2000.f + cx*x, cy/2 +cy*y, cz*z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
-
-				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-					Vec3(-2000.f + cx * x, cy / 2 + cy * y, cz* z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 180.f, 0.f));
-			}
-		}
-	}
-
-	for (int x = 1; x < 5; ++x)
-	{
-		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-			Vec3(-2000.f + cx * x , cy / 2, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
-
-		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-			Vec3(-2000.f + cx * x, cy / 2 + cy, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
-	}
-	
-	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-		Vec3(-500, cy / 2, 2300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
-
-	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-		Vec3(-500, cy / 2, -1800), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
-
-	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-		Vec3(500, cy / 2, 5300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 120.f, 0.f));
-
-#pragma endregion
+//#pragma region MAP
+//	// 임시 맵 제작 ( 나중에 수정할 예정 )
+//	shared_ptr<Container> container = make_shared<Container>();
+//
+//	const float cx = 806.f; // 컨테이너 크기
+//	const float cy = 273.f;
+//	const float cz = 298.f;
+//
+//	for (int y = 0; y < 2; ++y)
+//	{
+//		for (int x = 0; x < 1; ++x)
+//		{
+//			for (int z = -10; z < 20; ++z)
+//			{
+//				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//					Vec3(2000.f + cx*x, cy/2 +cy*y, cz*z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+//
+//				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//					Vec3(-2000.f + cx * x, cy / 2 + cy * y, cz* z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 180.f, 0.f));
+//			}
+//		}
+//	}
+//
+//	for (int x = 1; x < 5; ++x)
+//	{
+//		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//			Vec3(-2000.f + cx * x , cy / 2, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+//
+//		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//			Vec3(-2000.f + cx * x, cy / 2 + cy, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+//	}
+//	
+//	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//		Vec3(-500, cy / 2, 2300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
+//
+//	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//		Vec3(-500, cy / 2, -1800), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
+//
+//	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//		Vec3(500, cy / 2, 5300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 120.f, 0.f));
+//
+//#pragma endregion
 
 #pragma region Zombie
-	{
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
+	//{
+	//	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
 
-		for (int i = 0; i < 10; i++)
-		{
-			vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+	//	for (int i = 0; i < 10; i++)
+	//	{
+	//		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
 
-			for (auto& gameObject : gameObjects)
-			{
-				gameObject->SetName(L"Zombie");
-				gameObject->SetCheckFrustum(false);
-				gameObject->GetTransform()->SetLocalPosition(Vec3(-800.f + (160.f * i), 70.f, 2000.f));
-				gameObject->GetTransform()->SetLocalScale(Vec3(2.f, 2.f, 2.f));
-				gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
-				scene->AddGameObject(gameObject);
-				gameObject->AddComponent(make_shared<Zombie>());
-			}
-		}
-	}
+	//		for (auto& gameObject : gameObjects)
+	//		{
+	//			gameObject->SetName(L"Zombie");
+	//			gameObject->SetCheckFrustum(false);
+	//			gameObject->GetTransform()->SetLocalPosition(Vec3(-800.f + (160.f * i), 70.f, 2000.f));
+	//			gameObject->GetTransform()->SetLocalScale(Vec3(2.f, 2.f, 2.f));
+	//			gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+	//			scene->AddGameObject(gameObject);
+	//			gameObject->AddComponent(make_shared<Zombie>());
+	//		}
+	//	}
+	//}
 #pragma endregion
 
 	return scene;

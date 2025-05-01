@@ -11,6 +11,8 @@ struct MeshRenderInfo
 	vector<shared_ptr<Material>>	materials;
 
 	Vec3							maxPosition = {};
+	Vec3							center;
+	Vec3							extents;
 };
 
 class MeshData : public Object

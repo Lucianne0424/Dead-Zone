@@ -45,6 +45,7 @@ void Camera::FinalUpdate()
 	BoundingFrustum::CreateFromMatrix(frustum, Camera::S_MatProjection);
 	Matrix viewInv = Camera::S_MatView.Invert();
 	frustum.Transform(frustum, viewInv);
+	_frustum = frustum;
 }
 
 void Camera::SortGameObject()
@@ -79,6 +80,13 @@ void Camera::SortGameObject()
 			{
 			case SHADER_TYPE::DEFERRED:
 				_vecDeferred.push_back(gameObject);
+				{
+					shared_ptr<BaseCollider> collider = gameObject->GetCollider();
+					if (collider)
+					{
+						_vecDeferred.push_back(collider->GetDebugCollider());
+					}
+				}
 				break;
 			case SHADER_TYPE::FORWARD:
 				_vecForward.push_back(gameObject);
@@ -156,7 +164,11 @@ void Camera::Render_Shadow()
 
 ContainmentType Camera::FrustumCulling(shared_ptr<GameObject> gameObject)
 {
+	if (gameObject->GetCollider() == nullptr)
+		return ContainmentType::CONTAINS;
+
 	ColliderType colliderType = gameObject->GetCollider()->GetColliderType();
+
 	if (colliderType == ColliderType::SPHERE)
 	{
 		shared_ptr<SphereCollider> sphere = static_pointer_cast<SphereCollider>(gameObject->GetCollider());

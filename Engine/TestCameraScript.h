@@ -10,7 +10,7 @@ public:
 	virtual void LateUpdate() override;
 
 private:
-	float		_speed = 500.f;
+	float		_speed = 100.f;
 
 	Vec2		_mousePos = { 0.f, 0.f };
 };

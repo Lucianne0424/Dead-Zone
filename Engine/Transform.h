@@ -58,6 +58,28 @@ public:
 	void SetParent(shared_ptr<Transform> parent) { _parent = parent; }
 	weak_ptr<Transform> GetParent() { return _parent; }
 
+	static Vec3 QuaternionToEuler(const Vec4& quat)
+	{
+		Vec3 euler;
+
+		// Roll (X-axis rotation)
+		float t0 = +2.0f * (quat.w * quat.x + quat.y * quat.z);
+		float t1 = +1.0f - 2.0f * (quat.x * quat.x + quat.y * quat.y);
+		euler.x = std::atan2(t0, t1);
+
+		// Pitch (Y-axis rotation)
+		float t2 = +2.0f * (quat.w * quat.y - quat.z * quat.x);
+		t2 = std::clamp(t2, -1.0f, 1.0f);
+		euler.y = std::asin(t2);
+
+		// Yaw (Z-axis rotation)
+		float t3 = +2.0f * (quat.w * quat.z + quat.x * quat.y);
+		float t4 = +1.0f - 2.0f * (quat.y * quat.y + quat.z * quat.z);
+		euler.z = std::atan2(t3, t4);
+		
+		return euler;
+	}
+
 private:
 	// Parent ±‚¡ÿ
 	Vec3 _localPosition;
