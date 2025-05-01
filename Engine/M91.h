@@ -16,5 +16,8 @@ private:
 	static Vec3 _basePosition;
 	static Vec3 _baseRotation;
 	static Vec3 _baseScale;
+
+	shared_ptr<GameObject> particle;
+	shared_ptr<class MuzzleFlashParticle> _muzzle;
 };
 

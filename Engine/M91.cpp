@@ -33,6 +33,16 @@ void M91::Awake()
 	shared_ptr<Camera> camera = GET_SINGLE(SceneManager)->GetActiveScene()->GetMainCamera();
 	shared_ptr<Transform> parentTransform = camera->GetTransform();
 	GetTransform()->SetParent(parentTransform);
+
+	// 파티클 생성
+	particle = make_shared<GameObject>();
+	particle->AddComponent(make_shared<Transform>());
+	_muzzle = make_shared<MuzzleFlashParticle>();
+	particle->AddComponent(_muzzle);
+	particle->SetCheckFrustum(false);
+	particle->GetTransform()->SetParent(GetTransform());
+	particle->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, -100.f));
+	GET_SINGLE(SceneManager)->GetActiveScene()->AddGameObject(particle);
 }
 
 void M91::Update()
@@ -40,23 +50,12 @@ void M91::Update()
 	// 테스트
 	if (INPUT->GetButtonDown(KEY_TYPE::Q))
 	{
-		int32 index = static_cast<int32>(KEY_TYPE::Q);
-
-		shared_ptr<GameObject> particle = make_shared<GameObject>();
-		particle->AddComponent(make_shared<Transform>());
-
-		shared_ptr<class MuzzleFlashParticle> _muzzle = make_shared<MuzzleFlashParticle>();
-		_muzzle->EmitOnce();
-
-		particle->AddComponent(_muzzle);
-		particle->SetCheckFrustum(false);
-
-		particle->GetTransform()->SetParent(GetTransform());
-		particle->GetTransform()->SetLocalPosition(Vec3(0.f,0.f,-100.f));
-		//particle->GetTransform()->SetLocalRotation(Vec3(0.f,0.f,-180.f));
-
-		GET_SINGLE(SceneManager)->GetActiveScene()->AddGameObject(particle);
+		_muzzle->SetActive(true);
 	}
+	//if (INPUT->GetButtonDown(KEY_TYPE::E))
+	//{
+	//	_muzzle->SetActive(false);
+	//}
 }
 
 void M91::LateUpdate()

@@ -30,13 +30,23 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::FinalUpdate()
 {
-	_accTime += DELTA_TIME;
+	_elapsedTime += DELTA_TIME;
 
 	int32 add = 0;
-	if (_createInterval < _accTime)
+	if (_isActive && _lifeTime > 0.0f && _elapsedTime >= _lifeTime)
 	{
-		_accTime = _accTime - _createInterval;
-		add = 1;
+		_isActive = false;
+	}
+
+	if (_isActive)
+	{
+		_accTime += DELTA_TIME;
+
+		if (_createInterval < _accTime)
+		{
+			_accTime -= _createInterval;
+			add = 1;
+		}
 	}
 
 	_particleBuffer->PushComputeUAVData(UAV_REGISTER::u0);
@@ -53,6 +63,9 @@ void ParticleSystem::FinalUpdate()
 
 void ParticleSystem::Render()
 {
+	if (_accTime >= (_lifeTime + _maxLifeTime))
+		return;
+
 	GetTransform()->PushData();
 
 	_particleBuffer->PushGraphicsData(SRV_REGISTER::t9);

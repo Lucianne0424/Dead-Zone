@@ -9,9 +9,5 @@ public:
 
 	virtual void FinalUpdate() override;
 
-	void EmitOnce();
-
 private:
-	bool _emitRequested = false;
-	bool _autoDestruct = false;
 };

@@ -43,6 +43,9 @@ public:
 	void SetScale(float start, float end) { _startScale = start; _endScale = end; }
 	void SetCreateInterval(float interval) { _createInterval = interval; }
 	void SetTexture(shared_ptr<Texture> tex) { _material->SetTexture(0, tex); }
+	void SetlifeTime(float lifeTime) { _lifeTime = lifeTime; }
+
+	void SetActive(bool active) { _isActive = active; _elapsedTime = 0.0f; _accTime = 0.f; }
 
 protected:
 	shared_ptr<StructuredBuffer>	_particleBuffer;
@@ -53,13 +56,29 @@ protected:
 	shared_ptr<Material>		_material;
 	shared_ptr<Mesh>			_mesh;
 
-	float				_createInterval = 0.005f;
-	float				_accTime = 0.f;
+	// 파티클 활성 상태
+	bool            _isActive = false;
 
+	// 누적 시간
+	float				_accTime = 0.f;
+	// 지속 시간 
+	float				_lifeTime = 1.0f;
+	// 경과 시간
+	float				_elapsedTime = 0.f;
+
+	// 파티클 생성 간격
+	float				_createInterval = 0.005f;
+
+	// 수명
 	float				_minLifeTime = 0.5f;
 	float				_maxLifeTime = 1.f;
+
+	// 속도
 	float				_minSpeed = 100;
 	float				_maxSpeed = 50;
+
+	// 크기
 	float				_startScale = 10.f;
 	float				_endScale = 5.f;
+
 };
