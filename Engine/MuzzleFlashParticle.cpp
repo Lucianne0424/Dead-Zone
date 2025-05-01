@@ -28,6 +28,12 @@ MuzzleFlashParticle::MuzzleFlashParticle()
 void MuzzleFlashParticle::FinalUpdate()
 {
 
+	_lifeTime -= DELTA_TIME;
+	if (_lifeTime <= 0.f)
+	{
+		GetGameObject()->SetActive(false);
+	}
+
 	_accTime += DELTA_TIME;
 
 	_particleBuffer->PushComputeUAVData(UAV_REGISTER::u0);

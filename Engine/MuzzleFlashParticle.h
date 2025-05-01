@@ -14,4 +14,5 @@ public:
 private:
 	bool _emitRequested = false;
 	bool _autoDestruct = false;
+	float _lifeTime = 1.0f;
 };

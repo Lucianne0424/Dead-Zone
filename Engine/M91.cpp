@@ -10,6 +10,7 @@
 #include "Input.h"
 #include "MuzzleFlashParticle.h"
 #include "GameObject.h"
+#include "ParticlePool.h"
 
 
 Vec3 M91::_basePosition = { 5.f, -3.f, 20.f };
@@ -35,9 +36,11 @@ void M91::Awake()
 	GetTransform()->SetParent(parentTransform);
 }
 
+
 void M91::Update()
 {
 	// Å×½ºÆ®
+	/*
 	if (INPUT->GetButtonDown(KEY_TYPE::Q))
 	{
 		int32 index = static_cast<int32>(KEY_TYPE::Q);
@@ -56,6 +59,20 @@ void M91::Update()
 		//particle->GetTransform()->SetLocalRotation(Vec3(0.f,0.f,-180.f));
 
 		GET_SINGLE(SceneManager)->GetActiveScene()->AddGameObject(particle);
+	}
+	*/
+
+	auto particle = GET_SINGLE(ParticlePool)->GetFromPool();
+	if (particle)
+	{
+		auto muzzle = particle->GetScript<MuzzleFlashParticle>();
+		if (muzzle)
+			muzzle->EmitOnce();
+
+		particle->GetTransform()->SetParent(GetTransform());
+		particle->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, -100.f));
+
+		//GET_SINGLE(SceneManager)->GetActiveScene()->AddGameObject(particle);
 	}
 }
 

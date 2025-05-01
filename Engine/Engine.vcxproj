@@ -193,6 +193,7 @@
     <ClInclude Include="MonoBehaviour.h" />
     <ClInclude Include="MuzzleFlashParticle.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ParticlePool.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Player.h" />
@@ -244,6 +245,7 @@
     <ClCompile Include="MonoBehaviour.cpp" />
     <ClCompile Include="MuzzleFlashParticle.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ParticlePool.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

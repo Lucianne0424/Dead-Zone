@@ -12,6 +12,7 @@ class Terrain;
 class BaseCollider;
 class Animator;
 
+
 class GameObject : public Object, public enable_shared_from_this<GameObject>
 {
 public:
@@ -46,6 +47,22 @@ public:
 	void SetStatic(bool flag) { _static = flag; }
 	bool IsStatic() { return _static; }
 
+	void SetActive(bool active) { _isActive = active; }
+	bool IsActive() const { return _isActive; }
+
+
+	template<typename T>
+	shared_ptr<T> GetScript()
+	{
+		for (auto& script : _scripts)
+		{
+			shared_ptr<T> casted = dynamic_pointer_cast<T>(script);
+			if (casted)
+				return casted;
+		}
+		return nullptr;
+	}
+
 private:
 	array<shared_ptr<Component>, FIXED_COMPONENT_COUNT> _components;
 	vector<shared_ptr<MonoBehaviour>> _scripts;
@@ -53,5 +70,7 @@ private:
 	bool _checkFrustum = true;
 	uint8 _layerIndex = 0;
 	bool _static = false;
+
+	bool _isActive = true;
 };
 

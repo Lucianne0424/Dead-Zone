@@ -50,6 +50,9 @@ void GameObject::Start()
 
 void GameObject::Update()
 {
+	if (!_isActive)
+		return;
+
 	for (shared_ptr<Component>& component : _components)
 	{
 		if (component)
@@ -64,6 +67,9 @@ void GameObject::Update()
 
 void GameObject::LateUpdate()
 {
+	if (!_isActive)
+		return;
+
 	for (shared_ptr<Component>& component : _components)
 	{
 		if (component)
@@ -78,6 +84,9 @@ void GameObject::LateUpdate()
 
 void GameObject::FinalUpdate()
 {
+	if (!_isActive)
+		return;
+
 	for (shared_ptr<Component>& component : _components)
 	{
 		if (component)

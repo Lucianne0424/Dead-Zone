@@ -22,6 +22,7 @@
 #include "M91.h"
 
 #include "Container.h"
+#include "ParticlePool.h"
 
 void SceneManager::Update()
 {
@@ -398,6 +399,8 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		}
 	}
 #pragma endregion
+
+	GET_SINGLE(ParticlePool)->Init(1);
 
 	return scene;
 }
