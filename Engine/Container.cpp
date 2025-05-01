@@ -24,12 +24,12 @@ Container::Container()
 void Container::meshLoad()
 {
 	meshData[0] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container.fbx");
-	/*meshData[0] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-2Doors.fbx");
-	meshData[1] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-2DoorsShell.fbx");
-	meshData[2] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-4Doors.fbx");
-	meshData[3] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-4DoorsShell.fbx");
-	meshData[4] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-LeftDoor.fbx");
-	meshData[5] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-RightDoor.fbx");*/
+	meshData[1] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-2Doors.fbx");
+	/*meshData[2] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-2DoorsShell.fbx");
+	meshData[3] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-4Doors.fbx");
+	meshData[4] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-4DoorsShell.fbx");
+	meshData[5] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-LeftDoor.fbx");
+	meshData[6] = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Container\\Container20-RightDoor.fbx");*/
 	
 	
 }
