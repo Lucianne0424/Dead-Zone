@@ -23,7 +23,7 @@ public:
 
 	void SetRadius(float radius) { _radius = radius; }
 	void SetCenter(Vec3 center) { _center = center; }
-	void SetExtent(Vec3 extents) { _extents = extents; }
+	void SetExtents(Vec3 extents) { _extents = extents; }
 	void SetOrientation(Vec3 rotation);
 
 	shared_ptr<GameObject> GetDebugCollider() { return _debugCollider; }

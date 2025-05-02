@@ -8,6 +8,9 @@
 #include "MeshRenderer.h"
 #include "Animator.h"
 
+#include "SphereCollider.h"
+#include "OrientedBoxCollider.h"
+
 MeshData::MeshData() : Object(OBJECT_TYPE::MESH_DATA)
 {
 }
@@ -92,6 +95,20 @@ vector<shared_ptr<GameObject>> MeshData::Instantiate()
 			animator->SetBones(info.mesh->GetBones());
 			animator->SetAnimClip(info.mesh->GetAnimClip());
 		}
+
+#pragma region Add Collider
+		// Sphere 버전
+		//shared_ptr<SphereCollider> obb = make_shared<SphereCollider>();
+		//obb->SetCenter(info.center);
+		//obb->SetRadius(max(max(info.extents.x, info.extents.y), info.extents.z));
+
+		// OBB 버전
+		shared_ptr<OrientedBoxCollider> obb = make_shared<OrientedBoxCollider>();
+		obb->SetCenter(info.center);
+		obb->SetExtents(info.extents);
+		
+		gameObject->AddComponent(obb);
+#pragma endregion
 
 		v.push_back(gameObject);
 	}

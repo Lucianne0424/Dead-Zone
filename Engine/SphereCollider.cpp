@@ -15,8 +15,8 @@ SphereCollider::SphereCollider() : BaseCollider(ColliderType::SPHERE)
 	_debugCollider->AddComponent(make_shared<Transform>());
 	shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
 	{
-		shared_ptr<Mesh> cubeMesh = GET_SINGLE(Resources)->LoadCubeMesh();
-		meshRenderer->SetMesh(cubeMesh);
+		shared_ptr<Mesh> sphereMesh = GET_SINGLE(Resources)->LoadSphereMesh();
+		meshRenderer->SetMesh(sphereMesh);
 	}
 	{
 		shared_ptr<Shader> shader = GET_SINGLE(Resources)->Get<Shader>(L"WireFrame");
@@ -48,14 +48,12 @@ void SphereCollider::FinalUpdate()
 	_boundingSphere->Radius = _radius * max(max(scale.x, scale.y), scale.z);
 
 	// 디버그용 콜라이더 위치 설정
-	_debugCollider->GetTransform()->SetLocalPosition(_boundingSphere->Center);
-	Matrix m = Matrix::CreateFromQuaternion(orientation);
-	{
-		Vec3 rotation = Transform::QuaternionToEuler(orientation);
-		rotation = RadianToDegree(rotation);
-		_debugCollider->GetTransform()->SetLocalRotation(rotation);
-	}
-	_debugCollider->GetTransform()->SetLocalScale(scale);
+	shared_ptr<Transform> debugColliderTransform = _debugCollider->GetTransform();
+	if (debugColliderTransform->GetParent().lock() == nullptr)
+		_debugCollider->GetTransform()->SetParent(GetTransform()); // 트랜스폼 부모 설정
+	
+	debugColliderTransform->SetLocalPosition(_center);
+	debugColliderTransform->SetLocalScale(Vec3(_boundingSphere->Radius) * 2.f);
 
 	_debugCollider->Update();
 	_debugCollider->LateUpdate();
