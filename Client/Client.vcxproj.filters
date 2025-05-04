@@ -35,7 +35,7 @@
     <ClInclude Include="Game.h">
       <Filter>소스 파일\Game</Filter>
     </ClInclude>
-    <ClInclude Include="protocol.h">
+    <ClInclude Include="..\echoserver\protocol.h">
       <Filter>소스 파일\Utils</Filter>
     </ClInclude>
   </ItemGroup>

@@ -22,6 +22,10 @@ public:
     // 이 방에 속한 플레이어들
     std::vector<PER_SOCKET_CONTEXT*> players;
 
+    GameManager              gameManager;
+    std::chrono::steady_clock::time_point lastSpawn;
+    std::chrono::milliseconds                spawnInterval{ 1000 };
+
 private:
     // 방 내부 좀비 리스트
     std::vector<Zombie> zombies;

@@ -32,12 +32,12 @@ std::queue<PER_SOCKET_CONTEXT*> g_lobbyQueue;
 std::mutex g_playersMutex;
 std::vector<PER_SOCKET_CONTEXT*> g_connectedPlayers;
 
-std::vector<GameRoom*> g_gameRooms;
+std::atomic<bool> g_running{ true };
 
 LPFN_ACCEPTEX lpfnAcceptEx = NULL;
 
 GameRoom* FindGameRoomForPlayer(PER_SOCKET_CONTEXT* player) {
-    for (auto* room : g_gameRooms) {
+    for (auto* room : activeRooms) {
         for (auto* p : room->players) {
             if (p == player)
                 return room;
@@ -48,6 +48,7 @@ GameRoom* FindGameRoomForPlayer(PER_SOCKET_CONTEXT* player) {
 
 void PostAccept(SOCKET listenSocket);
 void PostRecv(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData);
+void PostSendPacket(PER_SOCKET_CONTEXT* pContext, const void* packet, size_t packetSize);
 void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext, PER_IO_DATA* pIoData, int bytesTransferred);
 void MatchmakingCheck();
 void WorkerThread(HANDLE hIOCP);
@@ -177,6 +178,8 @@ void WorkerThread(HANDLE) {
             newContext->faintCount = 0;
             newContext->isFainted = false;
             newContext->moveX = newContext->moveY = newContext->moveZ = 0.0f;
+            newContext->isJumping = false;
+            newContext->verticalVelocity = 0.0f;
 
             CreateIoCompletionPort((HANDLE)acceptedSocket, g_hIOCP, (ULONG_PTR)newContext, 0);
             PER_IO_DATA* pRecvIoData = new PER_IO_DATA;
@@ -198,26 +201,33 @@ void WorkerThread(HANDLE) {
         else if (pIoData->operationType == IO_READ) {
             if (bytesTransferred == 0) {
                 printf("클라이언트 종료: socket %d\n", pContext->socket);
-                {
-                {
-                    std::lock_guard<std::mutex> lock(g_playersMutex);
-                    auto it = std::find(g_connectedPlayers.begin(), g_connectedPlayers.end(), pContext);
-                    if (it != g_connectedPlayers.end())
-                         g_connectedPlayers.erase(it);
+
+                if (auto* room = FindGameRoomForPlayer(pContext)) {
+                    auto& vec = room->players;
+                    vec.erase(std::remove(vec.begin(), vec.end(), pContext),
+                        vec.end());
+                    
+                    if (vec.empty()) {
+                        delete room;  
                     }
+                }
+
                 sc_packet_player_leave leavePacket{};
                 leavePacket.size = sizeof(sc_packet_player_leave);
                 leavePacket.type = S2C_P_PLAYER_LEAVE;
                 leavePacket.playerId = pContext->socket;
-                
-                    if (auto* room = FindGameRoomForPlayer(pContext)) {
-                    for (auto* peer : room->players) {
-                       if (peer != pContext)
-                             PostSendPacket(peer, &leavePacket, leavePacket.size);
-                        
-                    }
-                    
+                if (auto* room = FindGameRoomForPlayer(pContext)) {
+                    for (auto* peer : room->players)
+                        PostSendPacket(peer, &leavePacket, leavePacket.size);
                 }
+
+                {
+                    std::lock_guard<std::mutex> lock(g_playersMutex);
+                    g_connectedPlayers.erase(
+                        std::remove(g_connectedPlayers.begin(),
+                            g_connectedPlayers.end(),
+                            pContext),
+                        g_connectedPlayers.end());
                 }
                 closesocket(pContext->socket);
                 delete pContext;
@@ -247,7 +257,7 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         pContext->state = STATE_LOBBY;
         pContext->health = 100;
         pContext->posX = 0.0f;
-        pContext->posY = 0.0f;
+        pContext->posY = 500.0f;
         pContext->posZ = 0.0f;
         pContext->walkSpeed = 3.0f;
         pContext->runSpeed = 5.0f;
@@ -256,6 +266,8 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         pContext->moveX = 0.0f;
         pContext->moveY = 0.0f;
         pContext->moveZ = 0.0f;
+        pContext->isJumping = false;
+        pContext->verticalVelocity = 0.0f;
 
         sc_packet_login_ok loginOk;
         loginOk.size = sizeof(sc_packet_login_ok);
@@ -300,9 +312,9 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         moveUpdate.yaw = pkt->yaw;
 
         if (auto* room = FindGameRoomForPlayer(pContext)) {
-            for (auto* peer : room->players) {
+            /*for (auto* peer : room->players) {
                 PostSendPacket(peer, &moveUpdate, moveUpdate.size);
-            }
+            }*/
         }
         break;
     }
@@ -322,6 +334,31 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
             for (auto* peer : room->players) {
                 PostSendPacket(peer, &attackEvent, attackEvent.size);
             }
+        }
+        break;
+    }
+
+    case C2S_P_JUMP: {
+        if (bytesTransferred < sizeof(cs_packet_jump) || pContext->isJumping)
+            break;
+
+        auto* req = reinterpret_cast<cs_packet_jump*>(pIoData->buffer);
+        float initialVelocity = req->initVelocity;
+
+        pContext->verticalVelocity = initialVelocity;
+        pContext->isJumping = true;
+
+        sc_packet_jump jumpEvent;
+        jumpEvent.size = sizeof(sc_packet_jump);
+        jumpEvent.type = S2C_P_JUMP;
+        jumpEvent.playerId = pContext->socket;
+        jumpEvent.initVelocity = initialVelocity;
+
+        if (auto* room = FindGameRoomForPlayer(pContext)) {
+            /*for (auto* peer : room->players) {
+                if (peer != pContext)
+                    PostSendPacket(peer, &jumpEvent, jumpEvent.size);
+            }*/
         }
         break;
     }
@@ -368,8 +405,7 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
                 PostSendPacket(peer, &info, info.size);
         }
 
-        GameRoom* newRoom = new GameRoom(players);
-        g_gameRooms.push_back(newRoom);
+        new GameRoom(players);
 
         printf("게임룸 생성: %s, %s, %s\n",
             p1->username.c_str(), p2->username.c_str(), p3->username.c_str());
@@ -379,29 +415,30 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
 int main() {
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        printf("WSAStartup 실패\n");
+        printf("WSAStartup failed\n");
         return 1;
     }
 
     g_listenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP,
         NULL, 0, WSA_FLAG_OVERLAPPED);
     if (g_listenSocket == INVALID_SOCKET) {
-        printf("리스닝 소켓 생성 실패\n");
+        printf("Socket creation failed\n");
         WSACleanup();
         return 1;
     }
+
     SOCKADDR_IN sa = {};
     sa.sin_family = AF_INET;
     sa.sin_addr.s_addr = INADDR_ANY;
     sa.sin_port = htons(DEFAULT_PORT);
     if (bind(g_listenSocket, (SOCKADDR*)&sa, sizeof(sa)) == SOCKET_ERROR ||
         listen(g_listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-        printf("bind/listen 실패\n");
+        printf("bind/listen failed\n");
         closesocket(g_listenSocket);
         WSACleanup();
         return 1;
     }
-    printf("서버 시작: 포트 %d\n", DEFAULT_PORT);
+    printf("Listening on port %d\n", DEFAULT_PORT);
 
     g_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
     CreateIoCompletionPort((HANDLE)g_listenSocket, g_hIOCP, 0, 0);
@@ -416,12 +453,30 @@ int main() {
     for (int i = 0; i < NUM_POST_ACCEPTS; ++i)
         PostAccept(g_listenSocket);
 
+    // 1) 게임룸 업데이트용 스레드
+    std::thread updateThread([]() {
+        auto prev = std::chrono::steady_clock::now();
+        while (g_running) {
+            auto now = std::chrono::steady_clock::now();
+            float dt = std::chrono::duration<float>(now - prev).count();
+            prev = now;
+            for (auto* room : activeRooms)
+                room->Update(dt);
+            std::this_thread::sleep_for(std::chrono::milliseconds(33));
+        }
+        });
+
+    // 2) IOCP 워커 스레드
     std::vector<std::thread> workers;
     for (int i = 0; i < NUM_WORKER_THREADS; ++i)
         workers.emplace_back(WorkerThread, g_hIOCP);
 
-    printf("엔터 눌러서 종료...\n");
+    printf("Press Enter to exit.\n");
     getchar();
+
+    // 3) 서버 종료 절차
+    g_running = false;
+    updateThread.join();
 
     for (int i = 0; i < NUM_WORKER_THREADS; ++i)
         PostQueuedCompletionStatus(g_hIOCP, 0, 0, nullptr);

@@ -5,6 +5,7 @@
 #include <mswsock.h>
 #include <string>
 #include <vector>
+#include <atomic> 
 #include "protocol.h"
 
 #define MAX_BUFFER 8192
@@ -30,6 +31,8 @@ struct PER_SOCKET_CONTEXT {
     int            faintCount;
     bool           isFainted;
     float          moveX, moveY, moveZ;
+    bool          isJumping;
+    float         verticalVelocity;
 };
 
 // AcceptEx 함수 포인터
@@ -39,10 +42,14 @@ extern LPFN_ACCEPTEX lpfnAcceptEx;
 class GameRoom;
 extern std::vector<GameRoom*> activeRooms;
 
+// 업데이트 루프 제어 플래그
+extern std::atomic<bool> g_running;
+
 // 네트워크 헬퍼
 void PostSend(PER_SOCKET_CONTEXT* ctx, const std::string& msg, PER_IO_DATA* io);
 void PostRecv(PER_SOCKET_CONTEXT* ctx, PER_IO_DATA* io);
 void PostAccept(SOCKET listenSocket);
+void PostSendPacket(PER_SOCKET_CONTEXT* pContext, const void* packet, size_t packetSize);
 
 // 패킷 처리
 void ProcessClientMessage(PER_SOCKET_CONTEXT* ctx, PER_IO_DATA* io, int bytesTransferred);

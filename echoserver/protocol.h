@@ -7,6 +7,8 @@ constexpr char S2C_P_GAME_STATE = 4;
 constexpr char C2S_P_LOGIN = 5;
 constexpr char C2S_P_MOVE = 6;
 constexpr char C2S_P_ATTACK = 7;
+constexpr char C2S_P_JUMP = 8;      
+constexpr char S2C_P_JUMP = 9;    
 constexpr char S2C_P_PLAYER_LEAVE = 11;
 constexpr char S2C_P_GAME_START = 12;
 constexpr char MAX_ID_LEN = 20;
@@ -64,6 +66,19 @@ struct sc_packet_attack {
     long long playerId;
     long long zombieId;
     Vector3 impactPoint;
+};
+
+struct cs_packet_jump {
+    unsigned char size;    
+    char          type;    
+    float         initVelocity; 
+};
+
+struct sc_packet_jump {
+    unsigned char size;       
+    char          type;       
+    long long     playerId;   
+    float         initVelocity; 
 };
 
 struct sc_packet_player_leave {

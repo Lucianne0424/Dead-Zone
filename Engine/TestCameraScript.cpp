@@ -6,7 +6,7 @@
 #include "Input.h"
 #include "Timer.h"
 #include "SceneManager.h"
-#include "protocol.h""
+#include "protocol.h"
 
 static Vec3 Normalize(const Vec3& v)
 {
@@ -28,6 +28,10 @@ TestCameraScript::~TestCameraScript()
 
 void TestCameraScript::LateUpdate()
 {
+	static bool   localJumping = false;
+	static float localVerticalVelocity = 0.0f;
+	const float  gravity = 9.8f;
+
 	Vec3 pos = GetTransform()->GetLocalPosition();
 	Vec3 moveDir = { 0.f, 0.f, 0.f };
 
@@ -39,6 +43,9 @@ void TestCameraScript::LateUpdate()
 		moveDir -= GetTransform()->GetRight();
 	if (INPUT->GetButton(KEY_TYPE::D))
 		moveDir += GetTransform()->GetRight();
+
+	static bool wasMovingLastFrame = false;
+	bool isMoving = (moveDir.x != 0.f || moveDir.y != 0.f || moveDir.z != 0.f);
 
 	if (moveDir.x != 0.f || moveDir.y != 0.f || moveDir.z != 0.f)
 	{
@@ -58,6 +65,44 @@ void TestCameraScript::LateUpdate()
 		send(GWindowInfo.sock,
 			reinterpret_cast<char*>(&pkt),
 			sizeof(pkt), 0);
+	}
+	else if (wasMovingLastFrame)
+	{
+		cs_packet_move stopPkt{};
+		stopPkt.size = sizeof(stopPkt);
+		stopPkt.type = C2S_P_MOVE;
+		stopPkt.direction.x = 0.f;
+		stopPkt.direction.y = 0.f;
+		stopPkt.direction.z = 0.f;
+		stopPkt.yaw = GetTransform()->GetLocalRotation().y;
+		send(GWindowInfo.sock,
+			reinterpret_cast<char*>(&stopPkt),
+			sizeof(stopPkt), 0);
+	}
+	wasMovingLastFrame = isMoving;
+
+
+	if (INPUT->GetButtonDown(KEY_TYPE::SPACE) && !localJumping) {
+		localJumping = true;
+		const float jumpSpeed = 12.0f;
+		localVerticalVelocity = jumpSpeed;
+		cs_packet_jump pkt{};
+		pkt.size = sizeof(cs_packet_jump);
+		pkt.type = C2S_P_JUMP;
+		pkt.initVelocity = jumpSpeed;
+		send(GWindowInfo.sock,
+			reinterpret_cast<char*>(&pkt),
+			sizeof(pkt),
+			0);
+	}
+
+	if (localJumping) {
+		pos.y += localVerticalVelocity * DELTA_TIME;
+		localVerticalVelocity -= gravity * DELTA_TIME;
+		if (pos.y <= 0.0f) {
+			pos.y = 0.0f;
+			localJumping = false;
+		}
 	}
 
 	if (INPUT->GetButton(KEY_TYPE::Q))
