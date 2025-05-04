@@ -82,7 +82,7 @@ void Camera::SortGameObject()
 				_vecDeferred.push_back(gameObject);
 				{
 					shared_ptr<BaseCollider> collider = gameObject->GetCollider();
-					if (collider)
+					if (collider && DEBUG_MODE)
 					{
 						_vecDeferred.push_back(collider->GetDebugCollider());
 					}

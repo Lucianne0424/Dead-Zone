@@ -3,8 +3,9 @@
 
 enum class ColliderType
 {
+	NONE,
 	SPHERE,
-	AABB,
+	AABB, // ¾ø´Â°Å
 	OBB,
 };
 

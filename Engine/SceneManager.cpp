@@ -107,6 +107,32 @@ void SceneManager::RenderUI()
 			device->GetTextFormat().Get(),
 			&textRect3,
 			device->GetSolidColorBrush().Get());
+
+		pivot = { 100.f, static_cast<float>(GEngine->GetWindow().height / 2) };
+		D2D1_RECT_F textRect4 = D2D1::RectF(pivot.x - 100, pivot.y - 200, pivot.x + 100, pivot.y + 200);
+
+		wstring text4 = L"X : ";
+		Vec3 mainCameraPos = _activeScene->GetMainCamera()->GetTransform()->GetWorldPosition();
+		wss.str(L"");
+		wss.clear();
+		wss << std::fixed << std::setprecision(2) << mainCameraPos.x;
+		text4 += wss.str();
+		text4 += L"\nY : ";
+		wss.str(L"");
+		wss.clear();
+		wss << std::fixed << std::setprecision(2) << mainCameraPos.y;
+		text4 += wss.str();
+		text4 += L"\nZ : ";
+		wss.str(L"");
+		wss.clear();
+		wss << std::fixed << std::setprecision(2) << mainCameraPos.z;
+		text4 += wss.str();
+		device->GetD2DDeviceContext()->DrawTextW(
+			text4.c_str(),
+			static_cast<uint32>(text4.size()),
+			device->GetTextFormat().Get(),
+			&textRect4,
+			device->GetSolidColorBrush().Get());
 	}
 
 	device->GetD2DDeviceContext()->EndDraw();
@@ -234,8 +260,9 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		camera->SetName(L"Main_Camera");
 		camera->AddComponent(make_shared<Transform>());
 		camera->AddComponent(make_shared<Camera>()); // Near=1, Far=1000, FOV=45도
-		//camera->AddComponent(make_shared<TestCameraScript>());
+		camera->AddComponent(make_shared<TestCameraScript>());
 		camera->GetCamera()->SetFar(10000.f);
+		camera->GetCamera()->SetFOV(XM_PI / 3.f); // 90도
 		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 0.f));
 		uint8 layerIndex = GET_SINGLE(SceneManager)->LayerNameToIndex(L"UI");
 		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, true); // UI는 안 찍음
@@ -484,23 +511,25 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 #pragma region TestFBX
-{
-	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Player.fbx");
-	
-	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
-
-	for (auto& gameObject : gameObjects)
 	{
-		gameObject->SetName(L"Player");
-		gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 500.f));
-		gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
-		gameObject->GetTransform()->SetLocalRotation(Vec3(0.f, 0.f, 0.f));
-		gameObject->AddComponent(make_shared<TestObjectScript>());
-		scene->AddGameObject(gameObject);
-	}
-}
-#pragma endregion
+		shared_ptr<GameObject> t = make_shared<GameObject>();
+		t->AddComponent(make_shared<Transform>());
+		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+		scene->AddGameObject(t);
 
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Factory1Items.fbx");
+	
+		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
+
+		for (auto& gameObject : gameObjects)
+		{
+			gameObject->SetName(L"Map");
+			gameObject->SetStatic(true);
+			gameObject->GetTransform()->SetParent(t->GetTransform());
+			scene->AddGameObject(gameObject);
+		}
+	}
+#pragma endregion
 
 
 	return scene;

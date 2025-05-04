@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "BaseCollider.h"
 
 class Mesh;
 class Material;
@@ -10,9 +11,12 @@ struct MeshRenderInfo
 	shared_ptr<Mesh>				mesh;
 	vector<shared_ptr<Material>>	materials;
 
-	Vec3							maxPosition = {};
 	Vec3							center;
 	Vec3							extents;
+
+	Vec3							position;
+	Vec3							rotation;
+	Vec3							scale;
 };
 
 class MeshData : public Object
@@ -27,7 +31,7 @@ public:
 	virtual void Load(const wstring& path);
 	virtual void Save(const wstring& path);
 
-	vector<shared_ptr<GameObject>> Instantiate();
+	vector<shared_ptr<GameObject>> Instantiate(ColliderType colliderType = ColliderType::NONE);
 
 private:
 	shared_ptr<Mesh>				_mesh;

@@ -51,7 +51,9 @@ struct FbxMeshInfo
 	vector<BoneWeight>					boneWeights; // »À °¡ÁßÄ¡
 	bool								hasAnimation;
 
-	Vec3								maxPosition = { 0.f, 0.f, 0.f };
+	Vec3								position;
+	Vec3								rotation;
+	Vec3								scale;
 };
 
 struct FbxKeyFrameInfo

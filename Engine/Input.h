@@ -30,6 +30,8 @@ enum class KEY_TYPE
 	KEY_3 = DIK_3,
 	KEY_4 = DIK_4,
 
+	KEY_F5 = DIK_F5,
+
 	SPACE = DIK_SPACE,
 };
 
