@@ -159,8 +159,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (!InitNetwork())
         return 1;
 
-    GWindowInfo.width = 800;
-    GWindowInfo.height = 600;
+    GWindowInfo.width = 1280;
+    GWindowInfo.height = 800;
     GWindowInfo.windowed = true;
     GWindowInfo.sock = g_clientSocket;
 
@@ -225,15 +225,31 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-    hInst = hInstance;
-    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
-    if (!hWnd)
-        return FALSE;
-    ShowWindow(hWnd, nCmdShow);
-    UpdateWindow(hWnd);
-    GWindowInfo.hwnd = hWnd;
-    return TRUE;
+   hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+
+   HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+
+   if (!hWnd)
+   {
+      return FALSE;
+   }
+
+   ShowWindow(hWnd, nCmdShow);
+   UpdateWindow(hWnd);
+
+   if (GetForegroundWindow() != hWnd)
+   {
+       if (IsIconic(hWnd))
+           ShowWindow(hWnd, SW_RESTORE);
+
+       SetForegroundWindow(hWnd);
+       SetFocus(hWnd);
+   }
+
+   GWindowInfo.hwnd = hWnd;
+
+   return TRUE;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

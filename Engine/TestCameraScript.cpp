@@ -28,6 +28,9 @@ TestCameraScript::~TestCameraScript()
 
 void TestCameraScript::LateUpdate()
 {
+	if(INPUT->GetButton(KEY_TYPE::KEY_F5))
+		SET_DEBUG_MODE(!DEBUG_MODE);
+
 	static bool   localJumping = false;
 	static float localVerticalVelocity = 0.0f;
 	const float  gravity = 9.8f;

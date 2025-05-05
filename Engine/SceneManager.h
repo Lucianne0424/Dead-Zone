@@ -23,6 +23,9 @@ public:
 
 	shared_ptr<class GameObject> Pick(int32 screenX, int32 screenY);
 
+	bool IsDebugMode() { return _debugMode; }
+	void SetDebugMode(bool debugMode) { _debugMode = debugMode; }
+
 public:
 	shared_ptr<Scene> GetActiveScene() { return _activeScene; }
 
@@ -34,5 +37,7 @@ private:
 
 	array<wstring, MAX_LAYER> _layerNames;
 	map<wstring, uint8> _layerIndex;
+
+	bool _debugMode = false;
 };
 

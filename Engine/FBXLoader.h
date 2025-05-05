@@ -50,6 +50,10 @@ struct FbxMeshInfo
 	vector<FbxMaterialInfo>				materials;
 	vector<BoneWeight>					boneWeights; // »À °¡ÁßÄ¡
 	bool								hasAnimation;
+
+	Vec3								position;
+	Vec3								rotation;
+	Vec3								scale;
 };
 
 struct FbxKeyFrameInfo
@@ -93,6 +97,7 @@ private:
 
 	void ParseNode(FbxNode* root);
 	void LoadMesh(FbxMesh* mesh);
+	void LoadMeshNotWithAnimation(FbxMesh* mesh);
 	void LoadMaterial(FbxSurfaceMaterial* surfaceMaterial);
 
 	void		GetNormal(FbxMesh* mesh, FbxMeshInfo* container, int32 idx, int32 vertexCounter);

@@ -9,15 +9,13 @@ public:
 
 	virtual void FinalUpdate() override;
 	virtual bool Intersects(Vec4 rayOrigin, Vec4 rayDir, OUT float& distance) override;
+	virtual bool Intersects(shared_ptr<BoundingSphere> boundingSphere) override;
+	virtual bool Intersects(shared_ptr<BoundingBox> boundingBox) override;
+	virtual bool Intersects(shared_ptr<BoundingOrientedBox> boundingOrientedBox) override;
 
-	void SetRadius(float radius) { _radius = radius; }
-	void SetCenter(Vec3 center) { _center = center; }
+	shared_ptr<BoundingSphere> GetBoundingSphere() { return _boundingSphere; }
 
 private:
-	// Local ±‚¡ÿ
-	float		_radius = 1.f;
-	Vec3		_center = Vec3(0, 0, 0);
-
-	BoundingSphere _boundingSphere;
+	shared_ptr<BoundingSphere> _boundingSphere;
 };
 

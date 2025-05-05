@@ -23,6 +23,11 @@
 
 #include "Container.h"
 
+// TODO: 나중에 삭제
+#include "Timer.h"
+#include <sstream>
+#include "TestObjectScript.h"
+
 void SceneManager::Update()
 {
 	if (_activeScene == nullptr)
@@ -46,7 +51,6 @@ void SceneManager::RenderUI()
 	shared_ptr<D3D11On12Device> device = GEngine->GetD3D11on12Device();
 	D2D1_SIZE_F rtSize = device->GetD3D11On12RT(backbufferindex)->GetSize();
 	//D2D1_RECT_F textRect = D2D1::RectF(0, 0, rtSize.width, rtSize.height);
-	D2D1_RECT_F textRect = D2D1::RectF(0, 0, 600, 600);
 
 	// Acquire our wrapped render target resource for the current back buffer.
 	device->GetD3D11on12Device()->AcquireWrappedResources(device->GetWrappedBackBuffer(backbufferindex).GetAddressOf(), 1);
@@ -58,14 +62,76 @@ void SceneManager::RenderUI()
 	//if (_activeScene)
 	//	_activeScene->RenderUI();
 
+	static float elapsedTime = 0.f;
+	if(DELTA_TIME < 1.f)
+		elapsedTime += DELTA_TIME;
 	if (_activeScene)
 	{
-		static const wstring text = L"123123123";
+		// 총알 UI
+		Vec2 pivot = {
+			static_cast<float>(GEngine->GetWindow().width - 100),
+			static_cast<float>(GEngine->GetWindow().height - 50) };
+		D2D1_RECT_F textRect = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
+
+		wstring text = L"5 / 50";
 		device->GetD2DDeviceContext()->DrawTextW(
 			text.c_str(),
 			static_cast<uint32>(text.size()),
 			device->GetTextFormat().Get(),
 			&textRect,
+			device->GetSolidColorBrush().Get());
+
+		// 타이머 UI
+		pivot = { static_cast<float>(GEngine->GetWindow().width / 2), 50.f };
+		D2D1_RECT_F textRect2 = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
+
+		wstring text2 = L"시간 : ";
+		std::wstringstream wss;
+		wss << std::fixed << std::setprecision(2) << elapsedTime;
+		text2 += wss.str();
+		device->GetD2DDeviceContext()->DrawTextW(
+			text2.c_str(),
+			static_cast<uint32>(text2.size()),
+			device->GetTextFormat().Get(),
+			&textRect2,
+			device->GetSolidColorBrush().Get());
+
+		// 체력 UI
+		pivot = { 100.f, static_cast<float>(GEngine->GetWindow().height - 50) };
+		D2D1_RECT_F textRect3 = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
+
+		wstring text3 = L"HP : 100";
+		device->GetD2DDeviceContext()->DrawTextW(
+			text3.c_str(),
+			static_cast<uint32>(text3.size()),
+			device->GetTextFormat().Get(),
+			&textRect3,
+			device->GetSolidColorBrush().Get());
+
+		pivot = { 100.f, static_cast<float>(GEngine->GetWindow().height / 2) };
+		D2D1_RECT_F textRect4 = D2D1::RectF(pivot.x - 100, pivot.y - 200, pivot.x + 100, pivot.y + 200);
+
+		wstring text4 = L"X : ";
+		Vec3 mainCameraPos = _activeScene->GetMainCamera()->GetTransform()->GetWorldPosition();
+		wss.str(L"");
+		wss.clear();
+		wss << std::fixed << std::setprecision(2) << mainCameraPos.x;
+		text4 += wss.str();
+		text4 += L"\nY : ";
+		wss.str(L"");
+		wss.clear();
+		wss << std::fixed << std::setprecision(2) << mainCameraPos.y;
+		text4 += wss.str();
+		text4 += L"\nZ : ";
+		wss.str(L"");
+		wss.clear();
+		wss << std::fixed << std::setprecision(2) << mainCameraPos.z;
+		text4 += wss.str();
+		device->GetD2DDeviceContext()->DrawTextW(
+			text4.c_str(),
+			static_cast<uint32>(text4.size()),
+			device->GetTextFormat().Get(),
+			&textRect4,
 			device->GetSolidColorBrush().Get());
 	}
 
@@ -196,7 +262,8 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		camera->AddComponent(make_shared<Camera>()); // Near=1, Far=1000, FOV=45도
 		camera->AddComponent(make_shared<TestCameraScript>());
 		camera->GetCamera()->SetFar(10000.f);
-		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 500.f, 0.f));
+		camera->GetCamera()->SetFOV(XM_PI / 3.f); // 90도
+		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 0.f));
 		uint8 layerIndex = GET_SINGLE(SceneManager)->LayerNameToIndex(L"UI");
 		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, true); // UI는 안 찍음
 		scene->AddGameObject(camera);
@@ -248,6 +315,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 	//	obj->AddComponent(make_shared<Transform>());
 	//	obj->AddComponent(make_shared<SphereCollider>());
 	//	obj->GetTransform()->SetLocalScale(Vec3(100.f, 100.f, 100.f));
+	//	obj->GetTransform()->SetLocalRotation(Vec3(0.f, 0.f, 0.f));
 	//	obj->GetTransform()->SetLocalPosition(Vec3(0, 0.f, 500.f));
 	//	obj->SetStatic(false);
 	//	shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
@@ -262,26 +330,27 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 	//	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetRadius(0.5f);
 	//	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
 	//	obj->AddComponent(meshRenderer);
+	//	obj->AddComponent(make_shared<TestObjectScript>());
 	//	scene->AddGameObject(obj);
 	//}
 #pragma endregion
 
-#pragma region Terrain
-	{
-		shared_ptr<GameObject> obj = make_shared<GameObject>();
-		obj->AddComponent(make_shared<Transform>());
-		obj->AddComponent(make_shared<Terrain>());
-		obj->AddComponent(make_shared<MeshRenderer>());
-
-		obj->GetTransform()->SetLocalScale(Vec3(300.f, 300.f, 300.f));
-		obj->GetTransform()->SetLocalPosition(Vec3(0.0f, 0.0f, 0.0f));
-		obj->SetStatic(true);
-		obj->GetTerrain()->Init(64, 64);
-		obj->SetCheckFrustum(false);
-
-		scene->AddGameObject(obj);
-	}
-#pragma endregion
+//#pragma region Terrain
+//	{
+//		shared_ptr<GameObject> obj = make_shared<GameObject>();
+//		obj->AddComponent(make_shared<Transform>());
+//		obj->AddComponent(make_shared<Terrain>());
+//		obj->AddComponent(make_shared<MeshRenderer>());
+//
+//		obj->GetTransform()->SetLocalScale(Vec3(300.f, 300.f, 300.f));
+//		obj->GetTransform()->SetLocalPosition(Vec3(0.0f, 0.0f, 0.0f));
+//		obj->SetStatic(true);
+//		obj->GetTerrain()->Init(64, 64);
+//		obj->SetCheckFrustum(false);
+//
+//		scene->AddGameObject(obj);
+//	}
+//#pragma endregion
 
 #pragma region UI_Test
 	for (int32 i = 0; i < 6; i++)
@@ -331,7 +400,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 			meshRenderer->SetMesh(mesh);
 		}
 		{
-			shared_ptr<Shader> shader = GET_SINGLE(Resources)->Get<Shader>(L"HUD");
+			shared_ptr<Shader> shader = GET_SINGLE(Resources)->Get<Shader>(L"AlphaTexture");
 			shared_ptr<Texture> texture = GET_SINGLE(Resources)->Load<Texture>(L"Crosshair", L"..\\Resources\\Texture\\Crosshair\\crosshair01.png");
 			shared_ptr<Material> material = make_shared<Material>();
 			material->SetShader(shader);
@@ -376,68 +445,92 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 
-#pragma region MAP
-	// 임시 맵 제작 ( 나중에 수정할 예정 )
-	shared_ptr<Container> container = make_shared<Container>();
-
-	const float cx = 806.f; // 컨테이너 크기
-	const float cy = 273.f;
-	const float cz = 298.f;
-
-	for (int y = 0; y < 2; ++y)
-	{
-		for (int x = 0; x < 1; ++x)
-		{
-			for (int z = -10; z < 20; ++z)
-			{
-				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-					Vec3(2000.f + cx*x, cy/2 +cy*y, cz*z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
-
-				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-					Vec3(-2000.f + cx * x, cy / 2 + cy * y, cz* z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 180.f, 0.f));
-			}
-		}
-	}
-
-	for (int x = 1; x < 5; ++x)
-	{
-		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-			Vec3(-2000.f + cx * x , cy / 2, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
-
-		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-			Vec3(-2000.f + cx * x, cy / 2 + cy, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
-	}
-	
-	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-		Vec3(-500, cy / 2, 2300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
-
-	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-		Vec3(-500, cy / 2, -1800), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
-
-	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
-		Vec3(500, cy / 2, 5300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 120.f, 0.f));
-
-#pragma endregion
+//#pragma region MAP
+//	// 임시 맵 제작 ( 나중에 수정할 예정 )
+//	shared_ptr<Container> container = make_shared<Container>();
+//
+//	const float cx = 806.f; // 컨테이너 크기
+//	const float cy = 273.f;
+//	const float cz = 298.f;
+//
+//	for (int y = 0; y < 2; ++y)
+//	{
+//		for (int x = 0; x < 1; ++x)
+//		{
+//			for (int z = -10; z < 20; ++z)
+//			{
+//				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//					Vec3(2000.f + cx*x, cy/2 +cy*y, cz*z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+//
+//				container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//					Vec3(-2000.f + cx * x, cy / 2 + cy * y, cz* z), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 180.f, 0.f));
+//			}
+//		}
+//	}
+//
+//	for (int x = 1; x < 5; ++x)
+//	{
+//		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//			Vec3(-2000.f + cx * x , cy / 2, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+//
+//		container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//			Vec3(-2000.f + cx * x, cy / 2 + cy, cz * -10), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 0.f, 0.f));
+//	}
+//	
+//	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//		Vec3(-500, cy / 2, 2300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
+//
+//	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//		Vec3(-500, cy / 2, -1800), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, -120.f, 0.f));
+//
+//	container->createContainer(scene, static_cast<uint8>(ContainerType::Container1),
+//		Vec3(500, cy / 2, 5300), Vec3(100.f, 100.f, 100.f), Vec3(-90.f, 120.f, 0.f));
+//
+//#pragma endregion
 
 #pragma region Zombie
 	//{
 	//	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
 
-	//	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
-
-	//	for (auto& gameObject : gameObjects)
+	//	for (int i = 0; i < 10; i++)
 	//	{
-	//		gameObject->SetName(L"Zombie");
-	//		gameObject->SetCheckFrustum(false);
-	//		gameObject->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 300.f));
-	//		//gameObject->GetTransform()->SetLocalScale(Vec3(1.f, 1.f, 1.f));
-	//		gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
-	//		scene->AddGameObject(gameObject);
-	//		gameObject->AddComponent(make_shared<Zombie>());
+	//		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+
+	//		for (auto& gameObject : gameObjects)
+	//		{
+	//			gameObject->SetName(L"Zombie");
+	//			gameObject->SetCheckFrustum(false);
+	//			gameObject->GetTransform()->SetLocalPosition(Vec3(-800.f + (160.f * i), 70.f, 2000.f));
+	//			gameObject->GetTransform()->SetLocalScale(Vec3(2.f, 2.f, 2.f));
+	//			gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+	//			scene->AddGameObject(gameObject);
+	//			gameObject->AddComponent(make_shared<Zombie>());
+	//		}
 	//	}
-	//	
 	//}
 #pragma endregion
+
+#pragma region TestFBX
+	{
+		shared_ptr<GameObject> t = make_shared<GameObject>();
+		t->AddComponent(make_shared<Transform>());
+		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+		scene->AddGameObject(t);
+
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Factory1Items.fbx");
+	
+		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
+
+		for (auto& gameObject : gameObjects)
+		{
+			gameObject->SetName(L"Map");
+			gameObject->SetStatic(true);
+			gameObject->GetTransform()->SetParent(t->GetTransform());
+			scene->AddGameObject(gameObject);
+		}
+	}
+#pragma endregion
+
 
 	return scene;
 }
