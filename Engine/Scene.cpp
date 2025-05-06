@@ -5,13 +5,15 @@
 #include "Engine.h"
 #include "ConstantBuffer.h"
 #include "Light.h"
-#include "Engine.h"
 #include "Resources.h"
+#include "Timer.h"
 
 #include "Transform.h"
 #include "MeshRenderer.h"
 #include "SphereCollider.h"
 #include "..//echoserver//protocol.h"
+
+extern WindowInfo GWindowInfo;
 
 void Scene::Awake()
 {
@@ -39,6 +41,29 @@ void Scene::Update()
 
 void Scene::LateUpdate()
 {
+	float gravity = 9.8f;
+
+	for (auto& obj : _players) {
+		uint32_t id = obj->GetID();
+		auto itJS = _jumpStates.find(id);
+		if (itJS == _jumpStates.end() || !itJS->second.isJumping)
+			continue;
+
+		auto& js = itJS->second;
+		Vec3 pos = obj->GetTransform()->GetLocalPosition();
+
+		pos.y += js.verticalVel * DELTA_TIME;
+		js.verticalVel -= gravity * DELTA_TIME;
+
+		if (pos.y <= 10.0f) {
+			pos.y = 10.0f;
+			js.isJumping = false;
+			js.verticalVel = 0.0f;
+		}
+
+		obj->GetTransform()->SetLocalPosition(pos);
+	}
+
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
 	{
 		gameObject->LateUpdate();
@@ -273,6 +298,60 @@ void Scene::MovePlayer(sc_packet_move* packet)
 	}
 
 	(*it)->GetTransform()->SetLocalPosition(position);
+}
+
+void Scene::JumpPlayer(sc_packet_jump* packet)
+{
+	uint32_t id = static_cast<uint32_t>(packet->playerId);
+	auto& js = _jumpStates[id];
+	js.isJumping = true;
+	js.verticalVel = packet->initVelocity;
+}
+
+void Scene::LandPlayer(sc_packet_land* packet)
+{
+	uint32_t id = static_cast<uint32_t>(packet->playerId);
+	auto& js = _jumpStates[id];
+	js.isJumping = false;
+	js.verticalVel = 0.0f;
+}
+
+
+
+void Scene::ApplySnapshot(sc_packet_snapshot* snap)
+{
+	for (int i = 0; i < snap->count; ++i) {
+		auto& e = snap->entries[i];
+		uint32_t id = static_cast<uint32_t>(e.playerId);
+
+		if (id == GWindowInfo.local)
+			continue;
+
+		auto it = std::find_if(_players.begin(), _players.end(),
+			[&](auto& p) { return p->GetID() == id; });
+		if (it == _players.end())
+			continue;
+
+		auto obj = *it;
+
+		auto itJS = _jumpStates.find(id);
+		bool remoteJumping = (itJS != _jumpStates.end() && itJS->second.isJumping);
+
+		Vec3 pos = obj->GetTransform()->GetLocalPosition();
+
+		pos.x = e.position.x;
+		pos.z = e.position.z;
+
+		if (!remoteJumping) {
+			pos.y = e.position.y;
+		}
+		obj->GetTransform()->SetLocalPosition(pos);
+
+		// 3) 회전도 보정
+		/*Vec3 rot = obj->GetTransform()->GetLocalRotation();
+		rot.y = e.yaw;
+		obj->GetTransform()->SetLocalRotation(rot);*/
+	}
 }
 
 void Scene::ClearPlayers()

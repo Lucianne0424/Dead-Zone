@@ -9,8 +9,10 @@ constexpr char C2S_P_MOVE = 6;
 constexpr char C2S_P_ATTACK = 7;
 constexpr char C2S_P_JUMP = 8;
 constexpr char S2C_P_JUMP = 9;
+constexpr char S2C_P_LAND = 10;
 constexpr char S2C_P_PLAYER_LEAVE = 11;
 constexpr char S2C_P_GAME_START = 12;
+constexpr char S2C_P_SNAPSHOT = 13;
 constexpr char MAX_ID_LEN = 20;
 
 struct Vector3 {
@@ -90,6 +92,23 @@ struct sc_packet_player_leave {
 struct sc_packet_game_start {
     unsigned char size;
     char type;
+};
+
+struct sc_packet_snapshot {
+    unsigned char size;
+    char          type;
+    unsigned char count;
+    struct Entry {
+        long long playerId;
+        Vector3   position;
+        float     yaw;
+    } entries[0];
+};
+
+struct sc_packet_land {
+    unsigned char size;
+    char          type;
+    long long     playerId;
 };
 
 #pragma pack(pop)

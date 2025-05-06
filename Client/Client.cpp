@@ -35,7 +35,7 @@ BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
-static uint32_t g_localPlayerId = 0;
+uint32_t g_localPlayerId = 0;
 
 // 네트워크 초기화 함수
 bool InitNetwork() {
@@ -94,6 +94,7 @@ void ReceiverThread(SOCKET clientSocket) {
                         if (!g_loggedIn) {
                         g_loggedIn = true;
                         g_localPlayerId = static_cast<uint32_t>(pLoginOk->playerId);
+                        GWindowInfo.local = g_localPlayerId;
                     }
                         if (static_cast<uint32_t>(pLoginOk->playerId) != g_localPlayerId) {
                         GET_SINGLE(SceneManager)->GetActiveScene()->AddPlayer(pLoginOk);
@@ -103,9 +104,29 @@ void ReceiverThread(SOCKET clientSocket) {
                 case S2C_P_MOVE: {
 					sc_packet_move* pMove = reinterpret_cast<sc_packet_move*>(buffer);
 					GET_SINGLE(SceneManager)->GetActiveScene()->MovePlayer(pMove);
-                    
                     break;
                 }
+                case S2C_P_JUMP: {
+                    sc_packet_jump* pJump = reinterpret_cast<sc_packet_jump*>(buffer);
+                    GET_SINGLE(SceneManager)
+                         ->GetActiveScene()
+                         ->JumpPlayer(pJump);
+                    break;
+                }
+                case S2C_P_LAND: {
+                    sc_packet_land* pLand = reinterpret_cast<sc_packet_land*>(buffer);
+                    GET_SINGLE(SceneManager)
+                         ->GetActiveScene()
+                         ->LandPlayer(pLand);
+                    break;
+                    }
+                case S2C_P_SNAPSHOT: {
+                    sc_packet_snapshot* pSnap = reinterpret_cast<sc_packet_snapshot*>(buffer);
+                    GET_SINGLE(SceneManager)
+                         ->GetActiveScene()
+                         ->ApplySnapshot(pSnap);
+                    break;
+                    }
                 case S2C_P_ATTACK: {
                     MessageBoxA(NULL, "공격 이벤트 수신", "Debug - Attack", MB_OK);
                     break;

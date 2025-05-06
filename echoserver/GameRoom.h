@@ -27,6 +27,8 @@ public:
     std::chrono::milliseconds                spawnInterval{ 1000 };
 
 private:
+    int   snapshotFrameCount = 0;
+    static constexpr int snapshotFrameInterval = 20;
     // 방 내부 좀비 리스트
     std::vector<Zombie> zombies;
 };

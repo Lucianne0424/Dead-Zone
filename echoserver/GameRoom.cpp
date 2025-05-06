@@ -3,7 +3,18 @@
 #include "protocol.h"
 #include <sstream>
 #include <algorithm>
+#include <iostream>
 #include <chrono>
+#include <cmath>
+
+constexpr float MAP_MIN_X = 237.0f;
+constexpr float MAP_MAX_X = 2030.0f;
+constexpr float MAP_MIN_Y = 10.0f;
+constexpr float MAP_MAX_Y = 960.0f;
+constexpr float MAP_MIN_Z = -3552.0f;
+constexpr float MAP_MAX_Z = 3535.0f;
+
+constexpr float PLAYER_RADIUS = 10.0f;
 
 std::vector<GameRoom*> activeRooms;
 
@@ -22,37 +33,87 @@ GameRoom::~GameRoom() {
 void GameRoom::Update(float dt)
 {
     const float gravity = 9.8f;
-    const float groundY = 0.0f;
+    const float groundY = MAP_MIN_Y;
 
-    // 1. 웨이브 상태 업데이트
-    gameManager.Update();
-
-    // 2. 플레이어 이동 업데이트
+    //  이동 점프 물리 처리
     for (auto* p : players) {
         p->posX += p->moveX * p->walkSpeed * dt;
+        p->posY += p->moveY * p->walkSpeed * dt;
         p->posZ += p->moveZ * p->walkSpeed * dt;
+
+        if (p->isJumping) {
+            p->posY += p->verticalVelocity * dt;
+            p->verticalVelocity -= gravity * dt;
+
+            if (p->posY <= groundY) {
+                p->posY = groundY;
+                p->verticalVelocity = 0.0f;
+                p->isJumping = false;
+
+                sc_packet_land landPkt;
+                landPkt.size = sizeof(landPkt);
+                landPkt.type = S2C_P_LAND;
+                landPkt.playerId = p->socket;
+                for (auto* peer : players) {
+                    if (peer != p)
+                        PostSendPacket(peer, &landPkt, landPkt.size);
+                }
+            }  
+            else {
+                if (p->posY < groundY)
+                    p->posY = groundY;
+            }
+        }
+        else {
+            if (p->posY < groundY)
+                p->posY = groundY;
+        }
+    }  
+
+    // 플레이어 ↔ 맵 충돌 처리 (AABB 클램프)
+    for (auto* p : players) {
+        if (p->posX - PLAYER_RADIUS < MAP_MIN_X)
+            p->posX = MAP_MIN_X + PLAYER_RADIUS;
+        else if (p->posX + PLAYER_RADIUS > MAP_MAX_X)
+            p->posX = MAP_MAX_X - PLAYER_RADIUS;
+
+        if (p->posZ - PLAYER_RADIUS < MAP_MIN_Z)
+            p->posZ = MAP_MIN_Z + PLAYER_RADIUS;
+        else if (p->posZ + PLAYER_RADIUS > MAP_MAX_Z)
+            p->posZ = MAP_MAX_Z - PLAYER_RADIUS;
+
+        if (p->posY < groundY)
+            p->posY = groundY;
     }
 
-    for (auto* p : players) {
-        if (!p->isJumping) continue;
+    // 플레이어 ↔ 플레이어 충돌 처리 (Sphere vs Sphere)
+    size_t n = players.size();
+    for (size_t i = 0; i < n; ++i) {
+        auto* a = players[i];
+        for (size_t j = i + 1; j < n; ++j) {
+            auto* b = players[j];
 
-        // 위치 갱신
-        p->posY += p->verticalVelocity * dt;
-        // 속도 갱신 (중력)
-        p->verticalVelocity -= gravity * dt;
+            float dx = b->posX - a->posX;
+            float dy = b->posY - a->posY;
+            float dz = b->posZ - a->posZ;
+            float dist2 = dx * dx + dy * dy + dz * dz;
+            float minD = PLAYER_RADIUS * 2.0f;
+            if (dist2 < minD * minD && dist2 > 1e-6f) {
+                float dist = std::sqrt(dist2);
+                float pen = minD - dist;
+    
+                float nx = dx / dist;
+                float ny = dy / dist;
+                float nz = dz / dist;
+                float half = pen * 0.5f;
 
-        // 착지 체크
-        if (p->posY <= groundY) {
-            p->posY = groundY;
-            p->verticalVelocity = 0.0f;
-            p->isJumping = false;
-
-            // 착지 이벤트 전송 (선택 사항)
-            // sc_packet_land { size, type=S2C_P_JUMP, playerId }
+                a->posX -= nx * half;  a->posY -= ny * half;  a->posZ -= nz * half;
+                b->posX += nx * half;  b->posY += ny * half;  b->posZ += nz * half;
+            }
         }
     }
 
-    // 3. 좀비 스폰 & 이동 업데이트
+    // 좀비 스폰 이동 업데이트
     auto now = std::chrono::steady_clock::now();
     if (zombies.size() < 10 && now - lastSpawn >= spawnInterval) {
         ZombieType t = static_cast<ZombieType>(rand() % 6);
@@ -66,29 +127,34 @@ void GameRoom::Update(float dt)
     for (auto& z : zombies)
         z.UpdatePosition(dt, targetX, targetY);
 
-    for (auto* origin : players) {
-        sc_packet_move pkt{};
-        pkt.size = sizeof(sc_packet_move);
-        pkt.type = S2C_P_MOVE;
-        pkt.playerId = origin->socket;               // origin의 ID
-        pkt.position = { origin->posX, origin->posY, origin->posZ };
-        pkt.yaw = 0;
+    if (++snapshotFrameCount >= snapshotFrameInterval) {
+        uint8_t count = static_cast<uint8_t>(players.size());
+        size_t  headerSize = offsetof(sc_packet_snapshot, entries);
+        size_t  entrySize = sizeof(sc_packet_snapshot::Entry);
+        size_t  totalSize = headerSize + count * entrySize;
 
-        // 모든 peer(=players)에게 이 origin의 상태를 전송
-        for (auto* peer : players) {
-            PostSendPacket(peer, &pkt, pkt.size);
+        char* buf = reinterpret_cast<char*>(malloc(totalSize));
+        if (!buf) {
+            std::cerr << "[Error] snapshot buf alloc failed: " << totalSize << " bytes\n";
+            snapshotFrameCount = 0;
+            return;
         }
-    }
-    //// 4. 상태 메시지 구성 & 브로드캐스트
-    //std::ostringstream ss;
-    //ss << "WAVE_STATE: " << gameManager.GetStateString() << "\n"
-    //    << "ZOMBIE_COUNT: " << zombies.size() << "\n";
-    //for (auto& z : zombies)
-    //    ss << z.GetStatus() << "\n";
-    //auto msg = ss.str();
 
-    //for (auto* p : players) {
-    //    auto* io = new PER_IO_DATA;
-    //    PostSend(p, msg, io);
-    //}
+        auto* hdr = reinterpret_cast<sc_packet_snapshot*>(buf);
+        hdr->size = static_cast<unsigned char>(totalSize);
+        hdr->type = S2C_P_SNAPSHOT;
+        hdr->count = count;
+
+        for (int i = 0; i < count; ++i) {
+            auto* p = players[i];
+            hdr->entries[i].playerId = p->socket;
+            hdr->entries[i].position = { p->posX, p->posY, p->posZ };
+            //hdr->entries[i].yaw = p->yaw;
+        }
+
+        for (auto* peer : players)
+            PostSendPacket(peer, buf, totalSize);
+        free(buf);
+        snapshotFrameCount = 0;
+    }
 }

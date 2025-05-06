@@ -2,6 +2,10 @@
 
 class GameObject;
 
+struct JumpState {
+	bool  isJumping = false;
+	float verticalVel = 0.0f;
+};
 
 class Scene
 {
@@ -41,6 +45,9 @@ public:
 	//void AddZombie(struct sc_packet_login_ok* packet);
 
 	void MovePlayer(struct sc_packet_move* packet);
+	void JumpPlayer(struct sc_packet_jump* packet);
+	void LandPlayer(struct sc_packet_land * packet);
+	void ApplySnapshot(struct sc_packet_snapshot* snap);
 	void ClearPlayers();
 private:
 	vector<shared_ptr<GameObject>>		_gameObjects;
@@ -49,5 +56,7 @@ private:
 
 	vector<shared_ptr<GameObject>>		_players;
 	vector<shared_ptr<GameObject>>		_zombies;
+
+	std::unordered_map<uint32_t, JumpState> _jumpStates;
 };
 

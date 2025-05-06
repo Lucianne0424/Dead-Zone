@@ -140,6 +140,7 @@ struct WindowInfo
 	int32	height; // 높이
 	bool	windowed; // 창모드 or 전체화면
 	SOCKET  sock;       // WinSock 소켓 핸들
+	uint32_t local;
 };
 
 struct Vertex

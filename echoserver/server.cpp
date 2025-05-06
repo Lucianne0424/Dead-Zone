@@ -173,7 +173,7 @@ void WorkerThread(HANDLE) {
             newContext->username.clear();
             newContext->health = 100;
             newContext->posX = newContext->posY = newContext->posZ = 0.0f;
-            newContext->walkSpeed = 3.0f;
+            newContext->walkSpeed = 100.0f;
             newContext->runSpeed = 5.0f;
             newContext->faintCount = 0;
             newContext->isFainted = false;
@@ -256,10 +256,10 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         pContext->username = "Player_" + std::to_string(pContext->socket);
         pContext->state = STATE_LOBBY;
         pContext->health = 100;
-        pContext->posX = 0.0f;
-        pContext->posY = 500.0f;
-        pContext->posZ = 0.0f;
-        pContext->walkSpeed = 3.0f;
+        pContext->posX = 1185.0f;
+        pContext->posY = 192.0f;
+        pContext->posZ = 473.0f;
+        pContext->walkSpeed = 100.0f;
         pContext->runSpeed = 5.0f;
         pContext->faintCount = 0;
         pContext->isFainted = false;
@@ -300,21 +300,18 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         pContext->moveX = dir.x;
         pContext->moveY = dir.y;
         pContext->moveZ = dir.z;
-        pContext->posX += dir.x * pContext->walkSpeed * 0.05f;
-        pContext->posY += dir.y * pContext->walkSpeed * 0.05f;
-        pContext->posZ += dir.z * pContext->walkSpeed * 0.05f;
-
-        sc_packet_move moveUpdate;
-        moveUpdate.size = sizeof(sc_packet_move);
-        moveUpdate.type = S2C_P_MOVE;
-        moveUpdate.playerId = pContext->socket;
-        moveUpdate.position = { pContext->posX, pContext->posY, pContext->posZ };
-        moveUpdate.yaw = pkt->yaw;
-
+        //pContext->yaw = pkt->yaw;
+       
+        sc_packet_move ev{};
+        ev.size = sizeof(ev);
+        ev.type = S2C_P_MOVE;
+        ev.playerId = pContext->socket;
+        ev.position = { pContext->posX, pContext->posY, pContext->posZ };
+        //ev.yaw = pContext->yaw;
         if (auto* room = FindGameRoomForPlayer(pContext)) {
-            /*for (auto* peer : room->players) {
-                PostSendPacket(peer, &moveUpdate, moveUpdate.size);
-            }*/
+            for (auto* peer : room->players)
+                if (peer != pContext)
+                     PostSendPacket(peer, &ev, ev.size);
         }
         break;
     }
@@ -348,17 +345,15 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         pContext->verticalVelocity = initialVelocity;
         pContext->isJumping = true;
 
-        sc_packet_jump jumpEvent;
-        jumpEvent.size = sizeof(sc_packet_jump);
-        jumpEvent.type = S2C_P_JUMP;
-        jumpEvent.playerId = pContext->socket;
-        jumpEvent.initVelocity = initialVelocity;
-
+        sc_packet_jump ev{};
+        ev.size = sizeof(ev);
+        ev.type = S2C_P_JUMP;
+        ev.playerId = pContext->socket;
+        ev.initVelocity = initialVelocity;
         if (auto* room = FindGameRoomForPlayer(pContext)) {
-            /*for (auto* peer : room->players) {
+            for (auto* peer : room->players)
                 if (peer != pContext)
-                    PostSendPacket(peer, &jumpEvent, jumpEvent.size);
-            }*/
+                    PostSendPacket(peer, &ev, ev.size);
         }
         break;
     }
