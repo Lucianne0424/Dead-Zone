@@ -517,7 +517,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
 		scene->AddGameObject(t);
 
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Player.fbx");
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Soldado.fbx");
 	
 		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
 
