@@ -194,6 +194,10 @@
       <Filter>Scene</Filter>
     </ClCompile>
     <ClCompile Include="TextUI.cpp" />
+    <ClCompile Include="OrientedBoxCollider.cpp" />
+    <ClCompile Include="MultiPlayer.cpp">
+      <Filter>Object\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -350,6 +354,10 @@
     <ClInclude Include="TextUI.h" />
     <ClInclude Include="protocol.h">
       <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="OrientedBoxCollider.h" />
+    <ClInclude Include="MultiPlayer.h">
+      <Filter>Object\Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

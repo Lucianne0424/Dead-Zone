@@ -34,6 +34,8 @@ public:
 	shared_ptr<Terrain> GetTerrain();
 	shared_ptr<BaseCollider> GetCollider();
 	shared_ptr<Animator> GetAnimator();
+	
+	shared_ptr<MonoBehaviour> GetMonoBehaviour(const wstring& name);
 
 	void AddComponent(shared_ptr<Component> component);
 

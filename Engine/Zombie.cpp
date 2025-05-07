@@ -7,6 +7,8 @@
 
 Zombie::Zombie()
 {
+	_name = L"Zombie";
+
 	shared_ptr<ZombieInfo> info = GET_SINGLE(GameInfo)->Get<ZombieInfo>(L"NormalZombie");
 	_info = *info;
 
@@ -22,6 +24,10 @@ Zombie::~Zombie()
 }
 
 void Zombie::Awake()
+{
+}
+
+void Zombie::Start()
 {
 }
 

@@ -10,7 +10,10 @@
 
 #include "Transform.h"
 #include "MeshRenderer.h"
+#include "MeshData.h"
 #include "SphereCollider.h"
+#include "MultiPlayer.h"
+
 #include "..//echoserver//protocol.h"
 
 extern WindowInfo GWindowInfo;
@@ -243,31 +246,41 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 
 void Scene::AddPlayer(sc_packet_login_ok* packet)
 {
+	// 플레이어가 3명 이상이면 추가하지 않음
+	if (_players.size() >= 3)
+		return;
+
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
 
-	shared_ptr<GameObject> obj = make_shared<GameObject>();
-	obj->SetID(static_cast<uint32_t>(packet->playerId));
-	obj->SetName(L"OBJ");
-	obj->AddComponent(make_shared<Transform>());
-	obj->AddComponent(make_shared<SphereCollider>());
-	obj->GetTransform()->SetLocalScale(Vec3(100.f, 100.f, 100.f));
-	obj->GetTransform()->SetLocalPosition(position);
-	obj->SetStatic(false);
-	shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
-	{
-		shared_ptr<Mesh> sphereMesh = GET_SINGLE(Resources)->LoadSphereMesh();
-		meshRenderer->SetMesh(sphereMesh);
-	}
-	{
-		shared_ptr<Material> material = GET_SINGLE(Resources)->Get<Material>(L"GameObject");
-		meshRenderer->SetMaterial(material->Clone());
-	}
-	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetRadius(0.5f);
-	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
-	obj->AddComponent(meshRenderer);
-	AddGameObject(obj);
+	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Soldado.fbx");
 
-	_players.push_back(obj);
+	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
+
+	// 씬에 플레이어 추가
+	// 게임 오브젝트들에 MultiPlayer 컴포넌트 추가
+	for (auto& gameObject : gameObjects)
+	{
+		gameObject->SetName(L"Player");
+		gameObject->AddComponent(make_shared<MultiPlayer>());
+		AddGameObject(gameObject);
+	}
+
+	// 플레이어의 0번을 부모 오브젝트로 설정
+	gameObjects[0]->SetID(static_cast<uint32_t>(packet->playerId));
+	gameObjects[0]->GetTransform()->SetLocalPosition(position);
+
+	for (int i = 0; i < gameObjects.size(); i++)
+	{
+		gameObjects[i]->GetTransform()->SetParent(gameObjects[0]->GetTransform());
+	}
+
+	// 클라 TODO: 플레이어 FBX가 생성되도록 변경
+	// 서버 TODO: MovePacket에 스테이트 만들어서 적용되도록
+	// 클라 TODO: MovePacket을 받았을 때 그거에 따라 애니메이션이 출력되도록
+	//				Script 만들기, 이 스크립트를 AddPlayer에서 플레이어 추가할때
+	//				각 게임오브젝트에 스크립트 추가하기
+
+	_players.push_back(gameObjects);
 }
 
 void Scene::RemovePlayer(sc_packet_player_leave* packet)
@@ -298,6 +311,10 @@ void Scene::MovePlayer(sc_packet_move* packet)
 	}
 
 	(*it)->GetTransform()->SetLocalPosition(position);
+
+	// _players에서 0번째 게임오브젝트의 아이디를 비교해서 플레이어 찾기
+	// 찾으면 그 플레이어의 스크립트를 가져와서 State를 변경하기 (MultiPlayer.cpp에 있는 SetState 함수)
+	// 다이나믹 캐스트나 정적 캐스트를 이용해서 함수 사용해야함
 }
 
 void Scene::JumpPlayer(sc_packet_jump* packet)

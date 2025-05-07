@@ -17,5 +17,11 @@ public:
 
 public:
 	virtual void FinalUpdate() sealed { }
+
+public:
+	const wstring& GetName() { return _name; }
+
+protected:
+	wstring _name;
 };
 

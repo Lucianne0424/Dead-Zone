@@ -24,7 +24,7 @@ public:
 	virtual ~Zombie();
 
 	virtual void Awake() override;
-	//virtual void Start() override;
+	virtual void Start() override;
 	virtual void Update() override;
 	virtual void LateUpdate() override;
 
