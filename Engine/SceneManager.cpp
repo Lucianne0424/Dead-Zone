@@ -413,19 +413,19 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 #pragma region FirstPerspective
-	{
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\M91.fbx");
+	//{
+	//	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\M91.fbx");
 
-		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
-		
-		for (auto& gameObject : gameObjects)
-		{
-			gameObject->SetName(L"M91");
-			gameObject->SetCheckFrustum(false);
-			scene->AddGameObject(gameObject);
-			gameObject->AddComponent(make_shared<M91>());
-		}
-	}
+	//	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+	//	
+	//	for (auto& gameObject : gameObjects)
+	//	{
+	//		gameObject->SetName(L"M91");
+	//		gameObject->SetCheckFrustum(false);
+	//		scene->AddGameObject(gameObject);
+	//		gameObject->AddComponent(make_shared<M91>());
+	//	}
+	//}
 #pragma endregion
 
 #pragma region Directional Light
@@ -517,7 +517,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
 		scene->AddGameObject(t);
 
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Factory1Items.fbx");
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Soldado.fbx");
 	
 		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
 
@@ -526,8 +526,12 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 			gameObject->SetName(L"Map");
 			gameObject->SetStatic(true);
 			gameObject->GetTransform()->SetParent(t->GetTransform());
+			//gameObject->GetTransform()->SetLocalRotation(Vec3(90.f, 0.f, 0.f));
+			gameObject->AddComponent(make_shared<TestDragon>());
 			scene->AddGameObject(gameObject);
 		}
+
+		//scene->AddGameObject(gameObjects[0]);
 	}
 #pragma endregion
 

@@ -36,14 +36,42 @@ OrientedBoxCollider::~OrientedBoxCollider()
 
 void OrientedBoxCollider::FinalUpdate()
 {
+	// 로컬 행렬 만들기
+	Matrix matScale = Matrix::CreateScale(Vec3(1.f, 1.f, 1.f));
+
+	SimpleMath::Quaternion q;
+
+	float sp = sinf(_rotation.x * 0.5f);
+	float cp = cosf(_rotation.x * 0.5f);
+
+	float sy = sinf(_rotation.y * 0.5f);
+	float cy = cosf(_rotation.y * 0.5f);
+
+	float sr = sinf(_rotation.z * 0.5f);
+	float cr = cosf(_rotation.z * 0.5f);
+
+	q.w = cy * cp * cr + sy * sp * sr;
+	q.x = cy * sp * cr + sy * cp * sr;
+	q.y = sy * cp * cr - cy * sp * sr;
+	q.z = cy * cp * sr - sy * sp * cr;
+
+	Matrix matRotation = Matrix::CreateFromQuaternion(q);
+	Matrix matTranslation = Matrix::CreateTranslation(_center);
+
+	_matLocal = matScale * matRotation * matTranslation;
+
 	Matrix worldMatrix = GetTransform()->GetWorldMatrix();
+
+	// 월드 행렬 계산
+	_matWorld = _matLocal * worldMatrix;
+
 	Vec3 scale{};
 	Vec3 rotation{};
 	Vec3 translation{};
 	SimpleMath::Quaternion orientation{};
-	worldMatrix.Decompose(scale, orientation, translation);
+	_matWorld.Decompose(scale, orientation, translation);
 
-	_boundingOrientedBox->Center = _center + translation;
+	_boundingOrientedBox->Center = translation;
 	_boundingOrientedBox->Extents = _extents * scale;
 	_boundingOrientedBox->Orientation = orientation;
 
