@@ -14,7 +14,8 @@
 #include "Timer.h"
 
 bool Gun::_initialized = true;
-shared_ptr<GameObject> Gun::_particle = make_shared<GameObject>();
+shared_ptr<GameObject> Gun::_particle = nullptr;
+shared_ptr<MuzzleFlashParticle> Gun::_muzzle = nullptr;
 
 Gun::Gun()
 {

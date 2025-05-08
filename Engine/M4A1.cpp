@@ -39,12 +39,12 @@ void M4A1::Awake()
 	shared_ptr<GunInfo> info = GET_SINGLE(GameInfo)->Get<GunInfo>(L"M4A1");
 	_info = *info;
 
-	//if (GetInitialized())
-	//{
-	//	InitializeParticle();
-	//}
-	//_particle->GetTransform()->SetParent(GetTransform());
-	//_particle->GetTransform()->SetLocalPosition(Vec3(-10.f, 5.f, -100.f));
+	if (GetInitialized())
+	{
+		InitializeParticle();
+	}
+	_particle->GetTransform()->SetParent(GetTransform());
+	_particle->GetTransform()->SetLocalPosition(Vec3(-10.f, 5.f, -100.f));
 }
 
 void M4A1::Update()

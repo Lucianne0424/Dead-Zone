@@ -23,7 +23,7 @@ public:
 
 private:
 	static bool _initialized; // 총기 초기화가 되었는지 확인
-	shared_ptr<class MuzzleFlashParticle> _muzzle;
+	static shared_ptr<class MuzzleFlashParticle> _muzzle;
 
 
 	float _fireElapsedTime = 0.f; // 발사 경과 시간
