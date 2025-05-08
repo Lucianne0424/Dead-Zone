@@ -22,7 +22,7 @@ public:
 	bool GetInitialized() { return _initialized; }
 
 private:
-	bool _initialized = true; // 총기 초기화가 되었는지 확인
+	static bool _initialized; // 총기 초기화가 되었는지 확인
 	shared_ptr<class MuzzleFlashParticle> _muzzle;
 
 
@@ -32,7 +32,7 @@ private:
 
 protected:
 	GunInfo _info;
-	shared_ptr<GameObject> _particle;
+	static shared_ptr<GameObject> _particle;
 	
 	
 };

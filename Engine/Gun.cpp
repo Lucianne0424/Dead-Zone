@@ -13,9 +13,11 @@
 #include "EnginePch.h"
 #include "Timer.h"
 
+bool Gun::_initialized = true;
+shared_ptr<GameObject> Gun::_particle = make_shared<GameObject>();
+
 Gun::Gun()
 {
-	
 }
 
 Gun::~Gun()
