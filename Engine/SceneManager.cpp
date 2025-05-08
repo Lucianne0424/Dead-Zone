@@ -19,7 +19,7 @@
 #include "TestDragon.h"
 
 #include "Zombie.h"
-#include "M91.h"
+#include "M4A1.h"
 
 #include "Container.h"
 
@@ -351,10 +351,10 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		
 		for (auto& gameObject : gameObjects)
 		{
-			gameObject->SetName(L"M91");
+			gameObject->SetName(L"M4A1");
 			gameObject->SetCheckFrustum(false);
 			scene->AddGameObject(gameObject);
-			gameObject->AddComponent(make_shared<M91>());
+			gameObject->AddComponent(make_shared<M4A1>());
 		}
 	}
 #pragma endregion

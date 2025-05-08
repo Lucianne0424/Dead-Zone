@@ -1,11 +1,11 @@
 #pragma once
 #include "Gun.h"
 
-class M91 : public Gun
+class M4A1 : public Gun
 {
 public:
-	M91();
-	virtual ~M91();
+	M4A1();
+	virtual ~M4A1();
 
 	virtual void Awake() override;
 	//virtual void Start() override;

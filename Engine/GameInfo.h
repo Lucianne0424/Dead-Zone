@@ -19,7 +19,7 @@ enum class ZOMBIE_TYPE : uint8
 
 enum class GUN_TYPE : uint8
 {
-	M91,
+	M4A1,
 
 	END
 };
@@ -64,6 +64,7 @@ struct GunInfo : BaseInfo
 	float			reloadSpeed;	// 재장전 속도 (s)
 	int32			ammoCapacity;	// 장탄수
 	int32			weight;			// 무게 (g)
+	float			recoil;			// 반동
 };
 
 
