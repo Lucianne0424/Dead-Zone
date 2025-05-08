@@ -41,11 +41,11 @@ void TestCameraScript::LateUpdate()
 	constexpr float MAP_MIN_Z = -3552.0f;
 	constexpr float MAP_MAX_Z = 3535.0f;
 	constexpr float MAP_MIN_Y = 10.0f;
-	constexpr float MAP_MAX_Y = 960.0f;
+	constexpr float MAP_MAX_Y =  960.0f; 
 
 	constexpr float PLAYER_RADIUS = 0.5f;
 
-	if (INPUT->GetButton(KEY_TYPE::KEY_F5))
+	if(INPUT->GetButton(KEY_TYPE::KEY_F5))
 		SET_DEBUG_MODE(!DEBUG_MODE);
 
 	static bool   localJumping = false;
@@ -80,7 +80,9 @@ void TestCameraScript::LateUpdate()
 		pkt.direction.x = dirNorm.x;
 		pkt.direction.y = dirNorm.y;
 		pkt.direction.z = dirNorm.z;
-		pkt.yaw = GetTransform()->GetLocalRotation().y;
+		pkt.look.x = GetTransform()->GetUp().x;
+		pkt.look.y = GetTransform()->GetUp().y;
+		pkt.look.z = GetTransform()->GetUp().z;
 
 		send(GWindowInfo.sock,
 			reinterpret_cast<char*>(&pkt),
@@ -94,7 +96,10 @@ void TestCameraScript::LateUpdate()
 		stopPkt.direction.x = 0.f;
 		stopPkt.direction.y = 0.f;
 		stopPkt.direction.z = 0.f;
-		stopPkt.yaw = GetTransform()->GetLocalRotation().y;
+		stopPkt.look.x = GetTransform()->GetUp().x;
+		stopPkt.look.y = GetTransform()->GetUp().y;
+		stopPkt.look.z = GetTransform()->GetUp().z;
+		
 		send(GWindowInfo.sock,
 			reinterpret_cast<char*>(&stopPkt),
 			sizeof(stopPkt), 0);

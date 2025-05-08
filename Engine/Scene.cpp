@@ -307,17 +307,16 @@ void Scene::AnimatePlayer(sc_packet_state* packet)
 void Scene::MovePlayer(sc_packet_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); 
-	
+	Vec3 look= Vec3(packet->look.x, packet->look.y, packet->look.z);
+
 	for (auto& group : _players) {
 		auto & root = group[0];
 		if (root->GetID() == packet->playerId) {
 			root->GetTransform()->SetLocalPosition(position);
+			root->GetTransform()->LookAt(look);
 			return;
 		}
 	}
-	// _players에서 0번째 게임오브젝트의 아이디를 비교해서 플레이어 찾기
-	// 찾으면 그 플레이어의 스크립트를 가져와서 State를 변경하기 (MultiPlayer.cpp에 있는 SetState 함수)
-	// 다이나믹 캐스트나 정적 캐스트를 이용해서 함수 사용해야함
 }
 
 void Scene::JumpPlayer(sc_packet_jump* packet)

@@ -36,7 +36,7 @@ struct cs_packet_move {
     unsigned char size;
     char          type;    
     Vector3       direction;
-    float         yaw;
+    Vector3       look;
 };
 
 struct cs_packet_attack {
@@ -87,7 +87,7 @@ struct sc_packet_move {
     char          type;      
     long long     playerId;
     Vector3       position;
-    float         yaw;
+    Vector3       look;
 };
 
 struct sc_packet_attack {

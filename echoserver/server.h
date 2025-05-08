@@ -27,6 +27,7 @@ struct PER_SOCKET_CONTEXT {
     std::string    username;
     int            health;
     float          posX, posY, posZ;
+    Vector3        look;
     float          walkSpeed, runSpeed;
     int            faintCount;
     bool           isFainted;

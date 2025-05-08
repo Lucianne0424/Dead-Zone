@@ -173,6 +173,7 @@ void WorkerThread(HANDLE) {
             newContext->username.clear();
             newContext->health = 100;
             newContext->posX = newContext->posY = newContext->posZ = 0.0f;
+            newContext->look = { 0.0f, 0.0f, 1.0f };
             newContext->walkSpeed = 100.0f;
             newContext->runSpeed = 5.0f;
             newContext->faintCount = 0;
@@ -259,6 +260,7 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         pContext->posX = 1185.0f;
         pContext->posY = 192.0f;
         pContext->posZ = 473.0f;
+        pContext->look = { 0.0f, 0.0f, 1.0f };
         pContext->walkSpeed = 100.0f;
         pContext->runSpeed = 5.0f;
         pContext->faintCount = 0;
@@ -299,14 +301,14 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         pContext->moveX = dir.x;
         pContext->moveY = dir.y;
         pContext->moveZ = dir.z;
-        //pContext->yaw = pkt->yaw;
+        pContext->look = pkt->look;
        
         sc_packet_move ev{};
         ev.size = sizeof(ev);
         ev.type = S2C_P_MOVE;
         ev.playerId = pContext->socket;
         ev.position = { pContext->posX, pContext->posY, pContext->posZ };
-        //ev.yaw = pContext->yaw;
+        ev.look = pContext->look;
         if (auto* room = FindGameRoomForPlayer(pContext)) {
             for (auto* peer : room->players)
                 if (peer != pContext)
