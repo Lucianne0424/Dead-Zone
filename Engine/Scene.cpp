@@ -44,27 +44,24 @@ void Scene::Update()
 
 void Scene::LateUpdate()
 {
-	float gravity = 9.8f;
+	const float gravity = 9.8f;
 
-	for (auto& obj : _players) {
-		uint32_t id = obj->GetID();
+	for (auto& group : _players) {
+		auto & root = group[0];
+		uint32_t id = root->GetID();
 		auto itJS = _jumpStates.find(id);
 		if (itJS == _jumpStates.end() || !itJS->second.isJumping)
-			continue;
-
-		auto& js = itJS->second;
-		Vec3 pos = obj->GetTransform()->GetLocalPosition();
-
+			 continue;
+		auto & js = itJS->second;
+		Vec3 pos = root->GetTransform()->GetLocalPosition();
 		pos.y += js.verticalVel * DELTA_TIME;
 		js.verticalVel -= gravity * DELTA_TIME;
-
 		if (pos.y <= 10.0f) {
 			pos.y = 10.0f;
 			js.isJumping = false;
 			js.verticalVel = 0.0f;
 		}
-
-		obj->GetTransform()->SetLocalPosition(pos);
+		root->GetTransform()->SetLocalPosition(pos);
 	}
 
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
@@ -246,8 +243,7 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 
 void Scene::AddPlayer(sc_packet_login_ok* packet)
 {
-	// 플레이어가 3명 이상이면 추가하지 않음
-	if (_players.size() >= 3)
+	if (_players.size() >= 2)
 		return;
 
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
@@ -256,8 +252,6 @@ void Scene::AddPlayer(sc_packet_login_ok* packet)
 
 	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
 
-	// 씬에 플레이어 추가
-	// 게임 오브젝트들에 MultiPlayer 컴포넌트 추가
 	for (auto& gameObject : gameObjects)
 	{
 		gameObject->SetName(L"Player");
@@ -265,7 +259,6 @@ void Scene::AddPlayer(sc_packet_login_ok* packet)
 		AddGameObject(gameObject);
 	}
 
-	// 플레이어의 0번을 부모 오브젝트로 설정
 	gameObjects[0]->SetID(static_cast<uint32_t>(packet->playerId));
 	gameObjects[0]->GetTransform()->SetLocalPosition(position);
 
@@ -287,13 +280,25 @@ void Scene::RemovePlayer(sc_packet_player_leave* packet)
 {
 	uint32_t leftId = static_cast<uint32_t>(packet->playerId);
 
-	for (auto it = _players.begin(); it != _players.end(); ++it)
-	{
-		if ((*it)->GetID() == leftId)
-		{
-			RemoveGameObject(*it);
+	for (auto it = _players.begin(); it != _players.end(); ++it) {
+		auto & root = (*it)[0];
+		if (root->GetID() == leftId) {
+			for (auto& part : *it)
+				 RemoveGameObject(part);
 			_players.erase(it);
 			break;
+		}
+	}
+}
+
+void Scene::AnimatePlayer(sc_packet_state* packet)
+{
+	PlayerState state = static_cast<PlayerState>(packet->state);
+	for (auto& group : _players) {
+		auto& root = group[0];
+		if (root->GetID() == packet->playerId) {
+			root->GetMonoBehaviour(L"MultiPlayer");
+			return;
 		}
 	}
 }
@@ -302,16 +307,13 @@ void Scene::MovePlayer(sc_packet_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); 
 	
-	auto it = std::find_if(_players.begin(), _players.end(),
-		[=](const shared_ptr<GameObject>& player) { return player->GetID() == static_cast<uint32_t>(packet->playerId);
-		});
-
-	if (it == _players.end()) {
+	for (auto& group : _players) {
+		auto & root = group[0];
+		if (root->GetID() == packet->playerId) {
+			root->GetTransform()->SetLocalPosition(position);
 			return;
+		}
 	}
-
-	(*it)->GetTransform()->SetLocalPosition(position);
-
 	// _players에서 0번째 게임오브젝트의 아이디를 비교해서 플레이어 찾기
 	// 찾으면 그 플레이어의 스크립트를 가져와서 State를 변경하기 (MultiPlayer.cpp에 있는 SetState 함수)
 	// 다이나믹 캐스트나 정적 캐스트를 이용해서 함수 사용해야함
@@ -333,28 +335,28 @@ void Scene::LandPlayer(sc_packet_land* packet)
 	js.verticalVel = 0.0f;
 }
 
-
-
-void Scene::ApplySnapshot(sc_packet_snapshot* snap)
+void Scene::ApplySnapshot(sc_packet_snapshot* packet)
 {
-	for (int i = 0; i < snap->count; ++i) {
-		auto& e = snap->entries[i];
+	for (int i = 0; i < packet->count; ++i) {
+		auto& e = packet->entries[i];
 		uint32_t id = static_cast<uint32_t>(e.playerId);
 
 		if (id == GWindowInfo.local)
 			continue;
 
-		auto it = std::find_if(_players.begin(), _players.end(),
-			[&](auto& p) { return p->GetID() == id; });
-		if (it == _players.end())
-			continue;
-
-		auto obj = *it;
+		shared_ptr<GameObject> rootObj;
+		for (auto& group : _players) {
+			if (group[0]->GetID() == id) {
+				rootObj = group[0];
+				break;
+			}
+		}
+		if (!rootObj) continue;
 
 		auto itJS = _jumpStates.find(id);
 		bool remoteJumping = (itJS != _jumpStates.end() && itJS->second.isJumping);
 
-		Vec3 pos = obj->GetTransform()->GetLocalPosition();
+		Vec3 pos = rootObj->GetTransform()->GetLocalPosition();
 
 		pos.x = e.position.x;
 		pos.z = e.position.z;
@@ -362,7 +364,7 @@ void Scene::ApplySnapshot(sc_packet_snapshot* snap)
 		if (!remoteJumping) {
 			pos.y = e.position.y;
 		}
-		obj->GetTransform()->SetLocalPosition(pos);
+		rootObj->GetTransform()->SetLocalPosition(pos);
 
 		// 3) 회전도 보정
 		/*Vec3 rot = obj->GetTransform()->GetLocalRotation();
@@ -373,7 +375,10 @@ void Scene::ApplySnapshot(sc_packet_snapshot* snap)
 
 void Scene::ClearPlayers()
 {
-	for (auto& obj : _players)
-		RemoveGameObject(obj);
+	for (auto& group : _players) {
+		for (auto& obj : group) {
+			RemoveGameObject(obj);
+		}
+	}
 	_players.clear();
 }

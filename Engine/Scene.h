@@ -47,7 +47,8 @@ public:
 	void MovePlayer(struct sc_packet_move* packet);
 	void JumpPlayer(struct sc_packet_jump* packet);
 	void LandPlayer(struct sc_packet_land * packet);
-	void ApplySnapshot(struct sc_packet_snapshot* snap);
+	void ApplySnapshot(struct sc_packet_snapshot* packet);
+	void AnimatePlayer(struct sc_packet_state* packet);
 	void ClearPlayers();
 private:
 	vector<shared_ptr<GameObject>>		_gameObjects;

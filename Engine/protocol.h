@@ -13,6 +13,8 @@ constexpr char S2C_P_LAND = 10;
 constexpr char S2C_P_PLAYER_LEAVE = 11;
 constexpr char S2C_P_GAME_START = 12;
 constexpr char S2C_P_SNAPSHOT = 13;
+constexpr char C2S_P_STATE = 14;
+constexpr char S2C_P_STATE = 15;
 constexpr char MAX_ID_LEN = 20;
 
 struct Vector3 {
@@ -92,6 +94,20 @@ struct sc_packet_player_leave {
 struct sc_packet_game_start {
     unsigned char size;
     char type;
+};
+
+struct cs_packet_state {
+    unsigned char size;
+    char          type;
+    long long     playerId;
+    unsigned char state;
+};
+
+struct sc_packet_state {
+    unsigned char size;
+    char          type;
+    long long     playerId;
+    unsigned char state;
 };
 
 struct sc_packet_snapshot {

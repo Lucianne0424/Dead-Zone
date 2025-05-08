@@ -357,6 +357,25 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         }
         break;
     }
+    case C2S_P_STATE: {
+        if (bytesTransferred < sizeof(cs_packet_state))
+            break;
+
+        auto* req = reinterpret_cast<cs_packet_state*>(pIoData->buffer);
+
+        sc_packet_state ev{};
+        ev.size = sizeof(ev);
+        ev.type = S2C_P_STATE;
+        ev.playerId = req->playerId;
+        ev.state = req->state;
+
+        if (auto* room = FindGameRoomForPlayer(pContext)) {
+            for (auto* peer : room->players) 
+                if (peer != pContext)
+                    PostSendPacket(peer, &ev, ev.size);
+        }
+        break;
+        }
 
     default: {
         printf("정의되지 않은 패킷 타입: %d\n", packetType);

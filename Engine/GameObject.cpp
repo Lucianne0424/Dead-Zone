@@ -143,7 +143,7 @@ shared_ptr<Animator> GameObject::GetAnimator()
 shared_ptr<MonoBehaviour> GameObject::GetMonoBehaviour(const wstring& name)
 {
 	for (auto script : _scripts) {
-		if (script->GetMonovihaviourName() == name) {
+		if (script->GetName() == name) {
 			return script;
 		}
 	}

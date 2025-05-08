@@ -131,6 +131,13 @@ void ReceiverThread(SOCKET clientSocket) {
                     MessageBoxA(NULL, "공격 이벤트 수신", "Debug - Attack", MB_OK);
                     break;
                 }
+                case S2C_P_STATE: {
+                    sc_packet_state* pState = reinterpret_cast<sc_packet_state*>(buffer);
+                    GET_SINGLE(SceneManager)
+                        ->GetActiveScene()
+                        ->AnimatePlayer(pState);
+                    break;
+                    }
                 case S2C_P_PLAYER_LEAVE: {
                     sc_packet_player_leave* pLeave = reinterpret_cast<sc_packet_player_leave*>(buffer);
                     GET_SINGLE(SceneManager)

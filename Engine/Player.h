@@ -22,6 +22,10 @@ public:
 	virtual void LateUpdate() override;
 
 	virtual void SetState(PlayerState state) {}
+
+	void Awake();
+	void Start();
+	void Update();
 	
 protected:
 	PlayerState _state;
