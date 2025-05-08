@@ -56,8 +56,8 @@ void Scene::LateUpdate()
 		Vec3 pos = root->GetTransform()->GetLocalPosition();
 		pos.y += js.verticalVel * DELTA_TIME;
 		js.verticalVel -= gravity * DELTA_TIME;
-		if (pos.y <= 10.0f) {
-			pos.y = 10.0f;
+		if (pos.y <= 0.0f) {
+			pos.y = 0.0f;
 			js.isJumping = false;
 			js.verticalVel = 0.0f;
 		}
@@ -341,8 +341,26 @@ void Scene::ApplySnapshot(sc_packet_snapshot* packet)
 		auto& e = packet->entries[i];
 		uint32_t id = static_cast<uint32_t>(e.playerId);
 
-		if (id == GWindowInfo.local)
-			continue;
+		if (id == GWindowInfo.local) {
+			auto cam = GetMainCamera();
+			auto camGO = cam->GetGameObject();
+			auto camTrans = camGO->GetTransform();
+
+			Vec3 predicted = camTrans->GetLocalPosition();
+			Vec3 serverPos{ e.position.x, e.position.y+140.f, e.position.z };
+
+			Vec3 delta = serverPos - predicted;
+			const float snapThreshold = 1.0f;   
+			const float lerpRatio = 0.1f;   
+
+			if (delta.Length() > snapThreshold) {
+				camTrans->SetLocalPosition(serverPos);
+			}
+			else {
+				camTrans->SetLocalPosition(predicted + delta * lerpRatio);
+			}
+			continue;  
+		}
 
 		shared_ptr<GameObject> rootObj;
 		for (auto& group : _players) {

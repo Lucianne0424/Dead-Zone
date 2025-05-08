@@ -174,7 +174,7 @@ void WorkerThread(HANDLE) {
             newContext->health = 100;
             newContext->posX = newContext->posY = newContext->posZ = 0.0f;
             newContext->look = { 0.0f, 0.0f, 1.0f };
-            newContext->walkSpeed = 100.0f;
+            newContext->walkSpeed = 300.0f;
             newContext->runSpeed = 5.0f;
             newContext->faintCount = 0;
             newContext->isFainted = false;
@@ -258,10 +258,10 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         pContext->state = STATE_LOBBY;
         pContext->health = 100;
         pContext->posX = 1185.0f;
-        pContext->posY = 192.0f;
+        pContext->posY = 0.0f;
         pContext->posZ = 473.0f;
         pContext->look = { 0.0f, 0.0f, 1.0f };
-        pContext->walkSpeed = 100.0f;
+        pContext->walkSpeed = 300.0f;
         pContext->runSpeed = 5.0f;
         pContext->faintCount = 0;
         pContext->isFainted = false;

@@ -29,21 +29,21 @@ TestCameraScript::~TestCameraScript()
 
 void TestCameraScript::LateUpdate()
 {
-	static bool bInitialized = false;
+	/*static bool bInitialized = false;
 	if (!bInitialized) {
-		Vec3 spawn{ 1185.0f, 192.0f, 473.0f };
+		Vec3 spawn{ 1185.0f, 140.0f, 473.0f };
 		GetTransform()->SetLocalPosition(spawn);
 		bInitialized = true;
-	}
+	}*/
 
 	constexpr float MAP_MIN_X = 237.0f;
 	constexpr float MAP_MAX_X = 2030.0f;
 	constexpr float MAP_MIN_Z = -3552.0f;
 	constexpr float MAP_MAX_Z = 3535.0f;
-	constexpr float MAP_MIN_Y = 10.0f;
+	constexpr float MAP_MIN_Y = 140.0f;
 	constexpr float MAP_MAX_Y =  960.0f; 
 
-	constexpr float PLAYER_RADIUS = 0.5f;
+	constexpr float PLAYER_RADIUS = 10.0f;
 
 	if(INPUT->GetButton(KEY_TYPE::KEY_F5))
 		SET_DEBUG_MODE(!DEBUG_MODE);

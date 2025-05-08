@@ -9,7 +9,7 @@
 
 constexpr float MAP_MIN_X = 237.0f;
 constexpr float MAP_MAX_X = 2030.0f;
-constexpr float MAP_MIN_Y = 10.0f;
+constexpr float MAP_MIN_Y = 0.0f;
 constexpr float MAP_MAX_Y = 960.0f;
 constexpr float MAP_MIN_Z = -3552.0f;
 constexpr float MAP_MAX_Z = 3535.0f;
@@ -149,7 +149,6 @@ void GameRoom::Update(float dt)
             auto* p = players[i];
             hdr->entries[i].playerId = p->socket;
             hdr->entries[i].position = { p->posX, p->posY, p->posZ };
-            //hdr->entries[i].yaw = p->yaw;
         }
 
         for (auto* peer : players)

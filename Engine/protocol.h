@@ -129,7 +129,6 @@ struct sc_packet_snapshot {
     struct Entry {
         long long playerId;
         Vector3   position;
-        float     yaw;
     } entries[0];
 };
 
