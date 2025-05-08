@@ -174,7 +174,7 @@
     <ClCompile Include="Player.cpp">
       <Filter>Object\Player</Filter>
     </ClCompile>
-    <ClCompile Include="M91.cpp">
+    <ClCompile Include="M4A1.cpp">
       <Filter>Object\Gun</Filter>
     </ClCompile>
     <ClCompile Include="Zombie.cpp">
@@ -329,7 +329,7 @@
     <ClInclude Include="Player.h">
       <Filter>Object\Player</Filter>
     </ClInclude>
-    <ClInclude Include="M91.h">
+    <ClInclude Include="M4A1.h">
       <Filter>Object\Gun</Filter>
     </ClInclude>
     <ClInclude Include="Zombie.h">

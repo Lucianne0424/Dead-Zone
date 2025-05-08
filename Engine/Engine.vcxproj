@@ -186,7 +186,7 @@
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingManager.h" />
     <ClInclude Include="Light.h" />
-    <ClInclude Include="M91.h" />
+    <ClInclude Include="M4A1.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshData.h" />
@@ -238,7 +238,7 @@
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingManager.cpp" />
     <ClCompile Include="Light.cpp" />
-    <ClCompile Include="M91.cpp" />
+    <ClCompile Include="M4A1.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshData.cpp" />
