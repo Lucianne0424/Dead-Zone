@@ -21,6 +21,8 @@ public:
 
 	bool GetInitialized() { return _initialized; }
 
+	int32 GetCurrentAmmo() { return _currentAmmo; }
+
 private:
 	static bool _initialized; // 총기 초기화가 되었는지 확인
 	static shared_ptr<class MuzzleFlashParticle> _muzzle;
