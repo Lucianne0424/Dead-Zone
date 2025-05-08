@@ -255,14 +255,17 @@ void Scene::AddPlayer(sc_packet_login_ok* packet)
 	for (auto& gameObject : gameObjects)
 	{
 		gameObject->SetName(L"Player");
-		gameObject->AddComponent(make_shared<MultiPlayer>());
+		shared_ptr<MultiPlayer> playerScript = make_shared<MultiPlayer>();
+		playerScript->SetState(PlayerState::IDLE);
+		gameObject->AddComponent(playerScript);
 		AddGameObject(gameObject);
 	}
 
 	gameObjects[0]->SetID(static_cast<uint32_t>(packet->playerId));
 	gameObjects[0]->GetTransform()->SetLocalPosition(position);
+	gameObjects[0]->GetTransform()->SetLocalRotation(Vec3(-90.0f, 0, 0.0f));
 
-	for (int i = 0; i < gameObjects.size(); i++)
+	for (int i = 1; i < gameObjects.size(); i++)
 	{
 		gameObjects[i]->GetTransform()->SetParent(gameObjects[0]->GetTransform());
 	}
@@ -297,7 +300,8 @@ void Scene::AnimatePlayer(sc_packet_state* packet)
 	for (auto& group : _players) {
 		auto& root = group[0];
 		if (root->GetID() == packet->playerId) {
-			root->GetMonoBehaviour(L"MultiPlayer");
+			shared_ptr<MultiPlayer> playerScript = static_pointer_cast<MultiPlayer>(root->GetMonoBehaviour(L"MultiPlayer"));
+			playerScript->SetState(state);
 			return;
 		}
 	}
