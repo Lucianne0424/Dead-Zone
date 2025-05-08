@@ -514,10 +514,10 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 	{
 		shared_ptr<GameObject> t = make_shared<GameObject>();
 		t->AddComponent(make_shared<Transform>());
-		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 180.f, 0.f));
 		scene->AddGameObject(t);
 
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Soldado.fbx");
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Factory1Items.fbx");
 	
 		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
 
@@ -526,12 +526,8 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 			gameObject->SetName(L"Map");
 			gameObject->SetStatic(true);
 			gameObject->GetTransform()->SetParent(t->GetTransform());
-			//gameObject->GetTransform()->SetLocalRotation(Vec3(90.f, 0.f, 0.f));
-			gameObject->AddComponent(make_shared<TestDragon>());
 			scene->AddGameObject(gameObject);
 		}
-
-		//scene->AddGameObject(gameObjects[0]);
 	}
 #pragma endregion
 

@@ -103,9 +103,9 @@ void FBXLoader::ParseNode(FbxNode* node)
 			};
 
 			meshInfo.rotation = {
-				static_cast<float>(nodeRotation[0]),
-				static_cast<float>(nodeRotation[2]),
-				static_cast<float>(nodeRotation[1])
+				static_cast<float>(-nodeRotation[0]),
+				static_cast<float>(-nodeRotation[2]),
+				static_cast<float>(-nodeRotation[1])
 			};
 
 			meshInfo.scale = {
