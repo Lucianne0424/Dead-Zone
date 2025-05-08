@@ -11,7 +11,8 @@ struct Particle
     float3 worldDir;
     float lifeTime;
     int alive;
-    float3 padding;
+    int type;
+    float2 padding;
 };
 
 StructuredBuffer<Particle> g_data : register(t9);
@@ -134,7 +135,7 @@ void CS_Main(int3 threadIndex : SV_DispatchThreadID)
 
     int maxCount = g_int_0;
     int addCount = g_int_1;
-    int frameNumber = g_int_2;
+    int type = g_int_2;
     float deltaTime = g_vec2_1.x;
     float accTime = g_vec2_1.y;
     float minLifeTime = g_vec4_0.x;
@@ -185,7 +186,12 @@ void CS_Main(int3 threadIndex : SV_DispatchThreadID)
             float3 dir = (noise - 0.5f) * 2.f;
 
             g_particle[threadIndex.x].worldDir = normalize(dir);
-            g_particle[threadIndex.x].worldPos = (noise.xyz - 0.5f) * 25;
+
+            if(type == 0)
+			{
+				g_particle[threadIndex.x].worldPos = (noise.xyz - 0.5f) * 25;
+			}
+
             g_particle[threadIndex.x].lifeTime = ((maxLifeTime - minLifeTime) * noise.x) + minLifeTime;
             g_particle[threadIndex.x].curTime = 0.f;
         }

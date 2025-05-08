@@ -14,8 +14,16 @@ struct ParticleInfo
 	Vec3	worldDir;
 	float	lifeTime;
 	int32	alive;
+	int32   type;
 	int32	padding[3];
 };
+
+enum PARTICLE_TYPE
+{
+	DEFAULT = 0,
+	MUZZLE_FLASH,    // 머즐 플래시
+};
+
 
 struct ComputeSharedInfo
 {
@@ -44,17 +52,21 @@ public:
 	void SetCreateInterval(float interval) { _createInterval = interval; }
 	void SetTexture(shared_ptr<Texture> tex) { _material->SetTexture(0, tex); }
 	void SetlifeTime(float lifeTime) { _lifeTime = lifeTime; }
+	void SetParticleType(int32 type) { _type = type; }
 
 	void SetActive(bool active) { _isActive = active; _elapsedTime = 0.0f; _accTime = 0.f; }
 
 protected:
 	shared_ptr<StructuredBuffer>	_particleBuffer;
 	shared_ptr<StructuredBuffer>	_computeSharedBuffer;
-	uint32							_maxParticle = 1000;
+	uint32							_maxParticle = 100;
 
 	shared_ptr<Material>		_computeMaterial;
 	shared_ptr<Material>		_material;
 	shared_ptr<Mesh>			_mesh;
+
+	// 타입
+	int32				_type = PARTICLE_TYPE::DEFAULT;
 
 	// 파티클 활성 상태
 	bool            _isActive = false;
@@ -80,5 +92,4 @@ protected:
 	// 크기
 	float				_startScale = 10.f;
 	float				_endScale = 5.f;
-
 };

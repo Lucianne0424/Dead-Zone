@@ -54,9 +54,11 @@ void ParticleSystem::FinalUpdate()
 
 	_computeMaterial->SetInt(0, _maxParticle);
 	_computeMaterial->SetInt(1, add);
+	_computeMaterial->SetInt(2, _type);
 
 	_computeMaterial->SetVec2(1, Vec2(DELTA_TIME, _accTime));
 	_computeMaterial->SetVec4(0, Vec4(_minLifeTime, _maxLifeTime, _minSpeed, _maxSpeed));
+	
 
 	_computeMaterial->Dispatch(1, 1, 1);
 }

@@ -41,7 +41,7 @@ void M91::Awake()
 	particle->AddComponent(_muzzle);
 	particle->SetCheckFrustum(false);
 	particle->GetTransform()->SetParent(GetTransform());
-	particle->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, -100.f));
+	particle->GetTransform()->SetLocalPosition(Vec3(-10.f, 5.f, -100.f));
 	GET_SINGLE(SceneManager)->GetActiveScene()->AddGameObject(particle);
 }
 

@@ -17,6 +17,8 @@ MuzzleFlashParticle::MuzzleFlashParticle()
 	SetLifeTime(0.05f, 0.15f);
 	SetSpeed(0.f, 0.f);
 	SetScale(5.f, 3.f);
+	SetParticleType(PARTICLE_TYPE::MUZZLE_FLASH);
+	
 	//SetlifeTime(1.0f);
 	//SetCreateInterval(0.001f);
 
@@ -41,6 +43,7 @@ void MuzzleFlashParticle::FinalUpdate()
 
 	_computeMaterial->SetInt(0, _maxParticle);
 	_computeMaterial->SetInt(1, add);
+	_computeMaterial->SetInt(2, _type);
 
 	_computeMaterial->SetVec2(1, Vec2(DELTA_TIME, _accTime));
 	_computeMaterial->SetVec4(0, Vec4(_minLifeTime, _maxLifeTime, _minSpeed, _maxSpeed));
