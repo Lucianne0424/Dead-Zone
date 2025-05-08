@@ -271,7 +271,7 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
 
         sc_packet_login_ok loginOk;
         loginOk.size = sizeof(sc_packet_login_ok);
-        loginOk.type = S2C_P_PLAYER_INFO;
+        loginOk.type = S2C_P_LOGIN_OK;
         loginOk.playerId = pContext->socket;
         loginOk.position = { pContext->posX, pContext->posY, pContext->posZ };
         loginOk.health = pContext->health;
@@ -296,7 +296,6 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         auto* pkt = reinterpret_cast<cs_packet_move*>(pIoData->buffer);
         Vector3 dir = pkt->direction;
 
-        // 서버 권한 위치 갱신
         pContext->moveX = dir.x;
         pContext->moveY = dir.y;
         pContext->moveZ = dir.z;
@@ -404,8 +403,8 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         }
 
         for (auto* pl : players) {
-            sc_packet_login_ok info{};
-            info.size = sizeof(sc_packet_login_ok);
+            sc_packet_player_info info{};
+            info.size = sizeof(sc_packet_player_info);
             info.type = S2C_P_PLAYER_INFO;
             info.playerId = pl->socket;
             info.position = { pl->posX, pl->posY, pl->posZ };

@@ -71,75 +71,93 @@ bool InitNetwork() {
 }
 
 void ReceiverThread(SOCKET clientSocket) {
-    char buffer[8192];
+    std::vector<char> buf;        
+    char buffer[8192];              
+
     while (true) {
         int recvResult = recv(clientSocket, buffer, sizeof(buffer), 0);
         if (recvResult > 0) {
-            if (recvResult >= 2) {
-                unsigned char pktSize = buffer[0];
-                char pktType = buffer[1];
+            buf.insert(buf.end(), buffer, buffer + recvResult);
+
+            size_t offset = 0;
+            while (offset + 2 <= buf.size()) {
+                uint8_t pktSize = static_cast<uint8_t>(buf[offset]);
+                if (pktSize < 2 || offset + pktSize > buf.size())
+                    break;
+
+                char* packet = buf.data() + offset;
+                uint8_t pktType = static_cast<uint8_t>(packet[1]);
+
                 std::ostringstream oss;
                 oss << "[서버 응답] Packet: Size=" << static_cast<int>(pktSize)
                     << ", Type=" << static_cast<int>(pktType)
                     << ", Raw Data: ";
-                for (int i = 0; i < recvResult; i++) {
+                for (int i = 0; i < pktSize; ++i) {
                     oss << std::hex << std::setw(2) << std::setfill('0')
-                        << (static_cast<int>(static_cast<unsigned char>(buffer[i]))) << " ";
+                        << (static_cast<int>(static_cast<unsigned char>(packet[i]))) << " ";
                 }
                 std::cout << "\n" << oss.str() << std::endl;
 
                 switch (pktType) {
-                case S2C_P_PLAYER_INFO: {
-                    sc_packet_login_ok* pLoginOk = reinterpret_cast<sc_packet_login_ok*>(buffer);
-                        if (!g_loggedIn) {
+                case S2C_P_LOGIN_OK: {
+                    auto* pOk = reinterpret_cast<sc_packet_login_ok*>(packet);
+                    if (!g_loggedIn) {
                         g_loggedIn = true;
-                        g_localPlayerId = static_cast<uint32_t>(pLoginOk->playerId);
+                        g_localPlayerId = static_cast<uint32_t>(pOk->playerId);
                         GWindowInfo.local = g_localPlayerId;
                     }
-                        if (static_cast<uint32_t>(pLoginOk->playerId) != g_localPlayerId) {
-                        GET_SINGLE(SceneManager)->GetActiveScene()->AddPlayer(pLoginOk);
+                    break;
+                }
+                case S2C_P_PLAYER_INFO: {
+                    auto* pInfo = reinterpret_cast<sc_packet_player_info*>(packet);
+                    if (static_cast<uint32_t>(pInfo->playerId) != g_localPlayerId) {
+                        GET_SINGLE(SceneManager)
+                            ->GetActiveScene()
+                            ->AddPlayer(pInfo);
                     }
                     break;
                 }
                 case S2C_P_MOVE: {
-					sc_packet_move* pMove = reinterpret_cast<sc_packet_move*>(buffer);
-					GET_SINGLE(SceneManager)->GetActiveScene()->MovePlayer(pMove);
+                    auto* pMove = reinterpret_cast<sc_packet_move*>(packet);
+                    GET_SINGLE(SceneManager)
+                        ->GetActiveScene()
+                        ->MovePlayer(pMove);
                     break;
                 }
                 case S2C_P_JUMP: {
-                    sc_packet_jump* pJump = reinterpret_cast<sc_packet_jump*>(buffer);
+                    auto* pJump = reinterpret_cast<sc_packet_jump*>(packet);
                     GET_SINGLE(SceneManager)
-                         ->GetActiveScene()
-                         ->JumpPlayer(pJump);
+                        ->GetActiveScene()
+                        ->JumpPlayer(pJump);
                     break;
                 }
                 case S2C_P_LAND: {
-                    sc_packet_land* pLand = reinterpret_cast<sc_packet_land*>(buffer);
+                    auto* pLand = reinterpret_cast<sc_packet_land*>(packet);
                     GET_SINGLE(SceneManager)
-                         ->GetActiveScene()
-                         ->LandPlayer(pLand);
+                        ->GetActiveScene()
+                        ->LandPlayer(pLand);
                     break;
-                    }
+                }
                 case S2C_P_SNAPSHOT: {
-                    sc_packet_snapshot* pSnap = reinterpret_cast<sc_packet_snapshot*>(buffer);
+                    auto* pSnap = reinterpret_cast<sc_packet_snapshot*>(packet);
                     GET_SINGLE(SceneManager)
-                         ->GetActiveScene()
-                         ->ApplySnapshot(pSnap);
+                        ->GetActiveScene()
+                        ->ApplySnapshot(pSnap);
                     break;
-                    }
+                }
                 case S2C_P_ATTACK: {
                     MessageBoxA(NULL, "공격 이벤트 수신", "Debug - Attack", MB_OK);
                     break;
                 }
                 case S2C_P_STATE: {
-                    sc_packet_state* pState = reinterpret_cast<sc_packet_state*>(buffer);
+                    auto* pState = reinterpret_cast<sc_packet_state*>(packet);
                     GET_SINGLE(SceneManager)
                         ->GetActiveScene()
                         ->AnimatePlayer(pState);
                     break;
-                    }
+                }
                 case S2C_P_PLAYER_LEAVE: {
-                    sc_packet_player_leave* pLeave = reinterpret_cast<sc_packet_player_leave*>(buffer);
+                    auto* pLeave = reinterpret_cast<sc_packet_player_leave*>(packet);
                     GET_SINGLE(SceneManager)
                         ->GetActiveScene()
                         ->RemovePlayer(pLeave);
@@ -147,15 +165,23 @@ void ReceiverThread(SOCKET clientSocket) {
                 }
                 case S2C_P_GAME_START: {
                     GET_SINGLE(SceneManager)
-                         ->GetActiveScene()
-                         ->ClearPlayers();
-                         g_gameStarted = true;
+                        ->GetActiveScene()
+                        ->ClearPlayers();
+                    g_gameStarted = true;
                     break;
                 }
                 default:
-                    std::cout << "[클라이언트] 정의되지 않은 패킷 타입: " << static_cast<int>(pktType) << std::endl;
+                    std::cout << "[클라이언트] 정의되지 않은 패킷 타입: "
+                        << static_cast<int>(pktType) << std::endl;
                     break;
                 }
+
+                offset += pktSize;
+            }
+
+            // 5) 파싱한 만큼 버퍼에서 제거
+            if (offset > 0) {
+                buf.erase(buf.begin(), buf.begin() + offset);
             }
         }
         else if (recvResult == 0) {
@@ -168,6 +194,7 @@ void ReceiverThread(SOCKET clientSocket) {
         }
     }
 }
+
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,

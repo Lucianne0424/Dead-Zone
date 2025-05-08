@@ -241,10 +241,10 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 		_gameObjects.erase(findIt);
 }
 
-void Scene::AddPlayer(sc_packet_login_ok* packet)
+void Scene::AddPlayer(sc_packet_player_info* packet)
 {
-	if (_players.size() >= 2)
-		return;
+	//if (_players.size() >= 2)
+		//return;
 
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
 
@@ -269,13 +269,6 @@ void Scene::AddPlayer(sc_packet_login_ok* packet)
 	{
 		gameObjects[i]->GetTransform()->SetParent(gameObjects[0]->GetTransform());
 	}
-
-	// 클라 TODO: 플레이어 FBX가 생성되도록 변경
-	// 서버 TODO: MovePacket에 스테이트 만들어서 적용되도록
-	// 클라 TODO: MovePacket을 받았을 때 그거에 따라 애니메이션이 출력되도록
-	//				Script 만들기, 이 스크립트를 AddPlayer에서 플레이어 추가할때
-	//				각 게임오브젝트에 스크립트 추가하기
-
 	_players.push_back(gameObjects);
 }
 
@@ -300,8 +293,12 @@ void Scene::AnimatePlayer(sc_packet_state* packet)
 	for (auto& group : _players) {
 		auto& root = group[0];
 		if (root->GetID() == packet->playerId) {
-			shared_ptr<MultiPlayer> playerScript = static_pointer_cast<MultiPlayer>(root->GetMonoBehaviour(L"MultiPlayer"));
-			playerScript->SetState(state);
+
+			for (auto& part : group) {
+				auto mp = static_pointer_cast<MultiPlayer>(part->GetMonoBehaviour(L"MultiPlayer"));
+				if (mp)
+					mp->SetState(state);
+			}
 			return;
 		}
 	}

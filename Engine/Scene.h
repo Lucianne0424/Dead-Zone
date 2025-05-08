@@ -40,7 +40,7 @@ public:
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
 
 public:
-	void AddPlayer(struct sc_packet_login_ok* packet);
+	void AddPlayer(struct sc_packet_player_info* packet);
 	void RemovePlayer(struct sc_packet_player_leave* packet);
 	//void AddZombie(struct sc_packet_login_ok* packet);
 

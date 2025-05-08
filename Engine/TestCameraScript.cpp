@@ -6,6 +6,7 @@
 #include "Input.h"
 #include "Timer.h"
 #include "SceneManager.h"
+#include "MultiPlayer.h" 
 #include "protocol.h"
 
 static Vec3 Normalize(const Vec3& v)
@@ -40,11 +41,11 @@ void TestCameraScript::LateUpdate()
 	constexpr float MAP_MIN_Z = -3552.0f;
 	constexpr float MAP_MAX_Z = 3535.0f;
 	constexpr float MAP_MIN_Y = 10.0f;
-	constexpr float MAP_MAX_Y =  960.0f; 
+	constexpr float MAP_MAX_Y = 960.0f;
 
 	constexpr float PLAYER_RADIUS = 0.5f;
 
-	if(INPUT->GetButton(KEY_TYPE::KEY_F5))
+	if (INPUT->GetButton(KEY_TYPE::KEY_F5))
 		SET_DEBUG_MODE(!DEBUG_MODE);
 
 	static bool   localJumping = false;
@@ -196,6 +197,32 @@ void TestCameraScript::LateUpdate()
 		pos.y = MAP_MIN_Y;
 	// if (pos.y > MAP_MAX_Y) 
 	//     pos.y = MAP_MAX_Y;
+
+	uint8_t newState = static_cast<uint8_t>(PlayerState::IDLE);
+	if (isMoving) {
+		Vec3 dirNorm = Normalize(moveDir);
+		Vec3 forward = Normalize(GetTransform()->GetLook());
+		Vec3 right = Normalize(GetTransform()->GetRight());
+		float fwd = dirNorm.x * forward.x + dirNorm.y * forward.y + dirNorm.z * forward.z;
+		float rgt = dirNorm.x * right.x + dirNorm.y * right.y + dirNorm.z * right.z;
+		if (fwd > 0.5f)             newState = static_cast<uint8_t>(PlayerState::RUN_FORWARD);
+		else if (fwd < -0.5f)        newState = static_cast<uint8_t>(PlayerState::RUN_BACKWARD);
+		else if (rgt > 0.5f)        newState = static_cast<uint8_t>(PlayerState::RUN_RIGHT);
+		else if (rgt < -0.5f)        newState = static_cast<uint8_t>(PlayerState::RUN_LEFT);
+		else                         newState = static_cast<uint8_t>(PlayerState::IDLE);
+	}
+	static uint8_t lastState = 255;
+	if (newState != lastState) {
+		cs_packet_state stPkt{};
+		stPkt.size = sizeof(stPkt);
+		stPkt.type = C2S_P_STATE;
+		stPkt.playerId = GWindowInfo.local;
+		stPkt.state = newState;
+		send(GWindowInfo.sock,
+			reinterpret_cast<char*>(&stPkt),
+			stPkt.size, 0);
+		lastState = newState;
+	}
 
 	GetTransform()->SetLocalPosition(pos);
 }

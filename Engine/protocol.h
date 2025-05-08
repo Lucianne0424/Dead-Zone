@@ -1,5 +1,6 @@
 #pragma once
 
+constexpr char S2C_P_LOGIN_OK = 16;
 constexpr char S2C_P_PLAYER_INFO = 1;
 constexpr char S2C_P_MOVE = 2;
 constexpr char S2C_P_ATTACK = 3;
@@ -27,73 +28,27 @@ struct Vector3 {
 
 struct cs_packet_login {
     unsigned char size;
-    char type;
-    char username[MAX_ID_LEN];
-};
-
-struct sc_packet_login_ok {
-    unsigned char size;
-    char type;
-    long long playerId;
-    Vector3 position;
-    int health;
-    float walkSpeed;
-    float runSpeed;
-    int faintCount;
-    bool isFainted;
+    char          type;
+    char          username[MAX_ID_LEN];
 };
 
 struct cs_packet_move {
     unsigned char size;
-    char type;
-    Vector3 direction;
-    float yaw;
-};
-
-struct sc_packet_move {
-    unsigned char size;
-    char type;
-    long long playerId;
-    Vector3 position;
-    float yaw;
+    char          type;
+    Vector3       direction;
+    float         yaw;
 };
 
 struct cs_packet_attack {
     unsigned char size;
-    char type;
-    Vector3 attackDirection;
-};
-
-struct sc_packet_attack {
-    unsigned char size;
-    char type;
-    long long playerId;
-    long long zombieId;
-    Vector3 impactPoint;
+    char          type;
+    Vector3       attackDirection;
 };
 
 struct cs_packet_jump {
     unsigned char size;
     char          type;
     float         initVelocity;
-};
-
-struct sc_packet_jump {
-    unsigned char size;
-    char          type;
-    long long     playerId;
-    float         initVelocity;
-};
-
-struct sc_packet_player_leave {
-    unsigned char size;
-    char type;
-    long long playerId;
-};
-
-struct sc_packet_game_start {
-    unsigned char size;
-    char type;
 };
 
 struct cs_packet_state {
@@ -103,11 +58,68 @@ struct cs_packet_state {
     unsigned char state;
 };
 
-struct sc_packet_state {
+struct sc_packet_login_ok {
     unsigned char size;
     char          type;
     long long     playerId;
-    unsigned char state;
+    Vector3       position;
+    int           health;
+    float         walkSpeed;
+    float         runSpeed;
+    int           faintCount;
+    bool          isFainted;
+};
+
+struct sc_packet_player_info {
+    unsigned char size;
+    char          type;
+    long long     playerId;
+    Vector3       position;
+    int           health;
+    float         walkSpeed;
+    float         runSpeed;
+    int           faintCount;
+    bool          isFainted;
+};
+
+struct sc_packet_move {
+    unsigned char size;
+    char          type;
+    long long     playerId;
+    Vector3       position;
+    float         yaw;
+};
+
+struct sc_packet_attack {
+    unsigned char size;
+    char          type;
+    long long     playerId;
+    long long     zombieId;
+    Vector3       impactPoint;
+};
+
+struct sc_packet_jump {
+    unsigned char size;
+    char          type;
+    long long     playerId;
+    float         initVelocity;
+};
+
+struct sc_packet_land {
+    unsigned char size;
+    char          type;
+    long long     playerId;
+};
+
+struct sc_packet_player_leave {
+    unsigned char size;
+    char          type;
+    long long     playerId;
+};
+
+struct sc_packet_game_start {
+    unsigned char size;
+    char          type;
 };
 
 struct sc_packet_snapshot {
@@ -121,10 +133,11 @@ struct sc_packet_snapshot {
     } entries[0];
 };
 
-struct sc_packet_land {
+struct sc_packet_state {
     unsigned char size;
     char          type;
     long long     playerId;
+    unsigned char state;
 };
 
 #pragma pack(pop)
