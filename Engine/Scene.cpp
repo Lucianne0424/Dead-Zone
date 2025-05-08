@@ -255,9 +255,9 @@ void Scene::AddPlayer(sc_packet_login_ok* packet)
 	for (auto& gameObject : gameObjects)
 	{
 		gameObject->SetName(L"Player");
-		shared_ptr<MultiPlayer> playerScript = make_shared<MultiPlayer>();
+		gameObject->AddComponent(make_shared<MultiPlayer>());
+		shared_ptr<MultiPlayer> playerScript = static_pointer_cast<MultiPlayer>(gameObject->GetMonoBehaviour(L"MultiPlayer"));
 		playerScript->SetState(PlayerState::IDLE);
-		gameObject->AddComponent(playerScript);
 		AddGameObject(gameObject);
 	}
 
