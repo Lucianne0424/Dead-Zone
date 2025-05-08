@@ -22,6 +22,7 @@ enum PARTICLE_TYPE
 {
 	DEFAULT = 0,
 	MUZZLE_FLASH,    // 머즐 플래시
+	BLOOD,          // 피
 };
 
 

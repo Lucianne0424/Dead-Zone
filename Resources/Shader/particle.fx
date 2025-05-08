@@ -191,6 +191,10 @@ void CS_Main(int3 threadIndex : SV_DispatchThreadID)
 			{
 				g_particle[threadIndex.x].worldPos = (noise.xyz - 0.5f) * 25;
 			}
+            else if(type == 2)
+            {
+            g_particle[threadIndex.x].worldPos = (noise.xyz - 0.5f);
+            }
 
             g_particle[threadIndex.x].lifeTime = ((maxLifeTime - minLifeTime) * noise.x) + minLifeTime;
             g_particle[threadIndex.x].curTime = 0.f;
