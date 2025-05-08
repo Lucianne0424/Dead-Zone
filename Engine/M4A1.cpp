@@ -36,7 +36,7 @@ void M4A1::Awake()
 	shared_ptr<Transform> parentTransform = camera->GetTransform();
 	GetTransform()->SetParent(parentTransform);
 
-	shared_ptr<GunInfo> info = GAME_INFO->Get<GunInfo>(L"M4A1");
+	shared_ptr<GunInfo> info = GET_SINGLE(GameInfo)->Get<GunInfo>(L"M4A1");
 	_info = *info;
 
 	if (GetInitialized())
