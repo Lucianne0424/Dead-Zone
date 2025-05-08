@@ -195,6 +195,10 @@
     <ClCompile Include="BloodParticle.cpp">
       <Filter>Object\Component\Particle</Filter>
     </ClCompile>
+    <ClCompile Include="TextUI.cpp" />
+    <ClCompile Include="OrientedBoxCollider.cpp">
+      <Filter>Object\Component\Collider</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -349,6 +353,10 @@
     </ClInclude>
     <ClInclude Include="BloodParticle.h">
       <Filter>Object\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="TextUI.h" />
+    <ClInclude Include="OrientedBoxCollider.h">
+      <Filter>Object\Component\Collider</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

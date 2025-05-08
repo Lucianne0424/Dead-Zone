@@ -19,14 +19,14 @@ void Transform::FinalUpdate()
 
 	SimpleMath::Quaternion q;
 
-	float sp = sinf(DegreeToRadian(_localRotation.x) * 0.5f);
-	float cp = cosf(DegreeToRadian(_localRotation.x) * 0.5f);
+	float sp = sinf(_localRotation.x * 0.5f);
+	float cp = cosf(_localRotation.x * 0.5f);
 
-	float sy = sinf(DegreeToRadian(_localRotation.y) * 0.5f);
-	float cy = cosf(DegreeToRadian(_localRotation.y) * 0.5f);
+	float sy = sinf(_localRotation.y * 0.5f);
+	float cy = cosf(_localRotation.y * 0.5f);
 
-	float sr = sinf(DegreeToRadian(_localRotation.z) * 0.5f);
-	float cr = cosf(DegreeToRadian(_localRotation.z) * 0.5f);
+	float sr = sinf(_localRotation.z * 0.5f);
+	float cr = cosf(_localRotation.z * 0.5f);
 
 	q.w = cy * cp * cr + sy * sp * sr;
 	q.x = cy * sp * cr + sy * cp * sr;

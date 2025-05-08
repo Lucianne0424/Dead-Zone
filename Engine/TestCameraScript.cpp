@@ -17,6 +17,9 @@ TestCameraScript::~TestCameraScript()
 
 void TestCameraScript::LateUpdate()
 {
+	if(INPUT->GetButton(KEY_TYPE::KEY_F5))
+		SET_DEBUG_MODE(!DEBUG_MODE);
+
 	Vec3 pos = GetTransform()->GetLocalPosition();
 
 	if (INPUT->GetButton(KEY_TYPE::W))

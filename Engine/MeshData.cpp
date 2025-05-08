@@ -8,6 +8,9 @@
 #include "MeshRenderer.h"
 #include "Animator.h"
 
+#include "SphereCollider.h"
+#include "OrientedBoxCollider.h"
+
 MeshData::MeshData() : Object(OBJECT_TYPE::MESH_DATA)
 {
 }
@@ -40,6 +43,23 @@ shared_ptr<MeshData> MeshData::LoadFromFBX(const wstring& path)
 		MeshRenderInfo info = {};
 		info.mesh = mesh;
 		info.materials = materials;
+		
+		// 정점들로 바운딩 박스 만들기
+		BoundingBox boundingBox;
+		FbxMeshInfo meshInfo = loader.GetMesh(i);
+		BoundingBox::CreateFromPoints(
+			boundingBox,
+			meshInfo.vertices.size(),
+			&meshInfo.vertices[0].pos,
+			sizeof(Vertex));
+
+		info.center = boundingBox.Center;
+		info.extents = boundingBox.Extents;
+
+		info.position = meshInfo.position;
+		info.rotation = meshInfo.rotation;
+		info.scale = meshInfo.scale;
+
 		meshData->_meshRenders.push_back(info);
 	}
 
@@ -56,7 +76,7 @@ void MeshData::Save(const wstring& _strFilePath)
 	// TODO
 }
 
-vector<shared_ptr<GameObject>> MeshData::Instantiate()
+vector<shared_ptr<GameObject>> MeshData::Instantiate(ColliderType colliderType)
 {
 	vector<shared_ptr<GameObject>> v;
 
@@ -82,6 +102,37 @@ vector<shared_ptr<GameObject>> MeshData::Instantiate()
 			animator->SetBones(info.mesh->GetBones());
 			animator->SetAnimClip(info.mesh->GetAnimClip());
 		}
+
+#pragma region Add Collider
+		switch (colliderType)
+		{
+		case ColliderType::NONE:
+			break;
+		case ColliderType::SPHERE:
+		{
+			shared_ptr<SphereCollider> sphere = make_shared<SphereCollider>();
+			sphere->SetCenter(info.center);
+			sphere->SetRadius(max(max(info.extents.x, info.extents.y), info.extents.z));
+			gameObject->AddComponent(sphere);
+			break;
+		}
+		case ColliderType::OBB:
+		{
+			shared_ptr<OrientedBoxCollider> obb = make_shared<OrientedBoxCollider>();
+			obb->SetCenter(info.center);
+			obb->SetExtents(info.extents);
+			gameObject->AddComponent(obb);
+			break;
+		}
+		}
+#pragma endregion
+
+#pragma region Set Transform
+		gameObject->GetTransform()->SetLocalPosition(info.position);
+		gameObject->GetTransform()->SetLocalRotation(info.rotation);
+		gameObject->GetTransform()->SetLocalScale(info.scale);
+
+#pragma endregion
 
 		v.push_back(gameObject);
 	}

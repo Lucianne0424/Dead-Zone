@@ -37,10 +37,11 @@ private:
 	ZombieInfo _info;
 
 private:
-	Vec3 _direction;
 	float _changeDirectionTime;
 	float _elapsedTime;
 	bool _moving;
 	float _pauseDuration{};
+
+	bool _start;
 };
 

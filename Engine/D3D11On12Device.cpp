@@ -66,7 +66,7 @@ void D3D11On12Device::Init(ComPtr<ID3D12Device> device, ComPtr<IDXGIFactory> dxg
 
 	// Create D2D/DWrite objects for rendering text.
 	{
-		_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Gray), &_textBrush);
+		_d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &_textBrush);
 		_dWriteFactory->CreateTextFormat(
 			L"Verdana",
 			nullptr,

@@ -46,8 +46,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
-    GWindowInfo.width = 800;
-    GWindowInfo.height = 600;
+    GWindowInfo.width = 1280;
+    GWindowInfo.height = 800;
     GWindowInfo.windowed = true;
 
     unique_ptr<Game> game = make_unique<Game>();
@@ -126,6 +126,15 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
+
+   if (GetForegroundWindow() != hWnd)
+   {
+       if (IsIconic(hWnd))
+           ShowWindow(hWnd, SW_RESTORE);
+
+       SetForegroundWindow(hWnd);
+       SetFocus(hWnd);
+   }
 
    GWindowInfo.hwnd = hWnd;
 

@@ -39,6 +39,7 @@ void GameInfo::CreateDefaultZombieInfo()
 				ZOMBIE_TYPE::NORMAL,
 				100,
 				10,
+				1.f,
 				100.f,
 				3.3f,
 			});

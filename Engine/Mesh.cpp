@@ -230,6 +230,9 @@ void Mesh::CreateBonesAndAnimations(class FBXLoader& loader)
 				{
 					int32 idx = static_cast<int32>(boneCount * f + b);
 
+					if (animClip.keyFrames[b].size() == 0)
+						continue;
+
 					frameParams[idx] = AnimFrameParams
 					{
 						Vec4(animClip.keyFrames[b][f].scale),

@@ -11,6 +11,10 @@
 #include "ParticleSystem.h"
 #include "InstancingManager.h"
 
+#include "BaseCollider.h"
+#include "SphereCollider.h"
+#include "OrientedBoxCollider.h"
+
 Matrix Camera::S_MatView;
 Matrix Camera::S_MatProjection;
 
@@ -33,7 +37,15 @@ void Camera::FinalUpdate()
 	else
 		_matProjection = ::XMMatrixOrthographicLH(_width * _scale, _height * _scale, _near, _far);
 
-	_frustum.FinalUpdate();
+	Camera::S_MatView = _matView;
+	Camera::S_MatProjection = _matProjection;
+
+	//_frustum.FinalUpdate();
+	BoundingFrustum frustum;
+	BoundingFrustum::CreateFromMatrix(frustum, Camera::S_MatProjection);
+	Matrix viewInv = Camera::S_MatView.Invert();
+	frustum.Transform(frustum, viewInv);
+	_frustum = frustum;
 }
 
 void Camera::SortGameObject()
@@ -55,9 +67,7 @@ void Camera::SortGameObject()
 
 		if (gameObject->GetCheckFrustum())
 		{
-			if (_frustum.ContainsSphere(
-				gameObject->GetTransform()->GetWorldPosition(),
-				gameObject->GetTransform()->GetBoundingSphereRadius()) == false)
+			if (FrustumCulling(gameObject) == DISJOINT)
 			{
 				continue;
 			}
@@ -70,6 +80,13 @@ void Camera::SortGameObject()
 			{
 			case SHADER_TYPE::DEFERRED:
 				_vecDeferred.push_back(gameObject);
+				{
+					shared_ptr<BaseCollider> collider = gameObject->GetCollider();
+					if (collider && DEBUG_MODE)
+					{
+						_vecDeferred.push_back(collider->GetDebugCollider());
+					}
+				}
 				break;
 			case SHADER_TYPE::FORWARD:
 				_vecForward.push_back(gameObject);
@@ -103,9 +120,7 @@ void Camera::SortShadowObject()
 
 		if (gameObject->GetCheckFrustum())
 		{
-			if (_frustum.ContainsSphere(
-				gameObject->GetTransform()->GetWorldPosition(),
-				gameObject->GetTransform()->GetBoundingSphereRadius()) == false)
+			if (FrustumCulling(gameObject) == DISJOINT)
 			{
 				continue;
 			}
@@ -144,5 +159,28 @@ void Camera::Render_Shadow()
 	for (auto& gameObject : _vecShadow)
 	{
 		gameObject->GetMeshRenderer()->RenderShadow();
+	}
+}
+
+ContainmentType Camera::FrustumCulling(shared_ptr<GameObject> gameObject)
+{
+	if (gameObject->GetCollider() == nullptr)
+		return ContainmentType::CONTAINS;
+
+	ColliderType colliderType = gameObject->GetCollider()->GetColliderType();
+
+	if (colliderType == ColliderType::SPHERE)
+	{
+		shared_ptr<SphereCollider> sphere = static_pointer_cast<SphereCollider>(gameObject->GetCollider());
+		return _frustum.Contains(*sphere->GetBoundingSphere());
+	}
+	else if (colliderType == ColliderType::OBB)
+	{
+		shared_ptr<OrientedBoxCollider> obb = static_pointer_cast<OrientedBoxCollider>(gameObject->GetCollider());
+		return _frustum.Contains(*obb->GetBoundingOrientedBox());
+	}
+	else
+	{
+		return ContainmentType::CONTAINS;
 	}
 }

@@ -48,6 +48,8 @@ public:
 	Matrix& GetViewMatrix() { return _matView; }
 	Matrix& GetProjectionMatrix() { return _matProjection; }
 
+	ContainmentType FrustumCulling(shared_ptr<class GameObject> gameObject); // 오브젝트가 프러스텀 안에 있는지 검사
+
 private:
 	PROJECTION_TYPE _type = PROJECTION_TYPE::PERSPECTIVE;
 
@@ -61,7 +63,8 @@ private:
 	Matrix _matView = {};
 	Matrix _matProjection = {};
 
-	Frustum _frustum;
+	//Frustum _frustum;
+	BoundingFrustum _frustum;
 	uint32 _cullingMask = 0;
 
 private:
