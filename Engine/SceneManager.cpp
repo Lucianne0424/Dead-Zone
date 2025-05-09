@@ -56,6 +56,7 @@ void SceneManager::RenderUI()
 	device->GetD3D11on12Device()->AcquireWrappedResources(device->GetWrappedBackBuffer(backbufferindex).GetAddressOf(), 1);
 	// Render text directly to the back buffer.
 	device->GetD2DDeviceContext()->SetTarget(device->GetD3D11On12RT(backbufferindex).Get());
+	device->GetSolidColorBrush()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 	device->GetD2DDeviceContext()->BeginDraw();
 
 	// TODO: UI ·»´õ¸µ
