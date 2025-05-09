@@ -14,9 +14,9 @@
 #include "Gun.h"
 
 
-Vec3 M4A1::_basePosition = { 5.f, -3.f, 20.f };
-Vec3 M4A1::_baseRotation = { 0.f, 175.f, 0.f };
-Vec3 M4A1::_baseScale = { 0.3f, 0.3f, 0.3f };
+Vec3 M4A1::_basePosition = { 10.f, -10.f, 20.f };
+Vec3 M4A1::_baseRotation = { 270.f, 0.f, 0.f };
+Vec3 M4A1::_baseScale = { 4.0f, 4.0f, 4.0f };
 
 M4A1::M4A1()
 {
@@ -44,7 +44,7 @@ void M4A1::Awake()
 		InitializeParticle();
 	}
 	_particle->GetTransform()->SetParent(GetTransform());
-	_particle->GetTransform()->SetLocalPosition(Vec3(-10.f, 5.f, -100.f));
+	_particle->GetTransform()->SetLocalPosition(Vec3(0.0f, -4.3f, 1.35f));
 }
 
 void M4A1::Update()
