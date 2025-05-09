@@ -12,6 +12,7 @@
 #include "MuzzleFlashParticle.h"
 #include "GameObject.h"
 #include "Gun.h"
+#include "Timer.h"
 
 
 Vec3 M4A1::_basePosition = { 10.f, -10.f, 20.f };
@@ -49,9 +50,20 @@ void M4A1::Awake()
 
 void M4A1::Update()
 {
-	if (INPUT->GetButton(MOUSE_TYPE::LBUTTON))
+	input(); // 임시 총기와 관련된 입력 처리
+
+	if (_gunRecoilTime > 0)
 	{
-		Fire();
+		_gunRecoilTime -= DELTA_TIME;
+		float recoilOffset = sin(_gunRecoilTime * 20.f) * 3;
+
+		// 총 모델을 위로 살짝 움직이거나 기울이기
+		GetTransform()->SetLocalRotation(_baseRotation + Vec3(-recoilOffset, 0, 0));
+	}
+	else
+	{
+		// 복구
+		GetTransform()->SetLocalRotation(_baseRotation);
 	}
 }
 

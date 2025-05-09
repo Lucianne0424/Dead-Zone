@@ -36,10 +36,13 @@ void Gun::Fire()
 			_muzzle->SetActive(true); // 파티클 활성화
 			Recoil(); // 반동 처리
 
+			_gunRecoilTime = 0.1f; // 반동 시간 초기화
+
 			// TODO : 사운드 출력
 
 		}
-		else
+
+		if (_currentAmmo <= 0)
 		{
 			Reload(); // 장탄수 0이면 장전
 			return;
@@ -73,6 +76,24 @@ void Gun::Recoil()
 	Vec3 rotation = camera->GetTransform()->GetLocalRotation();
 	rotation.x -= DELTA_TIME * _info.recoil;
 	camera->GetTransform()->SetLocalRotation(rotation);
+
+	//auto pos = GetTransform()->GetLocalPosition() + Vec3(0.f, 0.f, -0.1);
+	//GetTransform()->SetLocalPosition(pos);
+}
+
+void Gun::input()
+{
+	// 발사 버튼이 눌렸을 때
+	if (INPUT->GetButton(MOUSE_TYPE::LBUTTON))
+	{
+		Fire();
+	}
+
+	// 장전 버튼이 눌렸을 때
+	if (INPUT->GetButtonDown(KEY_TYPE::R))
+	{
+		Reload();
+	}
 }
 
 void Gun::InitializeParticle()

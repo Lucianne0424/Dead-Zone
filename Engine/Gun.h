@@ -17,6 +17,8 @@ public:
 	void Reload();
 	void Recoil();
 
+	void input(); // 임시, 나중에 위치 변경 할 예정
+
 	void InitializeParticle();
 
 	bool GetInitialized() { return _initialized; }
@@ -33,6 +35,7 @@ private:
 protected:
 	GunInfo _info;
 	static shared_ptr<GameObject> _particle;
+	float _gunRecoilTime;
 	
 	
 };

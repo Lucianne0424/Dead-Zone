@@ -64,7 +64,7 @@ void GameInfo::CreateDefaultGunInfo()
 				2.5f,				// 재장전 속도 (s)
 				30,					// 장탄수
 				2880,				// 무게 (g)
-				5.f,				// 반동
+				80.f,				// 반동
 			});
 		Add<GunInfo>(L"M4A1", info);
 	}
