@@ -30,6 +30,7 @@ enum class KEY_TYPE
 	KEY_3 = DIK_3,
 	KEY_4 = DIK_4,
 
+	KEY_F4 = DIK_F4,
 	KEY_F5 = DIK_F5,
 
 	SPACE = DIK_SPACE,
@@ -71,15 +72,24 @@ public:
 	bool GetButtonUp(KEY_TYPE key) { return GetKeyState(key) == KEY_STATE::UP; }
 
 	const POINT& GetMousePos() { return _mousePos; }
+	const POINT& GetDeltaPos() { return _deltaPos; }
+
+	void LockCursor(bool flag);
+	bool IsCursorLocked() { return _lockCursor; }
 
 private:
 	inline KEY_STATE GetMouseState(MOUSE_TYPE key) { return _mouseStates[static_cast<uint8>(key)]; }
 	inline KEY_STATE GetKeyState(KEY_TYPE key) { return _keyStates[static_cast<uint8>(key)]; }
 
 private:
+
 	HWND _hwnd;
 	HINSTANCE _hInst;
 	POINT _mousePos = {};
+	POINT _deltaPos = {};
+
+	bool _lockCursor = false;
+	POINT _centerScreenPos = {};
 
 	DIMOUSESTATE			_DIMouseState;
 	LPDIRECTINPUT8			_directInput;
