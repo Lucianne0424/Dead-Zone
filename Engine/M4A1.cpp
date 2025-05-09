@@ -21,6 +21,7 @@ Vec3 M4A1::_baseScale = { 4.0f, 4.0f, 4.0f };
 
 M4A1::M4A1()
 {
+	_name = L"M4A1";
 }
 
 M4A1::~M4A1()

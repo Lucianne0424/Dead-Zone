@@ -73,7 +73,11 @@ void SceneManager::RenderUI()
 			static_cast<float>(GEngine->GetWindow().height - 50) };
 		D2D1_RECT_F textRect = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
 
-		wstring text = L"5 / 50";
+		int32 currentAmmo = static_pointer_cast<M4A1>(_activeScene->FindGameObject(L"M4A1")->GetMonoBehaviour(L"M4A1"))->GetCurrentAmmo();
+		std::wstringstream wss1;
+		wss1 << std::fixed << std::setprecision(2) << currentAmmo;
+		wstring text = L"źâ: ";
+		text += wss1.str();
 		device->GetD2DDeviceContext()->DrawTextW(
 			text.c_str(),
 			static_cast<uint32>(text.size()),
@@ -420,11 +424,12 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		
 		for (auto& gameObject : gameObjects)
 		{
-			gameObject->SetName(L"M4A1");
 			gameObject->SetCheckFrustum(false);
 			scene->AddGameObject(gameObject);
 			gameObject->AddComponent(make_shared<M4A1>());
 		}
+
+		gameObjects[0]->SetName(L"M4A1");
 	}
 #pragma endregion
 

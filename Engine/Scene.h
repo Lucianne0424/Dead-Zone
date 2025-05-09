@@ -37,6 +37,10 @@ public:
 
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
 
+
+public:
+	shared_ptr<GameObject> FindGameObject(const wstring& name);
+
 private:
 	vector<shared_ptr<GameObject>>		_gameObjects;
 	vector<shared_ptr<Camera>>			_cameras;
