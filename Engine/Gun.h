@@ -15,10 +15,10 @@ public:
 
 	void Fire();
 	void Reload();
-	void Recoil();
+	void Recoil(float pitchAmount, float yawAmount);
 
 	void input(); // 임시, 나중에 위치 변경 할 예정
-
+	
 	void InitializeParticle();
 
 	bool GetInitialized() { return _initialized; }
@@ -38,6 +38,12 @@ protected:
 	GunInfo _info;
 	static shared_ptr<GameObject> _particle;
 	float _gunRecoilTime;
+
+
+	float _recoilPitch = 0.f;		// 위아래 흔들림
+	float _recoilYaw = 0.f;			// 좌우 흔들림
+	float _mousePitch = 0.f;		// 마우스 피치 (회전)
+	float _mouseYaw = 0.f;			// 마우스 요 (회전)
 	
 	
 };

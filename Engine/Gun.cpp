@@ -34,7 +34,7 @@ void Gun::Fire()
 			_currentAmmo--; // 장탄수 감소
 			_fireElapsedTime = 0.f; // 경과 시간 초기화
 			_muzzle->SetActive(true); // 파티클 활성화
-			Recoil(); // 반동 처리
+			Recoil(_info.recoil, 0.f); // 반동 처리
 
 			_gunRecoilTime = 0.1f; // 반동 시간 초기화
 
@@ -69,16 +69,11 @@ void Gun::Reload()
 	// TODO : 사운드 출력
 }
 
-void Gun::Recoil()
+void Gun::Recoil(float pitchAmount, float yawAmount)
 {
-	shared_ptr<Camera> camera = GET_SINGLE(SceneManager)->GetActiveScene()->GetMainCamera();
-
-	Vec3 rotation = camera->GetTransform()->GetLocalRotation();
-	rotation.x -= DELTA_TIME * _info.recoil;
-	camera->GetTransform()->SetLocalRotation(rotation);
-
-	//auto pos = GetTransform()->GetLocalPosition() + Vec3(0.f, 0.f, -0.1);
-	//GetTransform()->SetLocalPosition(pos);
+	// 총기 반동 설정
+	_recoilPitch += pitchAmount;	// 수직
+	_recoilYaw += yawAmount;		// 수평
 }
 
 void Gun::input()
