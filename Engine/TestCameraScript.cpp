@@ -7,8 +7,17 @@
 #include "Timer.h"
 #include "SceneManager.h"
 
+
+template<typename T>
+T Lerp(const T& a, const T& b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
+
+
 TestCameraScript::TestCameraScript()
 {
+	_name = L"MainCamera";
 }
 
 TestCameraScript::~TestCameraScript()
@@ -71,15 +80,30 @@ void TestCameraScript::LateUpdate()
 		GET_SINGLE(SceneManager)->Pick(pos.x, pos.y);
 	}
 
-	// 마우스 이동
-	Vec3 rotation = GetTransform()->GetLocalRotation();
+	POINT deltaPos = INPUT->GetDeltaPos();
 
-	POINT detlaPos = INPUT->GetDeltaPos();
+	_mouseYaw += deltaPos.x * DELTA_TIME * _sensitivity;
+	_mousePitch += deltaPos.y * DELTA_TIME * _sensitivity;
 
-	rotation.y += detlaPos.x * DELTA_TIME * 30.f;
-	rotation.x += detlaPos.y * DELTA_TIME * 30.f;
+	// 피치 제한 (위아래)
+	// _mousePitch = std::clamp(_mousePitch, -89.f, 89.f);
 
-	GetTransform()->SetLocalRotation(rotation);
+	// 반동 감쇠
+	_recoilPitch = Lerp(_recoilPitch, 0.f, 2.f * DELTA_TIME);
+	_recoilYaw = Lerp(_recoilYaw, 0.f, 2.f * DELTA_TIME);
+
+	// 최종 회전 = 마우스 + 반동
+	float finalPitch = _mousePitch - _recoilPitch;
+	float finalYaw = _mouseYaw - _recoilYaw;
+
+	GetTransform()->SetLocalRotation(Vec3(finalPitch, finalYaw, 0.f));
 
 	GetTransform()->SetLocalPosition(pos);
+}
+
+void TestCameraScript::Recoil(float pitchAmount, float yawAmount)
+{
+	// 카메라 반동 설정
+	_recoilPitch += pitchAmount;	// 수직
+	_recoilYaw += yawAmount;		// 수평
 }

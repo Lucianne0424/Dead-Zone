@@ -12,6 +12,7 @@
 #include "GameObject.h"
 #include "EnginePch.h"
 #include "Timer.h"
+#include "TestCameraScript.h"
 
 bool Gun::_initialized = true;
 shared_ptr<GameObject> Gun::_particle = nullptr;
@@ -37,6 +38,7 @@ void Gun::Fire()
 			Recoil(_info.recoil, 0.f); // 반동 처리
 
 			_gunRecoilTime = 0.1f; // 반동 시간 초기화
+			_cameraRecoilTime = 0.5f; // 카메라 반동 시간 초기화
 
 			// TODO : 사운드 출력
 
@@ -71,9 +73,8 @@ void Gun::Reload()
 
 void Gun::Recoil(float pitchAmount, float yawAmount)
 {
-	// 총기 반동 설정
-	_recoilPitch += pitchAmount;	// 수직
-	_recoilYaw += yawAmount;		// 수평
+	shared_ptr<Camera> camera = GET_SINGLE(SceneManager)->GetActiveScene()->GetMainCamera();
+	static_pointer_cast<TestCameraScript>(camera->GetGameObject()->GetMonoBehaviour(L"MainCamera"))->Recoil(pitchAmount, yawAmount); // 카메라 반동 처리
 }
 
 void Gun::input()
