@@ -20,6 +20,9 @@ void TestCameraScript::LateUpdate()
 	if(INPUT->GetButton(KEY_TYPE::KEY_F5))
 		SET_DEBUG_MODE(!DEBUG_MODE);
 
+	if (INPUT->GetButton(KEY_TYPE::KEY_F4))
+		INPUT->LockCursor(!INPUT->IsCursorLocked());
+
 	Vec3 pos = GetTransform()->GetLocalPosition();
 
 	if (INPUT->GetButton(KEY_TYPE::W))
@@ -68,29 +71,15 @@ void TestCameraScript::LateUpdate()
 		GET_SINGLE(SceneManager)->Pick(pos.x, pos.y);
 	}
 
-	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
-	{
-		const POINT& pos = INPUT->GetMousePos();
-		_mousePos.x = pos.x;
-		_mousePos.y = pos.y;
-	}
+	// 마우스 이동
+	Vec3 rotation = GetTransform()->GetLocalRotation();
 
-	if (INPUT->GetButton(MOUSE_TYPE::LBUTTON))
-	{
-		const POINT& pos = INPUT->GetMousePos();
-		Vec3 rotation = GetTransform()->GetLocalRotation();
+	POINT detlaPos = INPUT->GetDeltaPos();
 
-		float dx = (pos.x - _mousePos.x);
-		float dy = (pos.y - _mousePos.y);
+	rotation.y += detlaPos.x * DELTA_TIME * 30.f;
+	rotation.x += detlaPos.y * DELTA_TIME * 30.f;
 
-		rotation.y += dx * DELTA_TIME * 30.f;
-		rotation.x += dy * DELTA_TIME * 30.f;
-
-		_mousePos.x = pos.x;
-		_mousePos.y = pos.y;
-
-		GetTransform()->SetLocalRotation(rotation);
-	}
+	GetTransform()->SetLocalRotation(rotation);
 
 	GetTransform()->SetLocalPosition(pos);
 }
