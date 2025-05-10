@@ -103,19 +103,75 @@ void Input::Update()
 		return;
 	}
 
+#pragma region Original
+	//HRESULT hr;
+	//if (_mouse == nullptr || _keyboard == nullptr) return;
+
+	//if (FAILED(hr = _mouse->GetDeviceState(sizeof(DIMOUSESTATE), &_DIMouseState)))
+	//{
+	//	while (_mouse->Acquire() == DIERR_INPUTLOST);
+	//}
+
+	//BYTE asciiKeys[KEY_TYPE_COUNT] = {};
+	//if (FAILED(hr = _keyboard->GetDeviceState(KEY_TYPE_COUNT, &asciiKeys)))
+	//{
+	//	while (_keyboard->Acquire() == DIERR_INPUTLOST);
+	//}
+#pragma endregion
+
+#pragma region Test
 	HRESULT hr;
 	if (_mouse == nullptr || _keyboard == nullptr) return;
 
-	if (FAILED(hr = _mouse->GetDeviceState(sizeof(DIMOUSESTATE), &_DIMouseState)))
+	hr = _mouse->GetDeviceState(sizeof(DIMOUSESTATE), &_DIMouseState);
+	if (FAILED(hr))
 	{
-		while (_mouse->Acquire() == DIERR_INPUTLOST);
+		bool flag = false;
+		while (true)
+		{
+			hr = _mouse->Acquire();
+			if (SUCCEEDED(hr)) break; // 성공하면 탈출
+
+			// 다른 앱이 우선권을 가졌을 경우엔 재시도 불가
+			if (hr == DIERR_OTHERAPPHASPRIO)
+				break;
+
+			if (hr != DIERR_INPUTLOST)
+			{
+				flag = true;
+				break;
+			}
+		}
+
+		if (flag)
+			_mouse->GetDeviceState(sizeof(DIMOUSESTATE), &_DIMouseState);
 	}
 
 	BYTE asciiKeys[KEY_TYPE_COUNT] = {};
-	if (FAILED(hr = _keyboard->GetDeviceState(KEY_TYPE_COUNT, &asciiKeys)))
+	hr = _keyboard->GetDeviceState(KEY_TYPE_COUNT, &asciiKeys);
+	if (FAILED(hr))
 	{
-		while (_keyboard->Acquire() == DIERR_INPUTLOST);
+		bool flag = false;
+		while (true)
+		{
+			hr = _keyboard->Acquire();
+			if (SUCCEEDED(hr)) break; // 성공하면 탈출
+
+			// 다른 앱이 우선권을 가졌을 경우엔 재시도 불가
+			if (hr == DIERR_OTHERAPPHASPRIO)
+				break;
+			if (hr != DIERR_INPUTLOST)
+			{
+				flag = true;
+				break;
+			}
+		}
+
+		// 성공 후 다시 GetDeviceState 시도
+		if (flag)
+			_keyboard->GetDeviceState(KEY_TYPE_COUNT, &asciiKeys);
 	}
+#pragma endregion
 
 	BYTE mouseButtons[3];
 	for (uint32 i = 0; i < 3; i++)
