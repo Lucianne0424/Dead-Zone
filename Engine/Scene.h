@@ -50,6 +50,8 @@ public:
 	void ApplySnapshot(struct sc_packet_snapshot* packet);
 	void AnimatePlayer(struct sc_packet_state* packet);
 	void ClearPlayers();
+
+	void AddZombie(struct sc_packet_spawn_zombie* packet);
 private:
 	vector<shared_ptr<GameObject>>		_gameObjects;
 	vector<shared_ptr<class Camera>>	_cameras;

@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr char S2C_P_LOGIN_OK = 16;
+
 constexpr char S2C_P_PLAYER_INFO = 1;
 constexpr char S2C_P_MOVE = 2;
 constexpr char S2C_P_ATTACK = 3;
@@ -16,6 +16,8 @@ constexpr char S2C_P_GAME_START = 12;
 constexpr char S2C_P_SNAPSHOT = 13;
 constexpr char C2S_P_STATE = 14;
 constexpr char S2C_P_STATE = 15;
+constexpr char S2C_P_LOGIN_OK = 16;
+constexpr char S2C_P_SPAWN_ZOMBIE = 17;
 constexpr char MAX_ID_LEN = 20;
 
 struct Vector3 {
@@ -139,4 +141,11 @@ struct sc_packet_state {
     unsigned char state;
 };
 
+struct sc_packet_spawn_zombie {
+    unsigned char size;
+    char          type;
+    long long     zombieId;
+    Vector3       position;
+    unsigned char zombieType;
+};
 #pragma pack(pop)

@@ -31,4 +31,5 @@ private:
     static constexpr int snapshotFrameInterval = 20;
     // 방 내부 좀비 리스트
     std::vector<Zombie> zombies;
+    long long nextZombieId = 1;
 };

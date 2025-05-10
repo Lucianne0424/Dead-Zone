@@ -145,6 +145,13 @@ void ReceiverThread(SOCKET clientSocket) {
                         ->ApplySnapshot(pSnap);
                     break;
                 }
+                case S2C_P_SPAWN_ZOMBIE: {
+                    auto * pZombie = reinterpret_cast<sc_packet_spawn_zombie*>(packet);
+                    GET_SINGLE(SceneManager)
+                         ->GetActiveScene()
+                         ->AddZombie(pZombie);
+                    break;
+                    }
                 case S2C_P_ATTACK: {
                     MessageBoxA(NULL, "공격 이벤트 수신", "Debug - Attack", MB_OK);
                     break;

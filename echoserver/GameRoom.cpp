@@ -116,16 +116,38 @@ void GameRoom::Update(float dt)
     // 좀비 스폰 이동 업데이트
     auto now = std::chrono::steady_clock::now();
     if (zombies.size() < 10 && now - lastSpawn >= spawnInterval) {
-        ZombieType t = static_cast<ZombieType>(rand() % 6);
+        ZombieType t = ZombieType::BASIC;
+
+        float xRange = (MAP_MAX_X - PLAYER_RADIUS) - (MAP_MIN_X + PLAYER_RADIUS);
+        float zRange = (MAP_MAX_Z - PLAYER_RADIUS) - (MAP_MIN_Z + PLAYER_RADIUS);
+
+        float spawnX = MAP_MIN_X + PLAYER_RADIUS + (static_cast<float>(rand()) / RAND_MAX) * xRange;
+        float spawnZ = MAP_MIN_Z + PLAYER_RADIUS + (static_cast<float>(rand()) / RAND_MAX) * zRange;
+        float spawnY = MAP_MIN_Y; 
+
         Zombie z(t);
-        z.x = float(rand() % 200);
-        z.y = float(rand() % 200);
+        z.x = spawnX;
+        z.y = spawnY;
+        z.z = spawnZ;
+
+        long long zid = nextZombieId++;
         zombies.push_back(z);
+
         lastSpawn = now;
+
+        sc_packet_spawn_zombie pkt{};
+        pkt.size = static_cast<unsigned char>(sizeof(pkt));
+        pkt.type = S2C_P_SPAWN_ZOMBIE;
+        pkt.zombieId = zid;
+        pkt.position = { z.x, z.y, z.z };
+        pkt.zombieType = static_cast<unsigned char>(t);
+
+        for (auto* peer : players)
+            PostSendPacket(peer, &pkt, pkt.size);
     }
-    const float targetX = 100.f, targetY = 100.f;
+    /*const float targetX = 100.f, targetY = 100.f;
     for (auto& z : zombies)
-        z.UpdatePosition(dt, targetX, targetY);
+        z.UpdatePosition(dt, targetX, targetY);*/
 
     if (++snapshotFrameCount >= snapshotFrameInterval) {
         uint8_t count = static_cast<uint8_t>(players.size());
