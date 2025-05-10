@@ -49,6 +49,15 @@ public:
 	}
 	void SetLocalScale(const Vec3& scale) { _localScale = scale; }
 
+	void AddLocalRotation(const Vec3& rotation)
+	{
+		Vec3 localRotation = rotation;
+
+		_localRotation.x += DegreeToRadian(localRotation.x);
+		_localRotation.y += DegreeToRadian(localRotation.y);
+		_localRotation.z += DegreeToRadian(localRotation.z);
+	}
+
 	void LookAt(const Vec3& dir);
 
 	static bool CloseEnough(const float& a, const float& b, const float& epsilon = std::numeric_limits<float>::epsilon());

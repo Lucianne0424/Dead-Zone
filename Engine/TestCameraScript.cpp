@@ -72,7 +72,7 @@ void TestCameraScript::LateUpdate()
 		pkt.direction.x = _moveDir.x;
 		pkt.direction.y = _moveDir.y;
 		pkt.direction.z = _moveDir.z;
-		pkt.look.x = GetTransform()->GetUp().x;
+		pkt.look.x = INPUT->GetDeltaPos().x * DELTA_TIME * _sensitivity;
 		pkt.look.y = GetTransform()->GetUp().y;
 		pkt.look.z = GetTransform()->GetUp().z;
 

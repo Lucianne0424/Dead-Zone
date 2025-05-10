@@ -275,7 +275,7 @@ void Scene::AddPlayer(sc_packet_player_info* packet)
 
 	gameObjects[0]->SetID(static_cast<uint32_t>(packet->playerId));
 	gameObjects[0]->GetTransform()->SetLocalPosition(position);
-	gameObjects[0]->GetTransform()->SetLocalRotation(Vec3(-90.0f, 0, 0.0f));
+	gameObjects[0]->GetTransform()->SetLocalRotation(Vec3(-90.0f, 180.f, 0.0f));
 
 	for (int i = 1; i < gameObjects.size(); i++)
 	{
@@ -334,13 +334,13 @@ void Scene::AnimateZombie(sc_packet_zombie_state* packet)
 void Scene::MovePlayer(sc_packet_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); 
-	Vec3 look = Vec3(packet->look.x - 90.f, 180.f, packet->look.z);
+	Vec3 look = Vec3(0.f, packet->look.x, 0.f);
 
 	for (auto& group : _players) {
 		auto & root = group[0];
 		if (root->GetID() == packet->playerId) {
 			root->GetTransform()->SetLocalPosition(position);
-			root->GetTransform()->LookAt(look);
+			root->GetTransform()->AddLocalRotation(look);
 			return;
 		}
 	}
