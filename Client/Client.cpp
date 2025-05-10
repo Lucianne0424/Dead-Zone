@@ -10,6 +10,7 @@
 #include <limits>
 #include <sstream>
 #include <iomanip>
+#include <shellapi.h>
 
 #include "Scene.h"
 #include "SceneManager.h"
@@ -38,7 +39,7 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 uint32_t g_localPlayerId = 0;
 
 // 네트워크 초기화 함수
-bool InitNetwork() {
+bool InitNetwork(const std::string& serverIp) {
     WSADATA wsaData;
     int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (result != 0) {
@@ -51,11 +52,11 @@ bool InitNetwork() {
         WSACleanup();
         return false;
     }
-    sockaddr_in serverAddr;
+    sockaddr_in serverAddr = {};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(9000);
-    if (InetPtonA(AF_INET, "127.0.0.1", &serverAddr.sin_addr) != 1) {
-        std::wcerr << L"IP 주소 변환 실패" << std::endl;
+    if (InetPtonA(AF_INET, serverIp.c_str(), &serverAddr.sin_addr) != 1) {
+        std::wcerr << L"IP 주소 변환 실패: " << serverIp.c_str() << std::endl;
         closesocket(g_clientSocket);
         WSACleanup();
         return false;
@@ -234,7 +235,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (!InitInstance(hInstance, nCmdShow))
         return FALSE;
 
-    if (!InitNetwork())
+    int    argc = 0;
+    LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+    std::string serverIp = "127.0.0.1";
+    if (argc >= 2) {
+        int     len = WideCharToMultiByte(CP_ACP, 0, argv[1], -1, nullptr, 0, nullptr, nullptr);
+        std::string tmp(len, '\0');
+        WideCharToMultiByte(CP_ACP, 0, argv[1], -1, &tmp[0], len, nullptr, nullptr);
+        serverIp = tmp;
+    }
+    LocalFree(argv);
+
+    if (!InitNetwork(serverIp))
         return 1;
 
     GWindowInfo.width = 1280;

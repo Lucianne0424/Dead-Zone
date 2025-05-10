@@ -27,9 +27,22 @@ public:
     std::chrono::milliseconds                spawnInterval{ 1000 };
 
 private:
-    int   snapshotFrameCount = 0;
-    static constexpr int snapshotFrameInterval = 20;
-    // 방 내부 좀비 리스트
-    std::vector<Zombie> zombies;
+    std::vector<Zombie>              zombies;
+    uint32_t                          snapshotFrameCount = 0;
+    uint32_t                          snapshotFrameInterval;
     long long nextZombieId = 1;
+    void HandlePlayerPhysics(float dt);
+    void HandlePlayerCollisions();
+    void ResolveSphereCollision(float& ax, float& ay, float& az,
+        float& bx, float& by, float& bz,
+        float   radius);
+    void SendLandPacket(PER_SOCKET_CONTEXT* p);
+
+    void SpawnZombies();
+    void UpdateZombies(float dt);
+    void SetZombieState(Zombie& z, Zombie::ZOMBIE_STATE newState);
+    void BroadcastZombieMove(const Zombie& z);
+    void ClampZombiePosition(Zombie& z);
+
+    void BroadcastSnapshots();
 };
