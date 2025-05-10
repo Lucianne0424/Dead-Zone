@@ -2,7 +2,7 @@
 #include "MonoBehaviour.h"
 #include "GameInfo.h"
 
-enum PlayerState
+enum class PLAYER_STATE
 {
 	T_POSE,
 	IDLE,
@@ -13,6 +13,19 @@ enum PlayerState
 	FIRE,
 };
 
+enum class PLAYER_ANIMATION_TYPE
+{
+	T_POSE,
+	IDLE,
+	RUN_FORWARD,
+	RUN_BACKWARD,
+	RUN_LEFT,
+	RUN_RIGHT,
+	FIRE,
+
+	END,
+};
+
 class Player : public MonoBehaviour
 {
 public:
@@ -21,14 +34,14 @@ public:
 
 	virtual void LateUpdate() override;
 
-	virtual void SetState(PlayerState state) {}
+	virtual void SetState(PLAYER_STATE state) {}
 
 	void Awake();
 	void Start();
 	void Update();
 	
 protected:
-	PlayerState _state;
+	PLAYER_STATE _state;
 	PlayerInfo _info;
 };
 

@@ -8,7 +8,7 @@ Player::Player()
 	shared_ptr<PlayerInfo> info = GET_SINGLE(GameInfo)->Get<PlayerInfo>(L"Player");
 	_info = *info;
 
-	_state = PlayerState::T_POSE;
+	_state = PLAYER_STATE::T_POSE;
 }
 
 Player::~Player()

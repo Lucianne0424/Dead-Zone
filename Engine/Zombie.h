@@ -2,6 +2,18 @@
 #include "MonoBehaviour.h"
 #include "GameInfo.h"
 
+enum class ZOMBIE_STATE
+{
+	T_POSE,
+	IDLE,
+	WALK,
+	RUN,
+	ATTACK,
+	DIE,
+
+	END
+};
+
 enum class ZOMBIE_ANIMATION_TYPE
 {
 	ATTACK1,
@@ -14,6 +26,7 @@ enum class ZOMBIE_ANIMATION_TYPE
 	SCREAM,
 	WALK,
 	T_POSE,
+
 	END
 };
 
@@ -29,11 +42,15 @@ public:
 	virtual void LateUpdate() override;
 
 public:
+	virtual void SetState(ZOMBIE_STATE);
+
+public:
 	void SetRandomDirection();
 	void SetPauseDuration();
 	void Move();
 
 private:
+	ZOMBIE_STATE _state;
 	ZombieInfo _info;
 
 private:
