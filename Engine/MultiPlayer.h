@@ -9,7 +9,7 @@ public:
 
 	virtual void LateUpdate() override;
 
-	virtual void SetState(PlayerState playerState) override;
+	virtual void SetState(PLAYER_STATE playerState) override;
 
 public:
 

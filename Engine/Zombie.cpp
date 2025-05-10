@@ -65,6 +65,57 @@ void Zombie::LateUpdate()
 	}
 }
 
+void Zombie::SetState(ZOMBIE_STATE playerState)
+{
+	// 현재 상태와 패킷의 상태가 같으면 아무것도 하지 않음
+	if (_state == playerState)
+		return;
+
+	_state = playerState;
+	switch (playerState)
+	{
+	case ZOMBIE_STATE::T_POSE:
+	{
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::T_POSE);
+		GetAnimator()->Play(index);
+		break;
+	}
+	case ZOMBIE_STATE::IDLE:
+	{
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::IDLE1);
+		GetAnimator()->Play(index);
+		break;
+	}
+	case ZOMBIE_STATE::WALK:
+	{
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::WALK);
+		GetAnimator()->Play(index);
+		break;
+	}
+	case ZOMBIE_STATE::RUN:
+	{
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::RUN);
+		GetAnimator()->Play(index);
+		break;
+	}
+	case ZOMBIE_STATE::ATTACK:
+	{
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::ATTACK1);
+		GetAnimator()->Play(index);
+		break;
+	}
+	case ZOMBIE_STATE::DIE:
+	{
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::DIE1);
+		GetAnimator()->Play(index);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+
 void Zombie::SetRandomDirection()
 {
 	std::random_device rd;

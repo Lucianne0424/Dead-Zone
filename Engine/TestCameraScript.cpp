@@ -135,18 +135,18 @@ void TestCameraScript::LateUpdate()
 	// if (pos.y > MAP_MAX_Y) 
 	//     pos.y = MAP_MAX_Y;
 
-	uint8_t newState = static_cast<uint8_t>(PlayerState::IDLE);
+	uint8_t newState = static_cast<uint8_t>(PLAYER_STATE::IDLE);
 	if (isMoving) {
 		_moveDir.Normalize();
 		Vec3 forward = GetTransform()->GetLook();
 		Vec3 right = GetTransform()->GetRight();
 		float fwd = _moveDir.x * forward.x + _moveDir.y * forward.y + _moveDir.z * forward.z;
 		float rgt = _moveDir.x * right.x + _moveDir.y * right.y + _moveDir.z * right.z;
-		if (fwd > 0.5f)             newState = static_cast<uint8_t>(PlayerState::RUN_FORWARD);
-		else if (fwd < -0.5f)        newState = static_cast<uint8_t>(PlayerState::RUN_BACKWARD);
-		else if (rgt > 0.5f)        newState = static_cast<uint8_t>(PlayerState::RUN_RIGHT);
-		else if (rgt < -0.5f)        newState = static_cast<uint8_t>(PlayerState::RUN_LEFT);
-		else                         newState = static_cast<uint8_t>(PlayerState::IDLE);
+		if (fwd > 0.5f)             newState = static_cast<uint8_t>(PLAYER_STATE::RUN_FORWARD);
+		else if (fwd < -0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_BACKWARD);
+		else if (rgt > 0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_RIGHT);
+		else if (rgt < -0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_LEFT);
+		else                         newState = static_cast<uint8_t>(PLAYER_STATE::IDLE);
 	}
 
 	static uint8_t lastState = 255;

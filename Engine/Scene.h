@@ -58,6 +58,7 @@ public:
 	void ClearPlayers();
 
 	void AddZombie(struct sc_packet_spawn_zombie* packet);
+
 private:
 	vector<shared_ptr<GameObject>>		_gameObjects;
 	vector<shared_ptr<class Camera>>	_cameras;
@@ -67,7 +68,7 @@ private:
 	// 어차피 부모는 게임오브젝트들의 0번일꺼니까
 	// MovePacket으로 적용시킬때, 탐색하는 경우, _player
 	vector<vector<shared_ptr<GameObject>>>	_players;
-	vector<shared_ptr<GameObject>>		_zombies;
+	vector<vector<shared_ptr<GameObject>>>	_zombies;
 
 	std::unordered_map<uint32_t, JumpState> _jumpStates;
 };
