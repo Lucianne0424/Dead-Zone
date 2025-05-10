@@ -48,7 +48,7 @@ public:
 public:
 	void AddPlayer(struct sc_packet_player_info* packet);
 	void RemovePlayer(struct sc_packet_player_leave* packet);
-	//void AddZombie(struct sc_packet_login_ok* packet);
+	void AddZombie(struct sc_packet_login_ok* packet);
 
 	void MovePlayer(struct sc_packet_move* packet);
 	void JumpPlayer(struct sc_packet_jump* packet);
@@ -63,12 +63,11 @@ private:
 	vector<shared_ptr<class Camera>>	_cameras;
 	vector<shared_ptr<class Light>>		_lights;
 
-	vector<vector<shared_ptr<GameObject>>>	_players;
-	vector<shared_ptr<GameObject>>		_zombies;
-
 	// array<플레이어를 이루는 게임오브젝트들, 플레이어 수> _players
 	// 어차피 부모는 게임오브젝트들의 0번일꺼니까
 	// MovePacket으로 적용시킬때, 탐색하는 경우, _player
+	vector<vector<shared_ptr<GameObject>>>	_players;
+	vector<shared_ptr<GameObject>>		_zombies;
 
 	std::unordered_map<uint32_t, JumpState> _jumpStates;
 };

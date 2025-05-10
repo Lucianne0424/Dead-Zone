@@ -37,8 +37,6 @@ public:
 	
 	shared_ptr<MonoBehaviour> GetMonoBehaviour(const wstring& name);
 
-	shared_ptr<MonoBehaviour> GetMonoBehaviour(const wstring& name);
-
 	void AddComponent(shared_ptr<Component> component);
 
 	void SetCheckFrustum(bool checkFrustum) { _checkFrustum = checkFrustum; }

@@ -520,7 +520,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 	{
 		shared_ptr<GameObject> t = make_shared<GameObject>();
 		t->AddComponent(make_shared<Transform>());
-		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 180.f, 0.f));
+		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
 		scene->AddGameObject(t);
 
 		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Factory1Items.fbx");

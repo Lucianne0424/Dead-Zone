@@ -16,8 +16,6 @@
 
 #include "..//echoserver//protocol.h"
 
-extern WindowInfo GWindowInfo;
-
 void Scene::Awake()
 {
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
@@ -251,7 +249,6 @@ shared_ptr<GameObject> Scene::FindGameObject(const wstring& name)
 
 	return nullptr;
 }
-}
 
 void Scene::AddPlayer(sc_packet_player_info* packet)
 {
@@ -353,7 +350,7 @@ void Scene::ApplySnapshot(sc_packet_snapshot* packet)
 		auto& e = packet->entries[i];
 		uint32_t id = static_cast<uint32_t>(e.playerId);
 
-		if (id == GWindowInfo.local) {
+		if (id == GEngine->GetWindow().local) {
 			auto cam = GetMainCamera();
 			auto camGO = cam->GetGameObject();
 			auto camTrans = camGO->GetTransform();
