@@ -9,6 +9,14 @@
 #include "MultiPlayer.h" 
 #include "protocol.h"
 
+
+template<typename T>
+T Lerp(const T& a, const T& b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
+
+
 static Vec3 Normalize(const Vec3& v)
 {
 	float len = std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
@@ -21,6 +29,7 @@ static Vec3 Normalize(const Vec3& v)
 extern WindowInfo GWindowInfo;
 TestCameraScript::TestCameraScript()
 {
+	_name = L"MainCamera";
 }
 
 TestCameraScript::~TestCameraScript()
@@ -47,6 +56,9 @@ void TestCameraScript::LateUpdate()
 
 	if(INPUT->GetButton(KEY_TYPE::KEY_F5))
 		SET_DEBUG_MODE(!DEBUG_MODE);
+
+	if (INPUT->GetButton(KEY_TYPE::KEY_F4))
+		INPUT->LockCursor(!INPUT->IsCursorLocked());
 
 	static bool   localJumping = false;
 	static float localVerticalVelocity = 0.0f;
@@ -106,6 +118,8 @@ void TestCameraScript::LateUpdate()
 	}
 	wasMovingLastFrame = isMoving;
 
+	if (INPUT->GetButton(KEY_TYPE::S))
+		pos -= GetTransform()->GetLook() * _speed * DELTA_TIME;
 
 	if (INPUT->GetButtonDown(KEY_TYPE::SPACE) && !localJumping) {
 		localJumping = true;
@@ -164,29 +178,26 @@ void TestCameraScript::LateUpdate()
 		GET_SINGLE(SceneManager)->Pick(pos.x, pos.y);
 	}
 
-	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
-	{
-		const POINT& pos = INPUT->GetMousePos();
-		_mousePos.x = pos.x;
-		_mousePos.y = pos.y;
-	}
+	POINT deltaPos = INPUT->GetDeltaPos();
 
-	if (INPUT->GetButton(MOUSE_TYPE::LBUTTON))
-	{
-		const POINT& pos = INPUT->GetMousePos();
-		Vec3 rotation = GetTransform()->GetLocalRotation();
+	_mouseYaw += deltaPos.x * DELTA_TIME * _sensitivity;
+	_mousePitch += deltaPos.y * DELTA_TIME * _sensitivity;
 
-		float dx = (pos.x - _mousePos.x);
-		float dy = (pos.y - _mousePos.y);
+	// 피치 제한 (위아래)
+	// _mousePitch = std::clamp(_mousePitch, -89.f, 89.f);
 
-		rotation.y += dx * DELTA_TIME * 30.f;
-		rotation.x += dy * DELTA_TIME * 30.f;
+	// 반동 감쇠
+	_recoilPitch = Lerp(_recoilPitch, 0.f, 2.f * DELTA_TIME);
+	_recoilYaw = Lerp(_recoilYaw, 0.f, 2.f * DELTA_TIME);
 
-		_mousePos.x = pos.x;
-		_mousePos.y = pos.y;
+	// 최종 회전 = 마우스 + 반동
+	float finalPitch = _mousePitch - _recoilPitch;
+	float finalYaw = _mouseYaw - _recoilYaw;
 
-		GetTransform()->SetLocalRotation(rotation);
-	}
+	GetTransform()->SetLocalRotation(Vec3(finalPitch, finalYaw, 0.f));
+
+	GetTransform()->SetLocalPosition(pos);
+}
 
 	if (pos.x - PLAYER_RADIUS < MAP_MIN_X)
 		pos.x = MAP_MIN_X + PLAYER_RADIUS;
@@ -230,4 +241,9 @@ void TestCameraScript::LateUpdate()
 	}
 
 	GetTransform()->SetLocalPosition(pos);
+void TestCameraScript::Recoil(float pitchAmount, float yawAmount)
+{
+	// 카메라 반동 설정
+	_recoilPitch += pitchAmount;	// 수직
+	_recoilYaw += yawAmount;		// 수평
 }

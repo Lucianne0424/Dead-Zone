@@ -8,6 +8,9 @@ void Input::Init(HWND hwnd)
 	_hInst = (HINSTANCE)::GetWindowLongPtr(_hwnd, GWLP_HINSTANCE);
 	_mouseStates.resize(3, KEY_STATE::NONE);
 	_keyStates.resize(KEY_TYPE_COUNT, KEY_STATE::NONE);
+	_centerScreenPos = { GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2 };
+
+	LockCursor(false);
 
 	// DirectInput 초기화
 	HRESULT hr = S_OK;
@@ -95,19 +98,80 @@ void Input::Shutdown()
 
 void Input::Update()
 {
+	if (GetForegroundWindow() != _hwnd)
+	{
+		return;
+	}
+
+#pragma region Original
+	//HRESULT hr;
+	//if (_mouse == nullptr || _keyboard == nullptr) return;
+
+	//if (FAILED(hr = _mouse->GetDeviceState(sizeof(DIMOUSESTATE), &_DIMouseState)))
+	//{
+	//	while (_mouse->Acquire() == DIERR_INPUTLOST);
+	//}
+
+	//BYTE asciiKeys[KEY_TYPE_COUNT] = {};
+	//if (FAILED(hr = _keyboard->GetDeviceState(KEY_TYPE_COUNT, &asciiKeys)))
+	//{
+	//	while (_keyboard->Acquire() == DIERR_INPUTLOST);
+	//}
+#pragma endregion
+
+#pragma region Test
 	HRESULT hr;
 	if (_mouse == nullptr || _keyboard == nullptr) return;
 
-	if (FAILED(hr = _mouse->GetDeviceState(sizeof(DIMOUSESTATE), &_DIMouseState)))
+	hr = _mouse->GetDeviceState(sizeof(DIMOUSESTATE), &_DIMouseState);
+	if (FAILED(hr))
 	{
-		while (_mouse->Acquire() == DIERR_INPUTLOST);
+		bool flag = false;
+		while (true)
+		{
+			hr = _mouse->Acquire();
+			if (SUCCEEDED(hr)) break; // 성공하면 탈출
+
+			// 다른 앱이 우선권을 가졌을 경우엔 재시도 불가
+			if (hr == DIERR_OTHERAPPHASPRIO)
+				break;
+
+			if (hr != DIERR_INPUTLOST)
+			{
+				flag = true;
+				break;
+			}
+		}
+
+		if (flag)
+			_mouse->GetDeviceState(sizeof(DIMOUSESTATE), &_DIMouseState);
 	}
 
 	BYTE asciiKeys[KEY_TYPE_COUNT] = {};
-	if (FAILED(hr = _keyboard->GetDeviceState(KEY_TYPE_COUNT, &asciiKeys)))
+	hr = _keyboard->GetDeviceState(KEY_TYPE_COUNT, &asciiKeys);
+	if (FAILED(hr))
 	{
-		while (_keyboard->Acquire() == DIERR_INPUTLOST);
+		bool flag = false;
+		while (true)
+		{
+			hr = _keyboard->Acquire();
+			if (SUCCEEDED(hr)) break; // 성공하면 탈출
+
+			// 다른 앱이 우선권을 가졌을 경우엔 재시도 불가
+			if (hr == DIERR_OTHERAPPHASPRIO)
+				break;
+			if (hr != DIERR_INPUTLOST)
+			{
+				flag = true;
+				break;
+			}
+		}
+
+		// 성공 후 다시 GetDeviceState 시도
+		if (flag)
+			_keyboard->GetDeviceState(KEY_TYPE_COUNT, &asciiKeys);
 	}
+#pragma endregion
 
 	BYTE mouseButtons[3];
 	for (uint32 i = 0; i < 3; i++)
@@ -138,8 +202,9 @@ void Input::Update()
 		}
 	}
 
-	_mousePos.x = _DIMouseState.lX;
-	_mousePos.y = _DIMouseState.lY;
+	// 클라이언트 기준으로 좌표 가져옴
+	_deltaPos.x = _DIMouseState.lX;
+	_deltaPos.y = _DIMouseState.lY;
 
 	for (uint32 key = 0; key < KEY_TYPE_COUNT; key++)
 	{
@@ -166,6 +231,28 @@ void Input::Update()
 		}
 	}
 
-	::GetCursorPos(&_mousePos);
-	::ScreenToClient(GEngine->GetWindow().hwnd, &_mousePos);
+	_mousePos.x += _deltaPos.x;
+	_mousePos.y += _deltaPos.y;
+
+	GetCursorPos(&_mousePos);
+	ScreenToClient(_hwnd, &_mousePos);
+
+	if (_lockCursor)
+	{
+		// 마우스 위치를 화면 중앙으로 이동
+		_mousePos = _centerScreenPos;
+		ClientToScreen(_hwnd, &_mousePos);
+		SetCursorPos(_mousePos.x, _mousePos.y);
+	}
 }
+
+void Input::LockCursor(bool flag)
+{
+	_lockCursor = flag;
+
+	if (_lockCursor)
+		while (ShowCursor(FALSE) >= 0);
+	else
+		while (ShowCursor(TRUE) < 0);
+}
+

@@ -37,11 +37,11 @@
     <Filter Include="Object\Zombie">
       <UniqueIdentifier>{4d4a06fc-4125-40a8-ab64-1ac88b1c62ba}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scene">
-      <UniqueIdentifier>{8e22da98-1ab2-45b6-8287-eafe93b8d798}</UniqueIdentifier>
+    <Filter Include="Object\Container">
+      <UniqueIdentifier>{cfec221c-7244-4119-9274-86ed0a2fc4a1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Object\UI">
-      <UniqueIdentifier>{6dd3ea3e-55c8-4699-9277-515340a4ee16}</UniqueIdentifier>
+    <Filter Include="Object\Component\Particle">
+      <UniqueIdentifier>{92bfb076-62e5-4653-a917-06aeedad349d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -138,9 +138,6 @@
     <ClCompile Include="StructuredBuffer.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleSystem.cpp">
-      <Filter>Object\Component</Filter>
-    </ClCompile>
     <ClCompile Include="InstancingBuffer.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -177,7 +174,7 @@
     <ClCompile Include="Player.cpp">
       <Filter>Object\Player</Filter>
     </ClCompile>
-    <ClCompile Include="M91.cpp">
+    <ClCompile Include="M4A1.cpp">
       <Filter>Object\Gun</Filter>
     </ClCompile>
     <ClCompile Include="Zombie.cpp">
@@ -186,12 +183,17 @@
     <ClCompile Include="GameInfo.cpp">
       <Filter>Manager</Filter>
     </ClCompile>
-    <ClCompile Include="Container.cpp" />
-    <ClCompile Include="D3D11On12Device.cpp">
-      <Filter>Utils</Filter>
+    <ClCompile Include="Container.cpp">
+      <Filter>Object\Container</Filter>
     </ClCompile>
-    <ClCompile Include="Stage01.cpp">
-      <Filter>Scene</Filter>
+    <ClCompile Include="MuzzleFlashParticle.cpp">
+      <Filter>Object\Component\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Object\Component\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="BloodParticle.cpp">
+      <Filter>Object\Component\Particle</Filter>
     </ClCompile>
     <ClCompile Include="TextUI.cpp" />
     <ClCompile Include="OrientedBoxCollider.cpp" />
@@ -296,9 +298,6 @@
     <ClInclude Include="StructuredBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="ParticleSystem.h">
-      <Filter>Object\Component</Filter>
-    </ClInclude>
     <ClInclude Include="InstancingBuffer.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -335,7 +334,7 @@
     <ClInclude Include="Player.h">
       <Filter>Object\Player</Filter>
     </ClInclude>
-    <ClInclude Include="M91.h">
+    <ClInclude Include="M4A1.h">
       <Filter>Object\Gun</Filter>
     </ClInclude>
     <ClInclude Include="Zombie.h">
@@ -344,12 +343,17 @@
     <ClInclude Include="GameInfo.h">
       <Filter>Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Container.h" />
-    <ClInclude Include="D3D11On12Device.h">
-      <Filter>Utils</Filter>
+    <ClInclude Include="Container.h">
+      <Filter>Object\Container</Filter>
     </ClInclude>
-    <ClInclude Include="Stage01.h">
-      <Filter>Scene</Filter>
+    <ClInclude Include="MuzzleFlashParticle.h">
+      <Filter>Object\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Object\Component\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="BloodParticle.h">
+      <Filter>Object\Component\Particle</Filter>
     </ClInclude>
     <ClInclude Include="TextUI.h" />
     <ClInclude Include="protocol.h">

@@ -1,6 +1,8 @@
 #pragma once
 
 class GameObject;
+class Camera;
+class Light;
 
 struct JumpState {
 	bool  isJumping = false;
@@ -16,7 +18,7 @@ public:
 	void LateUpdate();
 	void FinalUpdate();
 
-	shared_ptr<class Camera> GetMainCamera();
+	shared_ptr<Camera> GetMainCamera();
 
 	void Render();
 	void RenderUI();
@@ -38,6 +40,10 @@ public:
 	void RemoveGameObject(shared_ptr<GameObject> gameObject);
 
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
+
+
+public:
+	shared_ptr<GameObject> FindGameObject(const wstring& name);
 
 public:
 	void AddPlayer(struct sc_packet_player_info* packet);

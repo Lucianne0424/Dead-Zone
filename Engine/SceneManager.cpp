@@ -19,7 +19,7 @@
 #include "TestDragon.h"
 
 #include "Zombie.h"
-#include "M91.h"
+#include "M4A1.h"
 
 #include "Container.h"
 
@@ -56,6 +56,7 @@ void SceneManager::RenderUI()
 	device->GetD3D11on12Device()->AcquireWrappedResources(device->GetWrappedBackBuffer(backbufferindex).GetAddressOf(), 1);
 	// Render text directly to the back buffer.
 	device->GetD2DDeviceContext()->SetTarget(device->GetD3D11On12RT(backbufferindex).Get());
+	device->GetSolidColorBrush()->SetColor(D2D1::ColorF(D2D1::ColorF::White));
 	device->GetD2DDeviceContext()->BeginDraw();
 
 	// TODO: UI ·»´õ¸µ
@@ -73,7 +74,11 @@ void SceneManager::RenderUI()
 			static_cast<float>(GEngine->GetWindow().height - 50) };
 		D2D1_RECT_F textRect = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
 
-		wstring text = L"5 / 50";
+		int32 currentAmmo = static_pointer_cast<M4A1>(_activeScene->FindGameObject(L"M4A1")->GetMonoBehaviour(L"M4A1"))->GetCurrentAmmo();
+		std::wstringstream wss1;
+		wss1 << std::fixed << std::setprecision(2) << currentAmmo;
+		wstring text = L"ÅºÃ¢: ";
+		text += wss1.str();
 		device->GetD2DDeviceContext()->DrawTextW(
 			text.c_str(),
 			static_cast<uint32>(text.size()),
@@ -413,19 +418,20 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma endregion
 
 #pragma region FirstPerspective
-	//{
-	//	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\M91.fbx");
+	{
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\M4A1.fbx");
 
-	//	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
-	//	
-	//	for (auto& gameObject : gameObjects)
-	//	{
-	//		gameObject->SetName(L"M91");
-	//		gameObject->SetCheckFrustum(false);
-	//		scene->AddGameObject(gameObject);
-	//		gameObject->AddComponent(make_shared<M91>());
-	//	}
-	//}
+		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+		
+		for (auto& gameObject : gameObjects)
+		{
+			gameObject->SetCheckFrustum(false);
+			scene->AddGameObject(gameObject);
+			gameObject->AddComponent(make_shared<M4A1>());
+		}
+
+		gameObjects[0]->SetName(L"M4A1");
+	}
 #pragma endregion
 
 #pragma region Directional Light
@@ -514,7 +520,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 	{
 		shared_ptr<GameObject> t = make_shared<GameObject>();
 		t->AddComponent(make_shared<Transform>());
-		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+		t->GetTransform()->SetLocalRotation(Vec3(-90.f, 180.f, 0.f));
 		scene->AddGameObject(t);
 
 		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Factory1Items.fbx");

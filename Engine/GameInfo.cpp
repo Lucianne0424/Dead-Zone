@@ -5,6 +5,7 @@ void GameInfo::Init()
 {
 	CreateDefaultPlayerInfo();
 	CreateDefaultZombieInfo();
+	CreateDefaultGunInfo();
 }
 
 void GameInfo::CreateDefaultPlayerInfo()
@@ -48,23 +49,24 @@ void GameInfo::CreateDefaultZombieInfo()
 
 void GameInfo::CreateDefaultGunInfo()
 {
-	// M91 Info
+	// M4A1 Info
 	{
 		shared_ptr<GunInfo> info = make_shared<GunInfo>(
 			GunInfo
 			{
 				INFO_TYPE::GUN,
-				L"M91",
-				GUN_TYPE::M91,
+				L"M4A1",
+				GUN_TYPE::M4A1,
 
-				1000,
-				4.f,
-				1000.f,
-				2.f,
-				5,
-				5500
+				60,					// 공격력
+				10.f,				// 발사 속도 (발/s)	
+				500.f,				// 사거리 (m)	
+				2.5f,				// 재장전 속도 (s)
+				30,					// 장탄수
+				2880,				// 무게 (g)
+				2.f,				// 반동
 			});
-		Add<GunInfo>(L"M91", info);
+		Add<GunInfo>(L"M4A1", info);
 	}
 }
 

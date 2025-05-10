@@ -241,6 +241,18 @@ void Scene::RemoveGameObject(shared_ptr<GameObject> gameObject)
 		_gameObjects.erase(findIt);
 }
 
+shared_ptr<GameObject> Scene::FindGameObject(const wstring& name)
+{
+	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
+	{
+		if (gameObject->GetName() == name)
+			return gameObject;
+	}
+
+	return nullptr;
+}
+}
+
 void Scene::AddPlayer(sc_packet_player_info* packet)
 {
 	//if (_players.size() >= 2)

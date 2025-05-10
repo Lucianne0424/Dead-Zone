@@ -167,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="Animator.h" />
     <ClInclude Include="BaseCollider.h" />
+    <ClInclude Include="BloodParticle.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CommandQueue.h" />
     <ClInclude Include="Component.h" />
@@ -186,12 +187,13 @@
     <ClInclude Include="InstancingBuffer.h" />
     <ClInclude Include="InstancingManager.h" />
     <ClInclude Include="Light.h" />
-    <ClInclude Include="M91.h" />
+    <ClInclude Include="M4A1.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshData.h" />
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="MonoBehaviour.h" />
+    <ClInclude Include="MuzzleFlashParticle.h" />
     <ClInclude Include="MultiPlayer.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="OrientedBoxCollider.h" />
@@ -224,6 +226,7 @@
   <ItemGroup>
     <ClCompile Include="Animator.cpp" />
     <ClCompile Include="BaseCollider.cpp" />
+    <ClCompile Include="BloodParticle.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CommandQueue.cpp" />
     <ClCompile Include="Component.cpp" />
@@ -242,12 +245,13 @@
     <ClCompile Include="InstancingBuffer.cpp" />
     <ClCompile Include="InstancingManager.cpp" />
     <ClCompile Include="Light.cpp" />
-    <ClCompile Include="M91.cpp" />
+    <ClCompile Include="M4A1.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshData.cpp" />
     <ClCompile Include="MeshRenderer.cpp" />
     <ClCompile Include="MonoBehaviour.cpp" />
+    <ClCompile Include="MuzzleFlashParticle.cpp" />
     <ClCompile Include="MultiPlayer.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="OrientedBoxCollider.cpp" />
