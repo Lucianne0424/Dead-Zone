@@ -56,7 +56,6 @@ struct cs_packet_jump {
 struct cs_packet_state {
     unsigned char size;
     char          type;
-    long long     playerId;
     unsigned char state;
 };
 

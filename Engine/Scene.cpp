@@ -16,6 +16,8 @@
 
 #include "..//echoserver//protocol.h"
 
+extern WindowInfo GWindowInfo;
+
 void Scene::Awake()
 {
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
@@ -302,7 +304,6 @@ void Scene::AnimatePlayer(sc_packet_state* packet)
 	for (auto& group : _players) {
 		auto& root = group[0];
 		if (root->GetID() == packet->playerId) {
-
 			for (auto& part : group) {
 				auto mp = static_pointer_cast<MultiPlayer>(part->GetMonoBehaviour(L"MultiPlayer"));
 				if (mp)

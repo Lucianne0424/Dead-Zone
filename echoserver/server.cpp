@@ -367,7 +367,7 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
         sc_packet_state ev{};
         ev.size = sizeof(ev);
         ev.type = S2C_P_STATE;
-        ev.playerId = req->playerId;
+        ev.playerId = pContext->socket;
         ev.state = req->state;
 
         if (auto* room = FindGameRoomForPlayer(pContext)) {

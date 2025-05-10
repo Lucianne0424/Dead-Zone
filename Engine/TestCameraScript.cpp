@@ -154,7 +154,6 @@ void TestCameraScript::LateUpdate()
 		cs_packet_state stPkt{};
 		stPkt.size = sizeof(stPkt);
 		stPkt.type = C2S_P_STATE;
-		stPkt.playerId = GEngine->GetWindow().local;
 		stPkt.state = newState;
 
 		send(GEngine->GetWindow().sock,

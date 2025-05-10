@@ -158,6 +158,7 @@ void ReceiverThread(SOCKET clientSocket) {
                 }
                 case S2C_P_STATE: {
                     auto* pState = reinterpret_cast<sc_packet_state*>(packet);
+                    
                     GET_SINGLE(SceneManager)
                         ->GetActiveScene()
                         ->AnimatePlayer(pState);
