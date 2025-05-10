@@ -13,6 +13,7 @@
 #include "MeshData.h"
 #include "SphereCollider.h"
 #include "MultiPlayer.h"
+#include "Zombie.h"
 
 #include "..//echoserver//protocol.h"
 
@@ -268,7 +269,7 @@ void Scene::AddPlayer(sc_packet_player_info* packet)
 		gameObject->SetName(L"Player");
 		gameObject->AddComponent(make_shared<MultiPlayer>());
 		shared_ptr<MultiPlayer> playerScript = static_pointer_cast<MultiPlayer>(gameObject->GetMonoBehaviour(L"MultiPlayer"));
-		playerScript->SetState(PlayerState::IDLE);
+		playerScript->SetState(PLAYER_STATE::IDLE);
 		AddGameObject(gameObject);
 	}
 
@@ -300,7 +301,7 @@ void Scene::RemovePlayer(sc_packet_player_leave* packet)
 
 void Scene::AnimatePlayer(sc_packet_state* packet)
 {
-	PlayerState state = static_cast<PlayerState>(packet->state);
+	PLAYER_STATE state = static_cast<PLAYER_STATE>(packet->state);
 	for (auto& group : _players) {
 		auto& root = group[0];
 		if (root->GetID() == packet->playerId) {
@@ -317,7 +318,7 @@ void Scene::AnimatePlayer(sc_packet_state* packet)
 void Scene::MovePlayer(sc_packet_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); 
-	Vec3 look= Vec3(packet->look.x, packet->look.y, packet->look.z);
+	Vec3 look = Vec3(packet->look.x - 90.f, 180.f, packet->look.z);
 
 	for (auto& group : _players) {
 		auto & root = group[0];
@@ -415,26 +416,26 @@ void Scene::AddZombie(sc_packet_spawn_zombie* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
 
-	shared_ptr<GameObject> obj = make_shared<GameObject>();
-	obj->SetID(static_cast<uint32_t>(packet->zombieId));
-	obj->SetName(L"OBJ");
-	obj->AddComponent(make_shared<Transform>());
-	obj->AddComponent(make_shared<SphereCollider>());
-	obj->GetTransform()->SetLocalScale(Vec3(100.f, 100.f, 100.f));
-	obj->GetTransform()->SetLocalPosition(position);
-	obj->SetStatic(false);
-	shared_ptr<MeshRenderer> meshRenderer = make_shared<MeshRenderer>();
+	shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
 
-	shared_ptr<Mesh> sphereMesh = GET_SINGLE(Resources)->LoadSphereMesh();
-	meshRenderer->SetMesh(sphereMesh);
+	vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
 
-	shared_ptr<Material> material = GET_SINGLE(Resources)->Get<Material>(L"GameObject");
-	meshRenderer->SetMaterial(material->Clone());
+	for (auto& gameObject : gameObjects)
+	{
+		gameObject->SetName(L"Zombie");
+		gameObject->AddComponent(make_shared<MultiPlayer>());
+		shared_ptr<Zombie> playerScript = static_pointer_cast<Zombie>(gameObject->GetMonoBehaviour(L"Zombie"));
+		playerScript->SetState(ZOMBIE_STATE::IDLE);
+		AddGameObject(gameObject);
+	}
 
-	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetRadius(0.5f);
-	dynamic_pointer_cast<SphereCollider>(obj->GetCollider())->SetCenter(Vec3(0.f, 0.f, 0.f));
-	obj->AddComponent(meshRenderer);
-	AddGameObject(obj);
+	gameObjects[0]->SetID(static_cast<uint32_t>(packet->zombieId));
+	gameObjects[0]->GetTransform()->SetLocalPosition(position);
+	gameObjects[0]->GetTransform()->SetLocalRotation(Vec3(-90.0f, 0, 0.0f));
 
-	_zombies.push_back(obj);
+	for (int i = 1; i < gameObjects.size(); i++)
+	{
+		gameObjects[i]->GetTransform()->SetParent(gameObjects[0]->GetTransform());
+	}
+	_zombies.push_back(gameObjects);
 }
