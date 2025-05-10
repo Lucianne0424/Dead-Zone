@@ -33,7 +33,7 @@ void Zombie::Start()
 
 void Zombie::Update()
 {
-	if (DELTA_TIME < 1.f)
+	/*if (DELTA_TIME < 1.f)
 		_elapsedTime += DELTA_TIME;
 
 	if (_moving && _elapsedTime >= 5.0f)
@@ -54,15 +54,15 @@ void Zombie::Update()
 
 		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::WALK);
 		GetAnimator()->Play(index);
-	}
+	}*/
 }
 
 void Zombie::LateUpdate()
 {
-	if (_moving)
+	/*if (_moving)
 	{
 		Move();
-	}
+	}*/
 }
 
 void Zombie::SetState(ZOMBIE_STATE playerState)

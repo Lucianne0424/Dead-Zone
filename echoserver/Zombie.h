@@ -25,11 +25,21 @@ enum BossState {
 class Zombie {
 public:
     ZombieType type;
+    long long  id;
     int health;
     int attack;
     float attackSpeed; // 초당 공격 횟수
     float walkSpeed;
     float runSpeed;
+    enum ZOMBIE_STATE : uint8_t {
+        T_POSE = 0,
+        IDLE = 1,
+        WALK = 2,
+        RUN = 3,
+        ATTACK = 4,
+        DIE = 5,
+        END = 6
+    }state = IDLE;
     std::string specialSkill;
 
     // 보스 좀비에만 사용
@@ -44,7 +54,7 @@ public:
             health = 100;
             attack = 10;
             attackSpeed = 1.0f;
-            walkSpeed = 1.0f;
+            walkSpeed = 150.0f;
             runSpeed = 3.3f;
             specialSkill = "None";
         }
@@ -119,34 +129,16 @@ public:
         }
     }
 
-    // dt: 경과 시간(초), (targetX, targetY): 목표 위치
-    // 단, 현재는 걷기 속도를 사용하여 이동 좀비ai 추가 시 플레이어를 향해 뛰어오는 속도 추가
-    void UpdatePosition(float dt, float targetX, float targetY) {
+    void UpdatePosition(float dt, float targetX, float targetZ) {
         float dx = targetX - x;
-        float dy = targetY - y;
-        float distance = std::sqrt(dx * dx + dy * dy);
+        float dz = targetZ - z;
+        float distance = std::sqrt(dx * dx + dz * dz);
         if (distance > 0.001f) {
             float vx = (dx / distance) * walkSpeed;
-            float vy = (dy / distance) * walkSpeed;
+            float vz = (dz / distance) * walkSpeed;
             x += vx * dt;
-            y += vy * dt;
+            z += vz * dt;
         }
-    }
-
-    // 상태 정보를 문자열로 반환 (테스트 메시지)
-    std::string GetStatus() {
-        char buffer[512];
-        if (type == BOSS) {
-            snprintf(buffer, sizeof(buffer),
-                "Type: %d (Boss State: %d), HP: %d, ATK: %d, ATK Speed: %.2f, Speed: %.2f, Special: %s, Pos: (%.2f, %.2f)",
-                type, bossState, health, attack, attackSpeed, walkSpeed, specialSkill.c_str(), x, y);
-        }
-        else {
-            snprintf(buffer, sizeof(buffer),
-                "Type: %d, HP: %d, ATK: %d, ATK Speed: %.2f, Walk: %.2f, Run: %.2f, Special: %s, Pos: (%.2f, %.2f)",
-                type, health, attack, attackSpeed, walkSpeed, runSpeed, specialSkill.c_str(), x, y);
-        }
-        return std::string(buffer);
     }
 
     // 스킬 사용 함수 예시

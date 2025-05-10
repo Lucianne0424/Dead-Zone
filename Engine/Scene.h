@@ -51,10 +51,12 @@ public:
 	void AddZombie(struct sc_packet_login_ok* packet);
 
 	void MovePlayer(struct sc_packet_move* packet);
+	void MoveZombie(struct sc_packet_zombie_move* packet);
 	void JumpPlayer(struct sc_packet_jump* packet);
 	void LandPlayer(struct sc_packet_land * packet);
 	void ApplySnapshot(struct sc_packet_snapshot* packet);
 	void AnimatePlayer(struct sc_packet_state* packet);
+	void AnimateZombie(struct sc_packet_zombie_state* packet);
 	void ClearPlayers();
 
 	void AddZombie(struct sc_packet_spawn_zombie* packet);

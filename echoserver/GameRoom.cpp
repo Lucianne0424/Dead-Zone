@@ -6,6 +6,7 @@
 #include <iostream>
 #include <chrono>
 #include <cmath>
+#include <limits>
 
 constexpr float MAP_MIN_X = 237.0f;
 constexpr float MAP_MAX_X = 2030.0f;
@@ -38,7 +39,7 @@ void GameRoom::Update(float dt)
     //  이동 점프 물리 처리
     for (auto* p : players) {
         p->posX += p->moveX * p->walkSpeed * dt;
-        p->posY += p->moveY * p->walkSpeed * dt;
+        //p->posY += p->moveY * p->walkSpeed * dt;
         p->posZ += p->moveZ * p->walkSpeed * dt;
 
         if (p->isJumping) {
@@ -131,6 +132,7 @@ void GameRoom::Update(float dt)
         z.z = spawnZ;
 
         long long zid = nextZombieId++;
+        z.id = zid;
         zombies.push_back(z);
 
         lastSpawn = now;
@@ -145,9 +147,58 @@ void GameRoom::Update(float dt)
         for (auto* peer : players)
             PostSendPacket(peer, &pkt, pkt.size);
     }
-    /*const float targetX = 100.f, targetY = 100.f;
-    for (auto& z : zombies)
-        z.UpdatePosition(dt, targetX, targetY);*/
+    
+    constexpr float DETECT_RADIUS = 500.0f;
+    const float   DETECT_RADIUS2 = DETECT_RADIUS * DETECT_RADIUS;
+
+    for (auto& z : zombies) {
+        PER_SOCKET_CONTEXT* nearest = nullptr;
+        float bestDist2 = std::numeric_limits<float>::infinity();
+        for (auto* p : players) {
+            float dx = p->posX - z.x;
+            float dz = p->posZ - z.z;
+            float d2 = dx * dx + dz * dz;
+            if (d2 < bestDist2) {
+                bestDist2 = d2;
+                nearest = p;
+            }
+        }
+        if (nearest && bestDist2 <= DETECT_RADIUS2) {
+            if (z.state != Zombie::WALK) {
+                z.state = Zombie::WALK;
+                sc_packet_zombie_state stPkt{};
+                stPkt.size = sizeof(stPkt);
+                stPkt.type = S2C_P_ZOMBIE_STATE;
+                stPkt.zombieId = z.id;
+                stPkt.state = static_cast<uint8_t>(z.state);
+                for (auto* peer : players)
+                    PostSendPacket(peer, &stPkt, stPkt.size);
+            }
+            float tx = nearest->posX;
+            float tz = nearest->posZ;
+            z.UpdatePosition(dt, tx, tz);
+
+            sc_packet_zombie_move mvPkt{};
+            mvPkt.size = static_cast<unsigned char>(sizeof(mvPkt));
+            mvPkt.type = S2C_P_ZOMBIE_MOVE;
+            mvPkt.zombieId = z.id;
+            mvPkt.position = { z.x, z.y, z.z };
+            for (auto* peer : players)
+                PostSendPacket(peer, &mvPkt, mvPkt.size);
+        }
+        else {
+            if (z.state != Zombie::IDLE) {
+                z.state = Zombie::IDLE;
+                sc_packet_zombie_state stPkt{};
+                stPkt.size = sizeof(stPkt);
+                stPkt.type = S2C_P_ZOMBIE_STATE;
+                stPkt.zombieId = z.id;
+                stPkt.state = static_cast<uint8_t>(z.state);
+                for (auto* peer : players)
+                    PostSendPacket(peer, &stPkt, stPkt.size);
+            }
+        }
+    }
 
     if (++snapshotFrameCount >= snapshotFrameInterval) {
         uint8_t count = static_cast<uint8_t>(players.size());

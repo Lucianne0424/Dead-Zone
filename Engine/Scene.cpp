@@ -315,6 +315,22 @@ void Scene::AnimatePlayer(sc_packet_state* packet)
 	}
 }
 
+void Scene::AnimateZombie(sc_packet_zombie_state* packet)
+{
+	ZOMBIE_STATE state = static_cast<ZOMBIE_STATE>(packet->state);
+	for (auto& group : _zombies) {
+		auto& root = group[0];
+		if (root->GetID() == packet->zombieId) {
+			for (auto& part : group) {
+				auto mp = static_pointer_cast<Zombie>(part->GetMonoBehaviour(L"Zombie"));
+				if (mp)
+					mp->SetState(state);
+			}
+			return;
+		}
+	}
+}
+
 void Scene::MovePlayer(sc_packet_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z); 
@@ -325,6 +341,19 @@ void Scene::MovePlayer(sc_packet_move* packet)
 		if (root->GetID() == packet->playerId) {
 			root->GetTransform()->SetLocalPosition(position);
 			root->GetTransform()->LookAt(look);
+			return;
+		}
+	}
+}
+void Scene::MoveZombie(sc_packet_zombie_move* packet)
+{
+	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
+	uint32_t zid = static_cast<uint32_t>(packet->zombieId);
+
+	for (auto& group : _zombies) {
+		auto& root = group[0];
+		if (root->GetID() == zid) {
+			root->GetTransform()->SetLocalPosition(position);
 			return;
 		}
 	}
@@ -423,7 +452,7 @@ void Scene::AddZombie(sc_packet_spawn_zombie* packet)
 	for (auto& gameObject : gameObjects)
 	{
 		gameObject->SetName(L"Zombie");
-		gameObject->AddComponent(make_shared<MultiPlayer>());
+		gameObject->AddComponent(make_shared<Zombie>());
 		shared_ptr<Zombie> playerScript = static_pointer_cast<Zombie>(gameObject->GetMonoBehaviour(L"Zombie"));
 		playerScript->SetState(ZOMBIE_STATE::IDLE);
 		AddGameObject(gameObject);

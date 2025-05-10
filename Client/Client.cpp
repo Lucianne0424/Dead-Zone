@@ -164,6 +164,20 @@ void ReceiverThread(SOCKET clientSocket) {
                         ->AnimatePlayer(pState);
                     break;
                 }
+                case S2C_P_ZOMBIE_MOVE: {
+                    auto* pZmove = reinterpret_cast<sc_packet_zombie_move*>(packet);
+                    GET_SINGLE(SceneManager)
+                        ->GetActiveScene()
+                        ->MoveZombie(pZmove);
+                    break;
+                }
+                case S2C_P_ZOMBIE_STATE: {
+                    auto* pZstate = reinterpret_cast<sc_packet_zombie_state*>(packet);
+                    GET_SINGLE(SceneManager)
+                        ->GetActiveScene()
+                        ->AnimateZombie(pZstate);
+                    break;
+                }
                 case S2C_P_PLAYER_LEAVE: {
                     auto* pLeave = reinterpret_cast<sc_packet_player_leave*>(packet);
                     GET_SINGLE(SceneManager)
@@ -178,6 +192,7 @@ void ReceiverThread(SOCKET clientSocket) {
                     g_gameStarted = true;
                     break;
                 }
+
                 default:
                     std::cout << "[클라이언트] 정의되지 않은 패킷 타입: "
                         << static_cast<int>(pktType) << std::endl;

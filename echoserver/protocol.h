@@ -18,6 +18,8 @@ constexpr char C2S_P_STATE = 14;
 constexpr char S2C_P_STATE = 15;
 constexpr char S2C_P_LOGIN_OK = 16;
 constexpr char S2C_P_SPAWN_ZOMBIE = 17;
+constexpr char S2C_P_ZOMBIE_MOVE = 18;
+constexpr char S2C_P_ZOMBIE_STATE = 19;
 constexpr char MAX_ID_LEN = 20;
 
 struct Vector3 {
@@ -146,5 +148,19 @@ struct sc_packet_spawn_zombie {
     long long     zombieId;
     Vector3       position;
     unsigned char zombieType;
+};
+
+struct sc_packet_zombie_move {
+    unsigned char size;
+    char          type;
+    long long     zombieId;
+    Vector3       position;
+};
+
+struct sc_packet_zombie_state {
+    unsigned char size;
+    char          type;
+    long long     zombieId;
+    unsigned char state;
 };
 #pragma pack(pop)
