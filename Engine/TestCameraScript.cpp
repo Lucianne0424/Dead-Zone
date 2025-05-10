@@ -56,9 +56,10 @@ void TestCameraScript::LateUpdate()
 	ProcessMouseInput();
 
 	static bool wasMovingLastFrame = false;
+	POINT deltapos = INPUT->GetDeltaPos();
 	bool isMoving = (_moveDir.x != 0.f || _moveDir.y != 0.f || _moveDir.z != 0.f);
 
-	if (_moveDir.x != 0.f || _moveDir.y != 0.f || _moveDir.z != 0.f)
+	if (isMoving || deltapos.x != 0.f || deltapos.y != 0.f)
 	{
 		_moveDir.Normalize();
 
