@@ -26,7 +26,7 @@ TestCameraScript::~TestCameraScript()
 
 void TestCameraScript::LateUpdate()
 {
-	if(INPUT->GetButton(KEY_TYPE::KEY_F5))
+	if (INPUT->GetButton(KEY_TYPE::KEY_F5))
 		SET_DEBUG_MODE(!DEBUG_MODE);
 
 	if (INPUT->GetButton(KEY_TYPE::KEY_F4))
@@ -35,16 +35,32 @@ void TestCameraScript::LateUpdate()
 	Vec3 pos = GetTransform()->GetLocalPosition();
 
 	if (INPUT->GetButton(KEY_TYPE::W))
-		pos += GetTransform()->GetLook() * _speed * DELTA_TIME;
+	{
+		Vec3 look = GetTransform()->GetLook();
+		look = Vec3(look.x, 0.f, look.z);
+		pos += look * _speed * DELTA_TIME;
+	}
 
 	if (INPUT->GetButton(KEY_TYPE::S))
-		pos -= GetTransform()->GetLook() * _speed * DELTA_TIME;
+	{
+		Vec3 look = GetTransform()->GetLook();
+		look = Vec3(look.x, 0.f, look.z);
+		pos -= look * _speed * DELTA_TIME;
+	}
 
 	if (INPUT->GetButton(KEY_TYPE::A))
-		pos -= GetTransform()->GetRight() * _speed * DELTA_TIME;
+	{
+		Vec3 right = GetTransform()->GetRight();
+		right = Vec3(right.x, 0.f, right.z);
+		pos -= right * _speed * DELTA_TIME;
+	}
 
 	if (INPUT->GetButton(KEY_TYPE::D))
-		pos += GetTransform()->GetRight() * _speed * DELTA_TIME;
+	{
+		Vec3 right = GetTransform()->GetRight();
+		right = Vec3(right.x, 0.f, right.z);
+		pos += right * _speed * DELTA_TIME;
+	}
 
 	if (INPUT->GetButton(KEY_TYPE::Q))
 	{
