@@ -56,6 +56,17 @@ shared_ptr<class Camera> Scene::GetMainCamera()
 	return _cameras[0];
 }
 
+shared_ptr<class Camera> Scene::GetGunCamera()
+{
+	for (const shared_ptr<Camera>& camera : _cameras)
+	{
+		if (camera->GetGameObject()->GetName() == L"Gun_Camera")
+			return camera;
+	}
+
+	return nullptr;
+}
+
 void Scene::Render()
 {
 	PushLightData();

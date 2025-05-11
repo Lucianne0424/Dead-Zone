@@ -235,6 +235,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 #pragma region LayerMask
 	SetLayerName(0, L"Default");
 	SetLayerName(1, L"UI");
+	SetLayerName(2, L"Gun"); // 총 UI 별도 처리
 #pragma endregion
 
 #pragma region ComputeShader
@@ -269,8 +270,13 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		camera->GetCamera()->SetFar(10000.f);
 		camera->GetCamera()->SetFOV(90.f);
 		camera->GetTransform()->SetLocalPosition(Vec3(0.f, 0.f, 0.f));
+
 		uint8 layerIndex = GET_SINGLE(SceneManager)->LayerNameToIndex(L"UI");
 		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, true); // UI는 안 찍음
+
+		layerIndex = GET_SINGLE(SceneManager)->LayerNameToIndex(L"Gun");
+		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, true); // Gun은 안 찍음
+
 		scene->AddGameObject(camera);
 	}
 #pragma endregion
@@ -287,6 +293,28 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		camera->GetCamera()->SetCullingMaskAll(); // 다 끄고
 		camera->GetCamera()->SetCullingMaskLayerOnOff(layerIndex, false); // UI만 찍음
 		scene->AddGameObject(camera);
+	}
+#pragma endregion
+
+#pragma region GunCamera
+	{
+		shared_ptr<GameObject> gunCamera = make_shared<GameObject>();
+		gunCamera->SetName(L"Gun_Camera");
+
+		gunCamera->AddComponent(make_shared<Transform>());
+		gunCamera->AddComponent(make_shared<Camera>());
+		
+		gunCamera->GetCamera()->SetFOV(60.f);
+		gunCamera->GetCamera()->SetFar(1000.f);
+
+		gunCamera->GetCamera()->SetCullingMaskAll(); // 다 끄고
+		gunCamera->GetCamera()->SetCullingMaskLayerOnOff(GET_SINGLE(SceneManager)->LayerNameToIndex(L"Gun"), false); // Gun만 찍음
+
+		// Main_Camera의 Transform을 따라가도록 설정
+		shared_ptr<GameObject> mainCam = scene->FindGameObject(L"Main_Camera");
+		gunCamera->GetTransform()->SetParent(mainCam->GetTransform());
+
+		scene->AddGameObject(gunCamera);
 	}
 #pragma endregion
 
@@ -422,10 +450,21 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\M4A1.fbx");
 
 		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
-		
+		uint8 gunLayer = GET_SINGLE(SceneManager)->LayerNameToIndex(L"Gun");
+
 		for (auto& gameObject : gameObjects)
 		{
+			if (gameObject->GetMeshRenderer())
+			{
+				auto mat = gameObject->GetMeshRenderer()->GetMaterial()->Clone(); // 기존 머티리얼 복사
+				auto shader = GET_SINGLE(Resources)->Get<Shader>(L"Forward"); // FORWARD 타입 셰이더
+
+				mat->SetShader(shader);
+				gameObject->GetMeshRenderer()->SetMaterial(mat);
+			}
+			gameObject->SetLayerIndex(gunLayer);
 			gameObject->SetCheckFrustum(false);
+			
 			scene->AddGameObject(gameObject);
 			gameObject->AddComponent(make_shared<M4A1>());
 		}
@@ -526,7 +565,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\Factory1Items.fbx");
 	
 		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate(ColliderType::OBB);
-
+		
 		for (auto& gameObject : gameObjects)
 		{
 			gameObject->SetName(L"Map");

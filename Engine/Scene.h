@@ -15,6 +15,7 @@ public:
 	void FinalUpdate();
 
 	shared_ptr<Camera> GetMainCamera();
+	shared_ptr<Camera> GetGunCamera();
 
 	void Render();
 	void RenderUI();
