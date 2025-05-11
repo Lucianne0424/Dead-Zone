@@ -41,6 +41,8 @@ public:
 
 	const vector<shared_ptr<GameObject>>& GetGameObjects() { return _gameObjects; }
 
+	const vector<vector<shared_ptr<GameObject>>>& GetPlayers() { return _players; }
+	const vector<vector<shared_ptr<GameObject>>>& GetZombies() { return _zombies; }
 
 public:
 	shared_ptr<GameObject> FindGameObject(const wstring& name);

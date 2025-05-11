@@ -72,9 +72,9 @@ void TestCameraScript::LateUpdate()
 		pkt.direction.x = _moveDir.x;
 		pkt.direction.y = _moveDir.y;
 		pkt.direction.z = _moveDir.z;
-		pkt.look.x = INPUT->GetDeltaPos().x * DELTA_TIME * _sensitivity;
-		pkt.look.y = GetTransform()->GetUp().y;
-		pkt.look.z = GetTransform()->GetUp().z;
+		pkt.look.x = GetTransform()->GetLook().x;
+		pkt.look.y = GetTransform()->GetLook().y;
+		pkt.look.z = GetTransform()->GetLook().z;
 
 		send(GEngine->GetWindow().sock,
 			reinterpret_cast<char*>(&pkt),
@@ -88,9 +88,9 @@ void TestCameraScript::LateUpdate()
 		stopPkt.direction.x = 0.f;
 		stopPkt.direction.y = 0.f;
 		stopPkt.direction.z = 0.f;
-		stopPkt.look.x = GetTransform()->GetUp().x;
-		stopPkt.look.y = GetTransform()->GetUp().y;
-		stopPkt.look.z = GetTransform()->GetUp().z;
+		stopPkt.look.x = GetTransform()->GetLook().x;
+		stopPkt.look.y = GetTransform()->GetLook().y;
+		stopPkt.look.z = GetTransform()->GetLook().z;
 		
 		send(GEngine->GetWindow().sock,
 			reinterpret_cast<char*>(&stopPkt),
