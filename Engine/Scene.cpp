@@ -355,6 +355,7 @@ void Scene::MovePlayer(sc_packet_move* packet)
 void Scene::MoveZombie(sc_packet_zombie_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
+	Vec3 dir(packet->dx, 0.f, packet->dz);
 	uint32_t zid = static_cast<uint32_t>(packet->zombieId);
 
 	for (auto& group : _zombies) {
@@ -459,7 +460,6 @@ void Scene::AddZombie(sc_packet_spawn_zombie* packet)
 	for (auto& gameObject : gameObjects)
 	{
 		gameObject->SetName(L"Zombie");
-		//gameObject->SetID(static_cast<uint32_t>(packet->zombieId));
 		gameObject->AddComponent(make_shared<Zombie>());
 		shared_ptr<Zombie> playerScript = static_pointer_cast<Zombie>(gameObject->GetMonoBehaviour(L"Zombie"));
 		playerScript->SetState(ZOMBIE_STATE::IDLE);
@@ -480,16 +480,7 @@ void Scene::AddZombie(sc_packet_spawn_zombie* packet)
 void Scene::DieZombie(sc_packet_zombie_die* pkt)
 {
 	uint32_t id = static_cast<uint32_t>(pkt->zombieId);
-
-	for (auto& group : _zombies) {
-		auto& root = group[0];
-		if (root->GetID() == id) {
-			for (auto& part : group) {
-					RemoveZombieById(id);
-				}
-			}
-			return;
-		}
+	RemoveZombieById(id);
 	}
 
 void Scene::RemoveZombieById(uint32_t zombieId)

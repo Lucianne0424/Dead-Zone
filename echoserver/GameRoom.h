@@ -42,7 +42,7 @@ private:
     void SpawnZombies();
     void UpdateZombies(float dt);
     void SetZombieState(Zombie& z, Zombie::ZOMBIE_STATE newState);
-    void BroadcastZombieMove(const Zombie& z);
+    void BroadcastZombieMove(const Zombie& z, float dx, float dz);
     void ClampZombiePosition(Zombie& z);
 
     void BroadcastSnapshots();

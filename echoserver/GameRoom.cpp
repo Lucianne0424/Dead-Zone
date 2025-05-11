@@ -189,8 +189,8 @@ void GameRoom::UpdateZombies(float dt)
         }
         else if (nearest && bestDist2 <= DETECT_RADIUS2) {
             SetZombieState(z, Zombie::WALK);
-            z.UpdatePosition(dt, nearest->posX, nearest->posZ);
-            BroadcastZombieMove(z);
+            auto [dx, dz] = z.UpdatePosition(dt, nearest->posX, nearest->posZ);
+            BroadcastZombieMove(z, dx, dz);
         }
         else {
             SetZombieState(z, Zombie::IDLE);
@@ -214,13 +214,15 @@ void GameRoom::SetZombieState(Zombie& z, Zombie::ZOMBIE_STATE newState)
         PostSendPacket(peer, &stPkt, stPkt.size);
 }
 
-void GameRoom::BroadcastZombieMove(const Zombie& z)
+void GameRoom::BroadcastZombieMove(const Zombie& z, float dx, float dz)
 {
     sc_packet_zombie_move mvPkt{};
     mvPkt.size = static_cast<unsigned char>(sizeof(mvPkt));
     mvPkt.type = S2C_P_ZOMBIE_MOVE;
     mvPkt.zombieId = z.id;
     mvPkt.position = { z.x, z.y, z.z };
+    mvPkt.dx = dx;
+    mvPkt.dz = dz;
     for (auto* peer : players)
         PostSendPacket(peer, &mvPkt, mvPkt.size);
 }

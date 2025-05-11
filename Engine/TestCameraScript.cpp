@@ -215,12 +215,6 @@ void TestCameraScript::ProcessMouseInput()
 			reinterpret_cast<char*>(&atkPkt),
 			sizeof(atkPkt),
 			0);
-		/*if (obj)
-		{
-			uint32_t zid = obj->GetID();
-			auto scene = GET_SINGLE(SceneManager)->GetActiveScene();
-			scene->RemoveZombieById(zid);
-		}*/
 	}
 
 	POINT deltaPos = INPUT->GetDeltaPos();

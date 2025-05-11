@@ -129,16 +129,20 @@ public:
         }
     }
 
-    void UpdatePosition(float dt, float targetX, float targetZ) {
+    std::pair<float, float> UpdatePosition(float dt, float targetX, float targetZ) {
         float dx = targetX - x;
         float dz = targetZ - z;
         float distance = std::sqrt(dx * dx + dz * dz);
         if (distance > 0.001f) {
             float vx = (dx / distance) * walkSpeed;
             float vz = (dz / distance) * walkSpeed;
-            x += vx * dt;
-            z += vz * dt;
+            float moveX = vx * dt;
+            float moveZ = vz * dt;
+            x += moveX;
+            z += moveZ;
+            return { moveX, moveZ };
         }
+        return { 0.f, 0.f };
     }
 
     // 스킬 사용 함수 예시

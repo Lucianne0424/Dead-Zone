@@ -156,6 +156,8 @@ struct sc_packet_zombie_move {
     char          type;
     long long     zombieId;
     Vector3       position;
+    float         dx;
+    float         dz;
 };
 
 struct sc_packet_zombie_state {
