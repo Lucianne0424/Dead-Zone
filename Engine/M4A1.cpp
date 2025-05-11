@@ -47,7 +47,7 @@ void M4A1::Awake()
 		InitializeParticle();
 	}
 	_particle->GetTransform()->SetParent(GetTransform());
-	_particle->GetTransform()->SetLocalPosition(Vec3(0.0f, -4.3f, 1.35f));
+	_particle->GetTransform()->SetLocalPosition(Vec3(0.f, -4.3f, 1.35f));
 }
 
 void M4A1::Update()
