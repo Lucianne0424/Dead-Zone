@@ -15,6 +15,21 @@ void Timer::Update()
 	_deltaTime = (currentCount - _prevCount) / static_cast<float>(_frequency);
 	_prevCount = currentCount;
 
+	// 타임아웃 태스크 업데이트
+	for (auto it = _timeoutTasks.begin(); it != _timeoutTasks.end(); )
+	{
+		it->timeLeft -= _deltaTime;
+		if (it->timeLeft <= 0.f)
+		{
+			it->callback();          // 시간 만료 콜백 실행
+			it = _timeoutTasks.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+
 	_frameCount++;
 	_frameTime += _deltaTime;
 
@@ -25,4 +40,9 @@ void Timer::Update()
 		_frameTime = 0.f;
 		_frameCount = 0;
 	}
+}
+
+void Timer::SetTimeout(const std::function<void()>& callback, float delay)
+{
+	_timeoutTasks.push_back(TimeoutTask{ callback, delay });
 }

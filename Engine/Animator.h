@@ -20,6 +20,12 @@ public:
 	int32 GetAnimCount() { return static_cast<uint32>(_animClips->size()); }
 	int32 GetCurrentClipIndex() { return _clipIndex; }
 	void Play(uint32 idx);
+	float GetUpdateTime() const { return _updateTime; }
+	double GetAnimDuration(uint32 idx)
+	{
+		assert(idx < _animClips->size());
+		return _animClips->at(idx).duration;
+	}
 
 public:
 	virtual void FinalUpdate() override;

@@ -352,6 +352,7 @@ void Scene::MovePlayer(sc_packet_move* packet)
 		}
 	}
 }
+
 void Scene::MoveZombie(sc_packet_zombie_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
@@ -480,19 +481,46 @@ void Scene::AddZombie(sc_packet_spawn_zombie* packet)
 void Scene::DieZombie(sc_packet_zombie_die* pkt)
 {
 	uint32_t id = static_cast<uint32_t>(pkt->zombieId);
-	RemoveZombieById(id);
-	}
 
+	// _zombies: vector< vector< shared_ptr<GameObject> > >
+	for (auto& group : _zombies) {
+		if (group.empty() || group[0]->GetID() != id)
+			continue;
+
+		// 1) 각 파트에 대해 DIE 상태로 전환 → 애니메이션 재생
+		for (auto& part : group) {
+			auto zComp = static_pointer_cast<Zombie>(part->GetMonoBehaviour(L"Zombie"));
+			if (zComp) {
+				zComp->SetState(ZOMBIE_STATE::DIE);
+			}
+		}
+
+		auto anim = group[0]->GetAnimator();
+		int32 idx = anim->GetCurrentClipIndex();
+		float deathAnimDuration = anim->GetAnimDuration(idx);
+		GET_SINGLE(Timer)->SetTimeout([this, id]() {
+			RemoveZombieById(id);
+			}, deathAnimDuration);
+
+		// 한 번 처리했으면 루프 탈출
+		break;
+	}
+}
+
+// 기존 RemoveZombieById는 그대로 사용
 void Scene::RemoveZombieById(uint32_t zombieId)
 {
 	for (auto it = _zombies.begin(); it != _zombies.end(); ++it) {
 		auto& group = *it;
-		if (group[0]->GetID() == zombieId) {
-			for (auto& part : group) {
-				RemoveGameObject(part);
-			}
-			_zombies.erase(it);
-			return;
+		if (group.empty() || group[0]->GetID() != zombieId)
+			continue;
+
+		// 씬 오브젝트에서 제거
+		for (auto& part : group) {
+			RemoveGameObject(part);
 		}
+		// 벡터에서 그룹 삭제
+		_zombies.erase(it);
+		return;
 	}
 }

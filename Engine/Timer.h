@@ -9,8 +9,17 @@ public:
 	void Init();
 	void Update();
 
+	void SetTimeout(const std::function<void()>& callback, float delay);
+
 	uint32 GetFps() { return _fps; }
 	float GetDeltaTime() { return _deltaTime; }
+
+private:
+	struct TimeoutTask {
+		std::function<void()> callback;
+		float                 timeLeft;
+	};
+	std::vector<TimeoutTask> _timeoutTasks;
 
 private:
 	uint64	_frequency = 0;
