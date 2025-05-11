@@ -8,13 +8,6 @@
 #include "SceneManager.h"
 
 
-template<typename T>
-T Lerp(const T& a, const T& b, float t)
-{
-	return a * (1.0f - t) + b * t;
-}
-
-
 TestCameraScript::TestCameraScript()
 {
 	_name = L"MainCamera";
@@ -74,11 +67,6 @@ void TestCameraScript::LateUpdate()
 		GetTransform()->SetLocalRotation(rotation);
 	}
 
-	if (INPUT->GetButtonDown(MOUSE_TYPE::RBUTTON))
-	{
-		const POINT& pos = INPUT->GetMousePos();
-		GET_SINGLE(SceneManager)->Pick(pos.x, pos.y);
-	}
 
 	POINT deltaPos = INPUT->GetDeltaPos();
 
