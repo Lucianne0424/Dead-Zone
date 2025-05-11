@@ -45,6 +45,8 @@ public:
 	void SetWidth(float value) { _width = value; }
 	void SetHeight(float value) { _height = value; }
 
+	float GetFOV() { return _fov; }
+
 	Matrix& GetViewMatrix() { return _matView; }
 	Matrix& GetProjectionMatrix() { return _matProjection; }
 
@@ -55,7 +57,7 @@ private:
 
 	float _near = 1.f;
 	float _far = 1000.f;
-	float _fov = XM_PI / 4.f;
+	float _fov = 90.f;
 	float _scale = 1.f;
 	float _width = 0.f;
 	float _height = 0.f;
