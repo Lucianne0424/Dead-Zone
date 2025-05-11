@@ -550,7 +550,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 		{
 			gameObject->SetName(L"Map");
 			gameObject->SetStatic(true);
-			//gameObject->GetTransform()->SetParent(t->GetTransform());
+			gameObject->GetTransform()->SetParent(t->GetTransform());
 			scene->AddGameObject(gameObject);
 		}
 	}

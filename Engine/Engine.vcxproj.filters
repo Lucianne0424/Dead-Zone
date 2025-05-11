@@ -43,6 +43,9 @@
     <Filter Include="Object\Component\Particle">
       <UniqueIdentifier>{92bfb076-62e5-4653-a917-06aeedad349d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{551d5984-a0c7-4ae3-acdd-5b1d0acf5d48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -198,6 +201,12 @@
     <ClCompile Include="TextUI.cpp" />
     <ClCompile Include="OrientedBoxCollider.cpp">
       <Filter>Object\Component\Collider</Filter>
+    </ClCompile>
+    <ClCompile Include="D3D11On12Device.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage01.cpp">
+      <Filter>Scenes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -357,6 +366,12 @@
     <ClInclude Include="TextUI.h" />
     <ClInclude Include="OrientedBoxCollider.h">
       <Filter>Object\Component\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11On12Device.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage01.h">
+      <Filter>Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
