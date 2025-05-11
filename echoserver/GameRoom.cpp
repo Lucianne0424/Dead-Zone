@@ -15,12 +15,12 @@ constexpr float MAP_MAX_Y = 960.0f;
 constexpr float MAP_MIN_Z = -3552.0f;
 constexpr float MAP_MAX_Z = 3535.0f;
 
-constexpr float PLAYER_RADIUS = 10.0f;
-constexpr float ZOMBIE_RADIUS = 10.0f;
+constexpr float PLAYER_RADIUS = 50.0f;
+constexpr float ZOMBIE_RADIUS = 50.0f;
 
 // 감지 및 공격 반경
 constexpr float DETECT_RADIUS = 500.0f;
-constexpr float ATTACK_RADIUS = 50.0f;
+constexpr float ATTACK_RADIUS = 100.0f;
 const float   DETECT_RADIUS2 = DETECT_RADIUS * DETECT_RADIUS;
 const float   ATTACK_RADIUS2 = ATTACK_RADIUS * ATTACK_RADIUS;
 

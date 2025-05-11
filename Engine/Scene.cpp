@@ -356,13 +356,20 @@ void Scene::MovePlayer(sc_packet_move* packet)
 void Scene::MoveZombie(sc_packet_zombie_move* packet)
 {
 	Vec3 position = Vec3(packet->position.x, packet->position.y, packet->position.z);
-	Vec3 dir(packet->dx, 0.f, packet->dz);
+	Vec3 look = Vec3(packet->dx, 0.f, packet->dz);
 	uint32_t zid = static_cast<uint32_t>(packet->zombieId);
 
 	for (auto& group : _zombies) {
 		auto& root = group[0];
 		if (root->GetID() == zid) {
-			root->GetTransform()->SetLocalPosition(position);
+			shared_ptr<Transform> rootTransform = root->GetTransform();
+			rootTransform->SetLocalPosition(position);
+			rootTransform->LookAt(look);
+
+			Vec3 rotation = rootTransform->GetLocalRotation();
+			rotation.x = -90.f;
+			rotation.y += 180.f;
+			rootTransform->SetLocalRotation(rotation);
 			return;
 		}
 	}

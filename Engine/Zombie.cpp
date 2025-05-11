@@ -88,7 +88,7 @@ void Zombie::SetState(ZOMBIE_STATE playerState)
 	}
 	case ZOMBIE_STATE::WALK:
 	{
-		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::WALK);
+		uint32 index = static_cast<uint32>(ZOMBIE_ANIMATION_TYPE::RUN);
 		GetAnimator()->Play(index);
 		break;
 	}
