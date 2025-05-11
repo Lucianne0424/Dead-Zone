@@ -97,21 +97,21 @@ void FBXLoader::ParseNode(FbxNode* node)
 			FbxMeshInfo& meshInfo = _meshes.back();
 
 			meshInfo.position = {
-				static_cast<float>(-nodePosition[0]),
-				static_cast<float>(nodePosition[1]),
-				static_cast<float>(nodePosition[2])
+				static_cast<float>(nodePosition[0]),
+				static_cast<float>(nodePosition[2]),
+				static_cast<float>(nodePosition[1])
 			};
 
 			meshInfo.rotation = {
-				static_cast<float>(nodeRotation[0]),
-				static_cast<float>(-nodeRotation[1]),
-				static_cast<float>(-nodeRotation[2])
+				static_cast<float>(-nodeRotation[0]),
+				static_cast<float>(-nodeRotation[2]),
+				static_cast<float>(-nodeRotation[1])
 			};
 
 			meshInfo.scale = {
 				static_cast<float>(nodeScale[0]),
-				static_cast<float>(nodeScale[1]),
-				static_cast<float>(nodeScale[2])
+				static_cast<float>(nodeScale[2]),
+				static_cast<float>(nodeScale[1])
 			};
 			break;
 		}
@@ -146,9 +146,9 @@ void FBXLoader::LoadMesh(FbxMesh* mesh)
 	FbxVector4* controlPoints = mesh->GetControlPoints();
 	for (int32 i = 0; i < vertexCount; ++i)
 	{
-		meshInfo.vertices[i].pos.x = static_cast<float>(-controlPoints[i].mData[0]);
-		meshInfo.vertices[i].pos.y = static_cast<float>(controlPoints[i].mData[1]);
-		meshInfo.vertices[i].pos.z = static_cast<float>(controlPoints[i].mData[2]);
+		meshInfo.vertices[i].pos.x = static_cast<float>(controlPoints[i].mData[0]);
+		meshInfo.vertices[i].pos.y = static_cast<float>(controlPoints[i].mData[2]);
+		meshInfo.vertices[i].pos.z = static_cast<float>(controlPoints[i].mData[1]);
 	}
 
 	const int32 materialCount = mesh->GetNode()->GetMaterialCount();
@@ -222,9 +222,9 @@ void FBXLoader::LoadMeshNotWithAnimation(FbxMesh* mesh)
 			Vertex vertex = {};
 			int32 controlPointIndex = mesh->GetPolygonVertex(i, j); // 제어점의 인덱스 추출
 
-			vertex.pos.x = static_cast<float>(-controlPoints[controlPointIndex].mData[0]);
-			vertex.pos.y = static_cast<float>(controlPoints[controlPointIndex].mData[1]);
-			vertex.pos.z = static_cast<float>(controlPoints[controlPointIndex].mData[2]);
+			vertex.pos.x = static_cast<float>(controlPoints[controlPointIndex].mData[0]);
+			vertex.pos.y = static_cast<float>(controlPoints[controlPointIndex].mData[2]);
+			vertex.pos.z = static_cast<float>(controlPoints[controlPointIndex].mData[1]);
 
 			if (mesh->GetElementNormalCount() == 0)
 				return;
@@ -248,9 +248,9 @@ void FBXLoader::LoadMeshNotWithAnimation(FbxMesh* mesh)
 			}
 
 			FbxVector4 vec = normal->GetDirectArray().GetAt(normalIdx);
-			vertex.normal.x = static_cast<float>(-vec.mData[0]);
-			vertex.normal.y = static_cast<float>(vec.mData[1]);
-			vertex.normal.z = static_cast<float>(vec.mData[2]);
+			vertex.normal.x = static_cast<float>(vec.mData[0]);
+			vertex.normal.y = static_cast<float>(vec.mData[2]);
+			vertex.normal.z = static_cast<float>(vec.mData[1]);
 
 			vertex.tangent.x = 1.f;
 			vertex.tangent.y = 0.f;
@@ -317,9 +317,9 @@ void FBXLoader::GetNormal(FbxMesh* mesh, FbxMeshInfo* container, int32 idx, int3
 	}
 
 	FbxVector4 vec = normal->GetDirectArray().GetAt(normalIdx);
-	container->vertices[idx].normal.x = static_cast<float>(-vec.mData[0]);
-	container->vertices[idx].normal.y = static_cast<float>(vec.mData[1]);
-	container->vertices[idx].normal.z = static_cast<float>(vec.mData[2]);
+	container->vertices[idx].normal.x = static_cast<float>(vec.mData[0]);
+	container->vertices[idx].normal.y = static_cast<float>(vec.mData[2]);
+	container->vertices[idx].normal.z = static_cast<float>(vec.mData[1]);
 }
 
 void FBXLoader::GetTangent(FbxMesh* mesh, FbxMeshInfo* meshInfo, int32 idx, int32 vertexCounter)
@@ -353,8 +353,8 @@ void FBXLoader::GetTangent(FbxMesh* mesh, FbxMeshInfo* meshInfo, int32 idx, int3
 
 	FbxVector4 vec = tangent->GetDirectArray().GetAt(tangentIdx);
 	meshInfo->vertices[idx].tangent.x = static_cast<float>(vec.mData[0]);
-	meshInfo->vertices[idx].tangent.y = static_cast<float>(vec.mData[1]);
-	meshInfo->vertices[idx].tangent.z = static_cast<float>(vec.mData[2]);
+	meshInfo->vertices[idx].tangent.y = static_cast<float>(vec.mData[2]);
+	meshInfo->vertices[idx].tangent.z = static_cast<float>(vec.mData[1]);
 }
 
 void FBXLoader::GetUV(FbxMesh* mesh, FbxMeshInfo* meshInfo, int32 idx, int32 uvIndex)
