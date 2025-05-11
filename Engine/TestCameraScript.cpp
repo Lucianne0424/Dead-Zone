@@ -202,19 +202,21 @@ void TestCameraScript::ProcessKeyInput()
 
 void TestCameraScript::ProcessMouseInput()
 {
-	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
+	if (INPUT->GetButton(MOUSE_TYPE::LBUTTON))
 	{
 		shared_ptr<GameObject> obj = GET_SINGLE(SceneManager)->PickZombie(GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2);
 
-		cs_packet_attack atkPkt{};
-		atkPkt.size = sizeof(atkPkt);
-		atkPkt.type = C2S_P_ATTACK;
-		atkPkt.zombieId = obj ? static_cast<long long>(obj->GetID()) : -1;
+		if (obj) {
+			cs_packet_attack atkPkt{};
+			atkPkt.size = sizeof(atkPkt);
+			atkPkt.type = C2S_P_ATTACK;
+			atkPkt.zombieId = obj ? static_cast<long long>(obj->GetID()) : -1;
 
-		send(GEngine->GetWindow().sock,
-			reinterpret_cast<char*>(&atkPkt),
-			sizeof(atkPkt),
-			0);
+			send(GEngine->GetWindow().sock,
+				reinterpret_cast<char*>(&atkPkt),
+				sizeof(atkPkt),
+				0);
+		}
 	}
 
 	POINT deltaPos = INPUT->GetDeltaPos();

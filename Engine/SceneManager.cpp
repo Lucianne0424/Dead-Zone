@@ -90,7 +90,7 @@ void SceneManager::RenderUI()
 			device->GetSolidColorBrush().Get());
 
 		// 타이머 UI
-		pivot = { static_cast<float>(GEngine->GetWindow().width / 2), 50.f };
+		/*pivot = { static_cast<float>(GEngine->GetWindow().width / 2), 50.f };
 		D2D1_RECT_F textRect2 = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
 
 		wstring text2 = L"시간 : ";
@@ -102,7 +102,7 @@ void SceneManager::RenderUI()
 			static_cast<uint32>(text2.size()),
 			device->GetTextFormat().Get(),
 			&textRect2,
-			device->GetSolidColorBrush().Get());
+			device->GetSolidColorBrush().Get());*/
 
 		// 체력 UI
 		pivot = { 100.f, static_cast<float>(GEngine->GetWindow().height - 50) };

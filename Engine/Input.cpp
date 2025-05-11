@@ -10,7 +10,7 @@ void Input::Init(HWND hwnd)
 	_keyStates.resize(KEY_TYPE_COUNT, KEY_STATE::NONE);
 	_centerScreenPos = { GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2 };
 
-	LockCursor(false);
+	LockCursor(true);
 
 	// DirectInput √ ±‚»≠
 	HRESULT hr = S_OK;
