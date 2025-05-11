@@ -179,6 +179,13 @@ void ReceiverThread(SOCKET clientSocket) {
                         ->AnimateZombie(pZstate);
                     break;
                 }
+                case S2C_P_ZOMBIE_DIE: {
+                    auto* pZdie = reinterpret_cast<sc_packet_zombie_die*>(packet);
+                    GET_SINGLE(SceneManager)
+                        ->GetActiveScene()
+                        ->DieZombie(pZdie);
+                    break;
+                }
                 case S2C_P_PLAYER_LEAVE: {
                     auto* pLeave = reinterpret_cast<sc_packet_player_leave*>(packet);
                     GET_SINGLE(SceneManager)

@@ -267,3 +267,14 @@ void GameRoom::BroadcastSnapshots()
     free(buf);
     snapshotFrameCount = 0;
 }
+
+void GameRoom::RemoveZombieById(long long zombieId)
+{
+    auto it = std::find_if(zombies.begin(), zombies.end(),
+        [zombieId](const Zombie& z) {
+            return z.id == zombieId;
+        });
+    if (it != zombies.end()) {
+        zombies.erase(it);
+    }
+}

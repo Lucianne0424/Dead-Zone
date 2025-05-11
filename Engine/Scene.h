@@ -60,6 +60,9 @@ public:
 	void ClearPlayers();
 
 	void AddZombie(struct sc_packet_spawn_zombie* packet);
+	void DieZombie(struct sc_packet_zombie_die* packet);
+	void RemoveZombieById(uint32_t zombieId);
+
 
 private:
 	vector<shared_ptr<GameObject>>		_gameObjects;

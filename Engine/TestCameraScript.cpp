@@ -8,6 +8,7 @@
 #include "Timer.h"
 #include "SceneManager.h"
 #include "MultiPlayer.h" 
+#include "Scene.h"
 #include "protocol.h"
 
 
@@ -203,11 +204,22 @@ void TestCameraScript::ProcessMouseInput()
 {
 	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
 	{
-		//const POINT& pos = INPUT->GetMousePos();
 		shared_ptr<GameObject> obj = GET_SINGLE(SceneManager)->Pick(GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2);
 
+		cs_packet_attack atkPkt{};
+		atkPkt.size = sizeof(atkPkt);
+		atkPkt.type = C2S_P_ATTACK;
+		atkPkt.zombieId = obj ? static_cast<long long>(obj->GetID()) : -1;
 
-
+		send(GEngine->GetWindow().sock,
+			reinterpret_cast<char*>(&atkPkt),
+			sizeof(atkPkt),
+			0);
+		if (obj)
+		{
+			uint32_t zid = obj->GetID();
+			RemoveZombieById(zid);
+		}
 	}
 
 	POINT deltaPos = INPUT->GetDeltaPos();

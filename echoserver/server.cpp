@@ -318,20 +318,25 @@ void ProcessClientMessage(PER_SOCKET_CONTEXT* pContext,
     }
 
     case C2S_P_ATTACK: {
-        if (bytesTransferred < sizeof(cs_packet_attack)) break;
-        auto* pkt = reinterpret_cast<cs_packet_attack*>(pIoData->buffer);
+        if (bytesTransferred < sizeof(cs_packet_attack))
+            break;
 
-        sc_packet_attack attackEvent;
-        attackEvent.size = sizeof(sc_packet_attack);
-        attackEvent.type = S2C_P_ATTACK;
-        attackEvent.playerId = pContext->socket;
-        attackEvent.zombieId = rand() % 100 + 1;
-        attackEvent.impactPoint = pkt->attackDirection;
+        auto* pkt = reinterpret_cast<cs_packet_attack*>(pIoData->buffer);
+        std::cout << "[서버] 공격 패킷 수신: playerId=" << pContext->socket
+            << ", zombieId=" << pkt->zombieId << std::endl;
+        long long zid = pkt->zombieId;
+
+        sc_packet_zombie_die diePkt{};
+        diePkt.size = static_cast<unsigned char>(sizeof(diePkt));
+        diePkt.type = S2C_P_ZOMBIE_DIE;
+        diePkt.zombieId = zid;
 
         if (auto* room = FindGameRoomForPlayer(pContext)) {
             for (auto* peer : room->players) {
-                PostSendPacket(peer, &attackEvent, attackEvent.size);
+                PostSendPacket(peer, &diePkt, diePkt.size);
             }
+
+            room->RemoveZombieById(zid);
         }
         break;
     }

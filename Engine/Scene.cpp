@@ -14,6 +14,7 @@
 #include "SphereCollider.h"
 #include "MultiPlayer.h"
 #include "Zombie.h"
+#include "Animator.h"
 
 #include "..//echoserver//protocol.h"
 
@@ -452,6 +453,7 @@ void Scene::AddZombie(sc_packet_spawn_zombie* packet)
 	for (auto& gameObject : gameObjects)
 	{
 		gameObject->SetName(L"Zombie");
+		gameObject->SetID(static_cast<uint32_t>(packet->zombieId));
 		gameObject->AddComponent(make_shared<Zombie>());
 		shared_ptr<Zombie> playerScript = static_pointer_cast<Zombie>(gameObject->GetMonoBehaviour(L"Zombie"));
 		playerScript->SetState(ZOMBIE_STATE::IDLE);
@@ -467,4 +469,33 @@ void Scene::AddZombie(sc_packet_spawn_zombie* packet)
 		gameObjects[i]->GetTransform()->SetParent(gameObjects[0]->GetTransform());
 	}
 	_zombies.push_back(gameObjects);
+}
+
+void Scene::DieZombie(sc_packet_zombie_die* pkt)
+{
+	uint32_t id = static_cast<uint32_t>(pkt->zombieId);
+
+	for (auto& group : _zombies) {
+		auto& root = group[0];
+		if (root->GetID() == id) {
+			for (auto& part : group) {
+					RemoveZombieById(id);
+				}
+			}
+			return;
+		}
+	}
+
+void Scene::RemoveZombieById(uint32_t zombieId)
+{
+	for (auto it = _zombies.begin(); it != _zombies.end(); ++it) {
+		auto& group = *it;
+		if (group[0]->GetID() == zombieId) {
+			for (auto& part : group) {
+				RemoveGameObject(part);
+			}
+			_zombies.erase(it);
+			return;
+		}
+	}
 }

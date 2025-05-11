@@ -26,6 +26,7 @@ public:
     std::chrono::steady_clock::time_point lastSpawn;
     std::chrono::milliseconds                spawnInterval{ 1000 };
 
+    void RemoveZombieById(long long zombieId);
 private:
     std::vector<Zombie>              zombies;
     uint32_t                          snapshotFrameCount = 0;
