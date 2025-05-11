@@ -4,8 +4,8 @@
 enum class MOUSE_TYPE
 {
 	LBUTTON = 0,
-	MBUTTON = 1,
-	RBUTTON = 2,
+	RBUTTON = 1,
+	MBUTTON = 2,
 };
 
 enum class KEY_TYPE
