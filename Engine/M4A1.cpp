@@ -16,7 +16,7 @@
 
 
 Vec3 M4A1::_basePosition = { 10.f, -10.f, 20.f };
-Vec3 M4A1::_baseRotation = { 270.f, 0.f, 0.f };
+Vec3 M4A1::_baseRotation = { 0.f, 180.f, 0.f };
 Vec3 M4A1::_baseScale = { 4.0f, 4.0f, 4.0f };
 
 
@@ -47,7 +47,7 @@ void M4A1::Awake()
 		InitializeParticle();
 	}
 	_particle->GetTransform()->SetParent(GetTransform());
-	_particle->GetTransform()->SetLocalPosition(Vec3(0.0f, -4.3f, 1.35f));
+	_particle->GetTransform()->SetLocalPosition(Vec3(0.f, 1.35f, -4.3f));
 }
 
 void M4A1::Update()
