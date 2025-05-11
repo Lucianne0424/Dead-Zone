@@ -196,9 +196,15 @@
       <Filter>Object\Component\Particle</Filter>
     </ClCompile>
     <ClCompile Include="TextUI.cpp" />
-    <ClCompile Include="OrientedBoxCollider.cpp" />
     <ClCompile Include="MultiPlayer.cpp">
       <Filter>Object\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage01.cpp" />
+    <ClCompile Include="D3D11On12Device.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="OrientedBoxCollider.cpp">
+      <Filter>Object\Component\Collider</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -359,9 +365,15 @@
     <ClInclude Include="protocol.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="OrientedBoxCollider.h" />
     <ClInclude Include="MultiPlayer.h">
       <Filter>Object\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage01.h" />
+    <ClInclude Include="D3D11On12Device.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="OrientedBoxCollider.h">
+      <Filter>Object\Component\Collider</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
