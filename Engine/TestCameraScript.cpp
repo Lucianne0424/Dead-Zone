@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "TestCameraScript.h"
+#include "Engine.h"
 #include "Transform.h"
 #include "Camera.h"
 #include "GameObject.h"
@@ -90,10 +91,12 @@ void TestCameraScript::LateUpdate()
 		GetTransform()->SetLocalRotation(rotation);
 	}
 
-	if (INPUT->GetButtonDown(MOUSE_TYPE::RBUTTON))
+	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
 	{
-		const POINT& pos = INPUT->GetMousePos();
-		GET_SINGLE(SceneManager)->Pick(pos.x, pos.y);
+		//const POINT& pos = INPUT->GetMousePos();
+		shared_ptr<GameObject> obj = GET_SINGLE(SceneManager)->Pick(GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2);
+		if(obj != nullptr)
+			obj->GetTransform()->SetLocalRotation(Vec3(0.f, 10.f, 0.f));
 	}
 
 	POINT deltaPos = INPUT->GetDeltaPos();
