@@ -204,7 +204,7 @@ void TestCameraScript::ProcessMouseInput()
 {
 	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
 	{
-		shared_ptr<GameObject> obj = GET_SINGLE(SceneManager)->Pick(GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2);
+		shared_ptr<GameObject> obj = GET_SINGLE(SceneManager)->PickZombie(GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2);
 
 		cs_packet_attack atkPkt{};
 		atkPkt.size = sizeof(atkPkt);
@@ -215,11 +215,12 @@ void TestCameraScript::ProcessMouseInput()
 			reinterpret_cast<char*>(&atkPkt),
 			sizeof(atkPkt),
 			0);
-		if (obj)
+		/*if (obj)
 		{
 			uint32_t zid = obj->GetID();
-			RemoveZombieById(zid);
-		}
+			auto scene = GET_SINGLE(SceneManager)->GetActiveScene();
+			scene->RemoveZombieById(zid);
+		}*/
 	}
 
 	POINT deltaPos = INPUT->GetDeltaPos();

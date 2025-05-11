@@ -459,7 +459,7 @@ void Scene::AddZombie(sc_packet_spawn_zombie* packet)
 	for (auto& gameObject : gameObjects)
 	{
 		gameObject->SetName(L"Zombie");
-		gameObject->SetID(static_cast<uint32_t>(packet->zombieId));
+		//gameObject->SetID(static_cast<uint32_t>(packet->zombieId));
 		gameObject->AddComponent(make_shared<Zombie>());
 		shared_ptr<Zombie> playerScript = static_pointer_cast<Zombie>(gameObject->GetMonoBehaviour(L"Zombie"));
 		playerScript->SetState(ZOMBIE_STATE::IDLE);
