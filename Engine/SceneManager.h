@@ -22,6 +22,7 @@ public:
 	uint8 LayerNameToIndex(const wstring& name);
 
 	shared_ptr<class GameObject> Pick(int32 screenX, int32 screenY);
+	shared_ptr<class GameObject> PickZombie(int32 screenX, int32 screenY);
 
 	bool IsDebugMode() { return _debugMode; }
 	void SetDebugMode(bool debugMode) { _debugMode = debugMode; }

@@ -249,6 +249,77 @@ shared_ptr<GameObject> SceneManager::Pick(int32 screenX, int32 screenY)
 	return picked;
 }
 
+shared_ptr<class GameObject> SceneManager::PickZombie(int32 screenX, int32 screenY)
+{
+	shared_ptr<Camera> camera = GetActiveScene()->GetMainCamera();
+
+	float width = static_cast<float>(GEngine->GetWindow().width);
+	float height = static_cast<float>(GEngine->GetWindow().height);
+
+	Matrix projectionMatrix = camera->GetProjectionMatrix();
+
+	// ViewSpace에서 Picking 진행
+	float viewX = (+2.0f * screenX / width - 1.0f) / projectionMatrix(0, 0);
+	float viewY = (-2.0f * screenY / height + 1.0f) / projectionMatrix(1, 1);
+
+	Matrix viewMatrix = camera->GetViewMatrix();
+	Matrix viewMatrixInv = viewMatrix.Invert();
+
+	auto& zombies = GET_SINGLE(SceneManager)->GetActiveScene()->GetZombies();
+
+	float minDistance = FLT_MAX;
+	shared_ptr<GameObject> picked;
+
+	// ViewSpace에서의 Ray 정의
+	Vec4 rayOrigin = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	Vec4 rayDir = Vec4(viewX, viewY, 1.0f, 0.0f);
+
+	// WorldSpace에서의 Ray 정의
+	rayOrigin = XMVector3TransformCoord(rayOrigin, viewMatrixInv);
+	rayDir = XMVector3TransformNormal(rayDir, viewMatrixInv);
+	rayDir.Normalize();
+
+	for (auto& zombieGroup : zombies)
+	{
+		for (auto& zombiePart : zombieGroup)
+		{
+			if (zombiePart->GetCollider() == nullptr)
+				continue;
+
+			// WorldSpace에서 연산
+			float distance = 0.f;
+
+			ColliderType colliderType = zombiePart->GetCollider()->GetColliderType();
+			if (colliderType == ColliderType::SPHERE)
+			{
+				shared_ptr<SphereCollider> sphere = static_pointer_cast<SphereCollider>(zombiePart->GetCollider());
+				if (sphere->Intersects(rayOrigin, rayDir, OUT distance) == false)
+					continue;
+			}
+			else if (colliderType == ColliderType::OBB)
+			{
+				shared_ptr<OrientedBoxCollider> obb = static_pointer_cast<OrientedBoxCollider>(zombiePart->GetCollider());
+				if (obb->Intersects(rayOrigin, rayDir, OUT distance) == false)
+					continue;
+			}
+			else
+			{
+				continue;
+			}
+
+			if (distance < minDistance)
+			{
+				// 이번 좀비가 picked된걸 확인했으면 다음 좀비로 넘어가기
+				minDistance = distance;
+				picked = zombieGroup[0];
+				break;
+			}
+		}
+	}
+
+	return picked;
+}
+
 shared_ptr<Scene> SceneManager::LoadTestScene()
 {
 #pragma region LayerMask
