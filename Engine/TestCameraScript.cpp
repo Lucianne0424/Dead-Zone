@@ -59,6 +59,7 @@ void TestCameraScript::LateUpdate()
 	static bool wasMovingLastFrame = false;
 	POINT deltapos = INPUT->GetDeltaPos();
 	bool isMoving = (_moveDir.x != 0.f || _moveDir.y != 0.f || _moveDir.z != 0.f);
+	bool isAttacking = INPUT->GetButton(MOUSE_TYPE::LBUTTON);
 
 	if (isMoving || deltapos.x != 0.f || deltapos.y != 0.f)
 	{
@@ -138,18 +139,24 @@ void TestCameraScript::LateUpdate()
 	//     pos.y = MAP_MAX_Y;
 
 	uint8_t newState = static_cast<uint8_t>(PLAYER_STATE::IDLE);
-	if (isMoving) {
-		_moveDir.Normalize();
-		Vec3 forward = GetTransform()->GetLook();
-		Vec3 right = GetTransform()->GetRight();
-		float fwd = _moveDir.x * forward.x + _moveDir.y * forward.y + _moveDir.z * forward.z;
-		float rgt = _moveDir.x * right.x + _moveDir.y * right.y + _moveDir.z * right.z;
-		if (fwd > 0.5f)             newState = static_cast<uint8_t>(PLAYER_STATE::RUN_FORWARD);
-		else if (fwd < -0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_BACKWARD);
-		else if (rgt > 0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_RIGHT);
-		else if (rgt < -0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_LEFT);
-		else                         newState = static_cast<uint8_t>(PLAYER_STATE::IDLE);
+	if (isAttacking) {
+		newState = static_cast<uint8_t>(PLAYER_STATE::FIRE);
 	}
+	else if (isMoving) {
+			_moveDir.Normalize();
+			Vec3 forward = GetTransform()->GetLook();
+			Vec3 right = GetTransform()->GetRight();
+			float fwd = _moveDir.x * forward.x + _moveDir.y * forward.y + _moveDir.z * forward.z;
+			float rgt = _moveDir.x * right.x + _moveDir.y * right.y + _moveDir.z * right.z;
+			if (fwd > 0.5f)             newState = static_cast<uint8_t>(PLAYER_STATE::RUN_FORWARD);
+			else if (fwd < -0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_BACKWARD);
+			else if (rgt > 0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_RIGHT);
+			else if (rgt < -0.5f)        newState = static_cast<uint8_t>(PLAYER_STATE::RUN_LEFT);
+			else                         newState = static_cast<uint8_t>(PLAYER_STATE::IDLE);
+	}
+	else {
+		newState = static_cast<uint8_t>(PLAYER_STATE::IDLE);
+		}
 
 	static uint8_t lastState = 255;
 	if (newState != lastState) {
