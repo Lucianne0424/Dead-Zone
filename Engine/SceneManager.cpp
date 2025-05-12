@@ -440,6 +440,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 			material->SetTexture(0, texture);
 			meshRenderer->SetMaterial(material);
 		}
+		crosshair->SetName(L"Crosshair");
 		crosshair->AddComponent(meshRenderer);
 		scene->AddGameObject(crosshair);
 	}

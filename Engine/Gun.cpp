@@ -121,10 +121,12 @@ void Gun::input()
 	if (INPUT->GetButton(MOUSE_TYPE::RBUTTON))
 	{
 		_isAiming = true;
+		GET_SINGLE(SceneManager)->GetActiveScene()->FindGameObject(L"Crosshair")->SetActive(false); // 조준선 비활성화
 	}
 	else
 	{
 		_isAiming = false;
+		GET_SINGLE(SceneManager)->GetActiveScene()->FindGameObject(L"Crosshair")->SetActive(true); // 조준선 활성화
 	}
 
 }

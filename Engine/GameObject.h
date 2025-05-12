@@ -48,10 +48,15 @@ public:
 	void SetStatic(bool flag) { _static = flag; }
 	bool IsStatic() { return _static; }
 
+	// 업데이트 및 랜더링 여부
+	void SetActive(bool active) { _isActive = active; }
+	bool IsActive() const { return _isActive; }
+
 private:
 	array<shared_ptr<Component>, FIXED_COMPONENT_COUNT> _components;
 	vector<shared_ptr<MonoBehaviour>> _scripts;
 
+	bool _isActive = true;
 	bool _checkFrustum = true;
 	uint8 _layerIndex = 0;
 	bool _static = false;

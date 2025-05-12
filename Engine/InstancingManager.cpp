@@ -12,6 +12,7 @@ void InstancingManager::Render(vector<shared_ptr<GameObject>>& gameObjects)
 
 	for (shared_ptr<GameObject>& gameObject : gameObjects)
 	{
+		if (!gameObject->IsActive()) continue;
 		const uint64 instanceId = gameObject->GetMeshRenderer()->GetInstanceID();
 		cache[instanceId].push_back(gameObject);
 	}
