@@ -111,6 +111,8 @@ void TestCameraScript::LateUpdate()
 			Vec3 pos = static_pointer_cast<AK47>(gun->GetMonoBehaviour(L"AK47"))->GetNomalParticlePos();
 			static_pointer_cast<AK47>(gun->GetMonoBehaviour(L"AK47"))->setParticlePos(pos);
 		}
+	}
+
 	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
 	{
 		shared_ptr<GameObject> obj = GET_SINGLE(SceneManager)->Pick(GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2);
