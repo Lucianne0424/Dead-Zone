@@ -212,5 +212,11 @@ extern unique_ptr<class Engine> GEngine;
 wstring s2ws(const string& s);
 string ws2s(const wstring& s);
 
+template<typename T>
+T Lerp(const T& a, const T& b, float t)
+{
+	return a * (1.0f - t) + b * t;
+}
+
 #define RadianToDegree(radian) ((radian) * (180.0f / XM_PI))
 #define DegreeToRadian(degree) ((degree) * (XM_PI / 180.0f))

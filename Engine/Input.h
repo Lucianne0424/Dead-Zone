@@ -26,6 +26,7 @@ enum class KEY_TYPE
 	C = DIK_C,
 
 	R = DIK_R,
+	F = DIK_F,
 
 	KEY_1 = DIK_1,
 	KEY_2 = DIK_2,
