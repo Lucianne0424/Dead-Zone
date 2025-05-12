@@ -14,13 +14,16 @@
 #include "Resources.h"
 #include "ParticleSystem.h"
 #include "Terrain.h"
+#include "BaseCollider.h"
 #include "SphereCollider.h"
+#include "OrientedBoxCollider.h"
 #include "MeshData.h"
 #include "TestDragon.h"
 
 #include "Zombie.h"
 #include "M4A1.h"
 #include "AK47.h"
+
 
 #include "Container.h"
 
@@ -224,8 +227,24 @@ shared_ptr<GameObject> SceneManager::Pick(int32 screenX, int32 screenY)
 
 		// WorldSpace에서 연산
 		float distance = 0.f;
-		if (gameObject->GetCollider()->Intersects(rayOrigin, rayDir, OUT distance) == false)
+
+		ColliderType colliderType = gameObject->GetCollider()->GetColliderType();
+		if (colliderType == ColliderType::SPHERE)
+		{
+			shared_ptr<SphereCollider> sphere = static_pointer_cast<SphereCollider>(gameObject->GetCollider());
+			if (sphere->Intersects(rayOrigin, rayDir, OUT distance) == false)
+				continue;
+		}
+		else if (colliderType == ColliderType::OBB)
+		{
+			shared_ptr<OrientedBoxCollider> obb = static_pointer_cast<OrientedBoxCollider>(gameObject->GetCollider());
+			if (obb->Intersects(rayOrigin, rayDir, OUT distance) == false)
+				continue;
+		}
+		else
+		{
 			continue;
+		}
 
 		if (distance < minDistance)
 		{
