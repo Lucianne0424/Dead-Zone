@@ -17,12 +17,6 @@
 #include "M4A1.h"
 #include "AK47.h"
 
-template<typename T>
-T Lerp(const T& a, const T& b, float t)
-{
-	return a * (1.0f - t) + b * t;
-}
-
 TestCameraScript::TestCameraScript()
 {
 	_name = L"MainCamera";
