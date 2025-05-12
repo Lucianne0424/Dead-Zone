@@ -16,10 +16,15 @@ public:
 	void Fire();
 	void Reload();
 	void Recoil(float pitchAmount, float yawAmount);
+	void Aiming(float aimFov, Vec3 aimPos);
+
+	float IsAiming() { return _isAiming; }
 
 	void input(); // 임시, 나중에 위치 변경 할 예정
 	
+	// 파티클 관련 함수
 	void InitializeParticle();
+	void setParticlePos(Vec3 pos);
 
 	bool GetInitialized() { return _initialized; }
 
@@ -39,6 +44,13 @@ protected:
 	static shared_ptr<GameObject> _particle;
 	float _gunRecoilTime; // 총기 반동 시간
 	float _cameraRecoilTime; // 카메라 반동 시간
-	
-	
+
+
+	// 정조준
+	bool _isAiming = false;
+
+	//TODO
+	//float _aimElapsed = 0.f;
+	//float _startFov = 90.f;
+	//Vec3 _startPos = Vec3(0.f, 0.f, 0.f);
 };

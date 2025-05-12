@@ -40,6 +40,7 @@ void Scene::Update()
 {
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
 	{
+		if (!gameObject->IsActive()) continue;
 		gameObject->Update();
 	}
 }
@@ -68,6 +69,7 @@ void Scene::LateUpdate()
 
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
 	{
+		if (!gameObject->IsActive()) continue;
 		gameObject->LateUpdate();
 	}
 }
@@ -76,6 +78,7 @@ void Scene::FinalUpdate()
 {
 	for (const shared_ptr<GameObject>& gameObject : _gameObjects)
 	{
+		if (!gameObject->IsActive()) continue;
 		gameObject->FinalUpdate();
 	}
 }
@@ -86,6 +89,17 @@ shared_ptr<class Camera> Scene::GetMainCamera()
 		return nullptr;
 
 	return _cameras[0];
+}
+
+shared_ptr<class Camera> Scene::GetGunCamera()
+{
+	for (const shared_ptr<Camera>& camera : _cameras)
+	{
+		if (camera->GetGameObject()->GetName() == L"Gun_Camera")
+			return camera;
+	}
+
+	return nullptr;
 }
 
 void Scene::Render()
