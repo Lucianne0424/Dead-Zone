@@ -41,11 +41,15 @@ public:
 	void SetNear(float value) { _near = value; }
 	void SetFar(float value) { _far = value; }
 	void SetFOV(float value) { _fov = value; }
+	void SetNormalFOV(float value) { _normalFov = value; } // fov 기본값 설정
 	void SetScale(float value) { _scale = value; }
 	void SetWidth(float value) { _width = value; }
 	void SetHeight(float value) { _height = value; }
+	
 
 	float GetFOV() { return _fov; }
+	float GetNormalFOV() { return _normalFov; } // fov 기본값 가져오기
+	
 
 	Matrix& GetViewMatrix() { return _matView; }
 	Matrix& GetProjectionMatrix() { return _matProjection; }
@@ -58,6 +62,7 @@ private:
 	float _near = 1.f;
 	float _far = 1000.f;
 	float _fov = 90.f;
+	float _normalFov = 90.f; // fov 기본값
 	float _scale = 1.f;
 	float _width = 0.f;
 	float _height = 0.f;

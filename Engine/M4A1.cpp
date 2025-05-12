@@ -15,9 +15,11 @@
 #include "Timer.h"
 
 
+//fov 60도 기준 ( 현재 GunCamera가 fov 60도 )
 Vec3 M4A1::_basePosition = { 10.f, -10.f, 20.f };
 Vec3 M4A1::_baseRotation = { 270.f, 0.f, 0.f };
 Vec3 M4A1::_baseScale = { 4.0f, 4.0f, 4.0f };
+Vec3 M4A1::_aimingPosition = { 0.f, -7.8f, 15.f };
 
 
 M4A1::M4A1()
@@ -35,7 +37,7 @@ void M4A1::Awake()
 	GetTransform()->SetLocalRotation(_baseRotation);
 	GetTransform()->SetLocalScale(_baseScale);
 
-	shared_ptr<Camera> camera = GET_SINGLE(SceneManager)->GetActiveScene()->GetMainCamera();
+	shared_ptr<Camera> camera = GET_SINGLE(SceneManager)->GetActiveScene()->GetGunCamera();
 	shared_ptr<Transform> parentTransform = camera->GetTransform();
 	GetTransform()->SetParent(parentTransform);
 
@@ -48,6 +50,10 @@ void M4A1::Awake()
 	}
 	_particle->GetTransform()->SetParent(GetTransform());
 	_particle->GetTransform()->SetLocalPosition(Vec3(0.0f, -4.3f, 1.35f));
+
+	//TODO
+	/*_startFov = camera->GetNormalFOV();
+	_startPos = _basePosition;*/
 }
 
 void M4A1::Update()
@@ -68,6 +74,13 @@ void M4A1::Update()
 		// 복구
 		GetTransform()->SetLocalRotation(_baseRotation);
 	}
+
+	// 정조준 처리
+	// fov 설정
+	float fov = IsAiming() ? _info.fov : GET_SINGLE(SceneManager)->GetActiveScene()->GetMainCamera()->GetNormalFOV();
+	Vec3 pos = IsAiming() ? _aimingPosition : _basePosition;
+	Aiming(fov, pos);
+	
 }
 
 void M4A1::LateUpdate()
