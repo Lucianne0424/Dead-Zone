@@ -221,6 +221,7 @@ void TestCameraScript::ProcessKeyInput()
 			Vec3 pos = static_pointer_cast<AK47>(gun->GetMonoBehaviour(L"AK47"))->GetNomalParticlePos();
 			static_pointer_cast<AK47>(gun->GetMonoBehaviour(L"AK47"))->setParticlePos(pos);
 		}
+	}
 }
 
 void TestCameraScript::ProcessMouseInput()
