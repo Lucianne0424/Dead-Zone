@@ -20,6 +20,7 @@ enum class ZOMBIE_TYPE : uint8
 enum class GUN_TYPE : uint8
 {
 	M4A1,
+	AK47,
 
 	END
 };

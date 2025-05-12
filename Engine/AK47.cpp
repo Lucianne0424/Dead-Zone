@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "M4A1.h"
+#include "AK47.h"
 #include "EnginePch.h"
 
 #include "Transform.h"
@@ -16,23 +16,23 @@
 
 
 //fov 60도 기준 ( 현재 GunCamera가 fov 60도 )
-Vec3 M4A1::_basePosition = { 10.f, -10.f, 20.f };
-Vec3 M4A1::_baseRotation = { 270.f, 0.f, 0.f };
-Vec3 M4A1::_baseScale = { 4.0f, 4.0f, 4.0f };
-Vec3 M4A1::_aimingPosition = { 0.f, -7.8f, 15.f };
-Vec3 M4A1::_ParticlePosition = { 0.0f, -4.3f, 1.35f };
+Vec3 AK47::_basePosition = { 10.f, -8.f, 18.f };
+Vec3 AK47::_baseRotation = { 270.f, 180.f, 0.f };
+Vec3 AK47::_baseScale = { 0.1f, 0.1f, 0.1f };
+Vec3 AK47::_aimingPosition = { 0.f, -4.5f, 12.f };
+Vec3 AK47::_ParticlePosition = { 0.0f, 180.0f, 33.0f };
 
 
-M4A1::M4A1()
+AK47::AK47()
 {
-	_name = L"M4A1";
+	_name = L"AK47";
 }
 
-M4A1::~M4A1()
+AK47::~AK47()
 {
 }
 
-void M4A1::Awake()
+void AK47::Awake()
 {
 	GetTransform()->SetLocalPosition(_basePosition);
 	GetTransform()->SetLocalRotation(_baseRotation);
@@ -42,7 +42,7 @@ void M4A1::Awake()
 	shared_ptr<Transform> parentTransform = camera->GetTransform();
 	GetTransform()->SetParent(parentTransform);
 
-	shared_ptr<GunInfo> info = GET_SINGLE(GameInfo)->Get<GunInfo>(L"M4A1");
+	shared_ptr<GunInfo> info = GET_SINGLE(GameInfo)->Get<GunInfo>(L"AK47");
 	_info = *info;
 
 	if (GetInitialized())
@@ -58,7 +58,7 @@ void M4A1::Awake()
 	_startPos = _basePosition;*/
 }
 
-void M4A1::Update()
+void AK47::Update()
 {
 	input(); // 임시 총기와 관련된 입력 처리
 
@@ -82,9 +82,9 @@ void M4A1::Update()
 	float fov = IsAiming() ? _info.fov : GET_SINGLE(SceneManager)->GetActiveScene()->GetMainCamera()->GetNormalFOV();
 	Vec3 pos = IsAiming() ? _aimingPosition : _basePosition;
 	Aiming(fov, pos);
-	
+
 }
 
-void M4A1::LateUpdate()
+void AK47::LateUpdate()
 {
 }

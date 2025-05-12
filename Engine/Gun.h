@@ -24,6 +24,7 @@ public:
 	
 	// 파티클 관련 함수
 	void InitializeParticle();
+	void setParticlePos(Vec3 pos);
 
 	bool GetInitialized() { return _initialized; }
 

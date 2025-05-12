@@ -145,3 +145,9 @@ void Gun::InitializeParticle()
 	GET_SINGLE(SceneManager)->GetActiveScene()->AddGameObject(_particle);
 	_initialized = false;
 }
+
+void Gun::setParticlePos(Vec3 pos)
+{
+	_particle->GetTransform()->SetParent(GetTransform());
+	_particle->GetTransform()->SetLocalPosition(pos);
+}

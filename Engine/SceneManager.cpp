@@ -20,6 +20,7 @@
 
 #include "Zombie.h"
 #include "M4A1.h"
+#include "AK47.h"
 
 #include "Container.h"
 
@@ -73,8 +74,14 @@ void SceneManager::RenderUI()
 			static_cast<float>(GEngine->GetWindow().width - 100),
 			static_cast<float>(GEngine->GetWindow().height - 50) };
 		D2D1_RECT_F textRect = D2D1::RectF(pivot.x - 100, pivot.y - 100, pivot.x + 100, pivot.y + 100);
-
-		int32 currentAmmo = static_pointer_cast<M4A1>(_activeScene->FindGameObject(L"M4A1")->GetMonoBehaviour(L"M4A1"))->GetCurrentAmmo();
+		int32 currentAmmo = 0;
+		
+		int32 gunType = static_pointer_cast<TestCameraScript>(_activeScene->FindGameObject(L"Main_Camera")->GetMonoBehaviour(L"MainCamera"))->getGunType();
+		if (gunType == 0)
+			currentAmmo = static_pointer_cast<M4A1>(_activeScene->FindGameObject(L"M4A1")->GetMonoBehaviour(L"M4A1"))->GetCurrentAmmo();
+		else if (gunType == 1)
+			currentAmmo = static_pointer_cast<M4A1>(_activeScene->FindGameObject(L"AK47")->GetMonoBehaviour(L"AK47"))->GetCurrentAmmo();
+		
 		std::wstringstream wss1;
 		wss1 << std::fixed << std::setprecision(2) << currentAmmo;
 		wstring text = L"탄창: ";
@@ -234,8 +241,8 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 {
 #pragma region LayerMask
 	SetLayerName(0, L"Default");
-	SetLayerName(1, L"UI");
-	SetLayerName(2, L"Gun"); // 총 UI 별도 처리
+	SetLayerName(1, L"Gun"); // 총 UI 별도 처리
+	SetLayerName(2, L"UI");
 #pragma endregion
 
 #pragma region ComputeShader
@@ -446,7 +453,7 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 	}
 #pragma endregion
 
-#pragma region FirstPerspective
+#pragma region M4A1
 	{
 		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\M4A1.fbx");
 
@@ -465,12 +472,42 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 			}
 			gameObject->SetLayerIndex(gunLayer);
 			gameObject->SetCheckFrustum(false);
+			gameObject->SetActive(false);
 			
 			scene->AddGameObject(gameObject);
 			gameObject->AddComponent(make_shared<M4A1>());
 		}
 
 		gameObjects[0]->SetName(L"M4A1");
+	}
+#pragma endregion
+
+#pragma region AK47
+	{
+		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\AK74.fbx");
+
+		vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+		uint8 gunLayer = GET_SINGLE(SceneManager)->LayerNameToIndex(L"Gun");
+
+		for (auto& gameObject : gameObjects)
+		{
+			if (gameObject->GetMeshRenderer())
+			{
+				auto mat = gameObject->GetMeshRenderer()->GetMaterial()->Clone(); // 기존 머티리얼 복사
+				auto shader = GET_SINGLE(Resources)->Get<Shader>(L"Forward"); // FORWARD 타입 셰이더
+
+				mat->SetShader(shader);
+				gameObject->GetMeshRenderer()->SetMaterial(mat);
+			}
+			gameObject->SetLayerIndex(gunLayer);
+			gameObject->SetCheckFrustum(false);
+			gameObject->SetActive(true);
+
+			scene->AddGameObject(gameObject);
+			gameObject->AddComponent(make_shared<AK47>());
+		}
+
+		gameObjects[0]->SetName(L"AK47");
 	}
 #pragma endregion
 

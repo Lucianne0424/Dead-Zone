@@ -6,7 +6,11 @@
 #include "Input.h"
 #include "Timer.h"
 #include "SceneManager.h"
-
+#include "Scene.h"
+#include "ParticleSystem.h"
+#include "Gun.h"
+#include "M4A1.h"
+#include "AK47.h"
 
 TestCameraScript::TestCameraScript()
 {
@@ -67,6 +71,30 @@ void TestCameraScript::LateUpdate()
 		GetTransform()->SetLocalRotation(rotation);
 	}
 
+	if (INPUT->GetButtonDown(KEY_TYPE::F))
+	{
+		// 테스트용 임시로 대충 만듦
+		_GunType = (_GunType + 1) % _MaxGunType;
+		if (_GunType == 0)
+		{
+			GET_SINGLE(SceneManager)->GetActiveScene()->FindGameObject(L"M4A1")->SetActive(true);
+			GET_SINGLE(SceneManager)->GetActiveScene()->FindGameObject(L"AK47")->SetActive(false);
+
+			auto gun = GET_SINGLE(SceneManager)->GetActiveScene()->FindGameObject(L"M4A1");
+			gun->SetActive(true);
+			Vec3 pos = static_pointer_cast<M4A1>(gun->GetMonoBehaviour(L"M4A1"))->GetNomalParticlePos();
+			static_pointer_cast<M4A1>(gun->GetMonoBehaviour(L"M4A1"))->setParticlePos(pos);
+
+		}
+		else if (_GunType == 1)
+		{
+			GET_SINGLE(SceneManager)->GetActiveScene()->FindGameObject(L"M4A1")->SetActive(false);
+			auto gun = GET_SINGLE(SceneManager)->GetActiveScene()->FindGameObject(L"AK47");
+			gun->SetActive(true);
+			Vec3 pos = static_pointer_cast<AK47>(gun->GetMonoBehaviour(L"AK47"))->GetNomalParticlePos();
+			static_pointer_cast<AK47>(gun->GetMonoBehaviour(L"AK47"))->setParticlePos(pos);
+		}
+	}
 
 	POINT deltaPos = INPUT->GetDeltaPos();
 

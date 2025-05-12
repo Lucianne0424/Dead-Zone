@@ -70,5 +70,27 @@ void GameInfo::CreateDefaultGunInfo()
 			});
 		Add<GunInfo>(L"M4A1", info);
 	}
+
+	// AK47 Info
+	{
+		shared_ptr<GunInfo> info = make_shared<GunInfo>(
+			GunInfo
+			{
+				INFO_TYPE::GUN,
+				L"AK47",
+				GUN_TYPE::AK47,
+
+				80,					// 공격력
+				8.f,				// 발사 속도 (발/s)	
+				300.f,				// 사거리 (m)	
+				2.5f,				// 재장전 속도 (s)
+				30,					// 장탄수
+				3470,				// 무게 (g)
+				3.f,				// 반동
+				60.f,				// 정조준 시 시야각
+				1.f,				// 정조준 속도 (s)
+			});
+		Add<GunInfo>(L"AK47", info);
+	}
 }
 

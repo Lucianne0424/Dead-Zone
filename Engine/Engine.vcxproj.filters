@@ -199,6 +199,11 @@
     <ClCompile Include="OrientedBoxCollider.cpp">
       <Filter>Object\Component\Collider</Filter>
     </ClCompile>
+    <ClCompile Include="D3D11On12Device.cpp" />
+    <ClCompile Include="Stage01.cpp" />
+    <ClCompile Include="AK47.cpp">
+      <Filter>Object\Gun</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -357,6 +362,11 @@
     <ClInclude Include="TextUI.h" />
     <ClInclude Include="OrientedBoxCollider.h">
       <Filter>Object\Component\Collider</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11On12Device.h" />
+    <ClInclude Include="Stage01.h" />
+    <ClInclude Include="AK47.h">
+      <Filter>Object\Gun</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
