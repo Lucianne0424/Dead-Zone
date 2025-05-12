@@ -12,6 +12,7 @@
 #include "Gun.h"
 #include "M4A1.h"
 #include "AK47.h"
+#include "Zombie.h"
 
 TestCameraScript::TestCameraScript()
 {
@@ -116,6 +117,8 @@ void TestCameraScript::LateUpdate()
 	if (INPUT->GetButtonDown(MOUSE_TYPE::LBUTTON))
 	{
 		shared_ptr<GameObject> obj = GET_SINGLE(SceneManager)->Pick(GEngine->GetWindow().width / 2, GEngine->GetWindow().height / 2);
+		
+		
 	}
 
 	POINT deltaPos = INPUT->GetDeltaPos();
