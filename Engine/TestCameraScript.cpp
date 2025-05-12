@@ -139,7 +139,7 @@ void TestCameraScript::LateUpdate()
 	//     pos.y = MAP_MAX_Y;
 
 	uint8_t newState = static_cast<uint8_t>(PLAYER_STATE::IDLE);
-	if (isAttacking) {
+	if (isAttacking && !isMoving) {
 		newState = static_cast<uint8_t>(PLAYER_STATE::FIRE);
 	}
 	else if (isMoving) {
