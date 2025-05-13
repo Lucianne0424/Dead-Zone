@@ -660,27 +660,27 @@ shared_ptr<Scene> SceneManager::LoadTestScene()
 //
 //#pragma endregion
 
-#pragma region Zombie
-	{
-		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
-
-		for (int i = 0; i < 10; i++)
-		{
-			vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
-
-			for (auto& gameObject : gameObjects)
-			{
-				gameObject->SetName(L"Zombie");
-				gameObject->SetCheckFrustum(false);
-				gameObject->GetTransform()->SetLocalPosition(Vec3(-800.f + (160.f * i), 70.f, 2000.f));
-				gameObject->GetTransform()->SetLocalScale(Vec3(2.f, 2.f, 2.f));
-				gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
-				scene->AddGameObject(gameObject);
-				gameObject->AddComponent(make_shared<Zombie>());
-			}
-		}
-	}
-#pragma endregion
+//#pragma region Zombie
+//	{
+//		shared_ptr<MeshData> meshData = GET_SINGLE(Resources)->LoadFBX(L"..\\Resources\\FBX\\NormalZombie.fbx");
+//
+//		for (int i = 0; i < 10; i++)
+//		{
+//			vector<shared_ptr<GameObject>> gameObjects = meshData->Instantiate();
+//
+//			for (auto& gameObject : gameObjects)
+//			{
+//				gameObject->SetName(L"Zombie");
+//				gameObject->SetCheckFrustum(false);
+//				gameObject->GetTransform()->SetLocalPosition(Vec3(-800.f + (160.f * i), 70.f, 2000.f));
+//				gameObject->GetTransform()->SetLocalScale(Vec3(2.f, 2.f, 2.f));
+//				gameObject->GetTransform()->SetLocalRotation(Vec3(-90.f, 0.f, 0.f));
+//				scene->AddGameObject(gameObject);
+//				gameObject->AddComponent(make_shared<Zombie>());
+//			}
+//		}
+//	}
+//#pragma endregion
 
 #pragma region TestFBX
 	{

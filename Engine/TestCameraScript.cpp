@@ -222,6 +222,7 @@ void TestCameraScript::ProcessMouseInput()
 				sizeof(atkPkt),
 				0);
 		}
+	}
 
 	if (INPUT->GetButton(KEY_TYPE::C))
 	{
