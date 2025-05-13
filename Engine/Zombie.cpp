@@ -5,6 +5,13 @@
 #include "Transform.h"
 #include "Animator.h"
 
+#include "Scene.h"
+#include "SceneManager.h"
+#include "EnginePch.h"
+
+#include "BloodParticle.h"
+#include "GameObject.h"
+
 Zombie::Zombie()
 {
 	_name = L"Zombie";
@@ -25,6 +32,19 @@ Zombie::~Zombie()
 
 void Zombie::Awake()
 {
+	// 파티클 생성
+	_particle = make_shared<GameObject>();
+	_particle->AddComponent(make_shared<Transform>());
+	_blood = make_shared<BloodParticle>();
+	_particle->AddComponent(_blood);
+
+
+	_particle->GetTransform()->SetParent(GetTransform());
+	_particle->GetTransform()->SetLocalPosition(Vec3(0.f, 13.f, 100.f));
+	_particle->SetCheckFrustum(false);
+
+	GET_SINGLE(SceneManager)->GetActiveScene()->AddGameObject(_particle);
+	_blood->SetActive(true);
 }
 
 void Zombie::Start()

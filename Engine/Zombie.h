@@ -52,8 +52,11 @@ public:
 private:
 	ZOMBIE_STATE _state;
 	ZombieInfo _info;
+	shared_ptr<class GameObject> _particle;
+	shared_ptr<class BloodParticle> _blood;
 
 private:
+	bool _initialized = false;
 	float _changeDirectionTime;
 	float _elapsedTime;
 	bool _moving;

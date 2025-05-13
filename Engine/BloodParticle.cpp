@@ -13,10 +13,10 @@ BloodParticle::BloodParticle()
 	_computeSharedBuffer->Init(sizeof(ComputeSharedInfo), 1);
 
 	// 파라미터 설정
-	SetMaxParticle(20);
-	SetLifeTime(0.2f, 0.5f);
-	SetSpeed(20.0f, 50.f);
-	SetScale(5.f, 2.5f);
+	SetMaxParticle(30);
+	SetLifeTime(1.2f, 1.5f);
+	SetSpeed(50.0f, 100.f);
+	SetScale(50.f, 25.f);
 	SetlifeTime(0.1f);
 	SetCreateInterval(0.005f);
 	SetParticleType(PARTICLE_TYPE::BLOOD);
@@ -24,7 +24,7 @@ BloodParticle::BloodParticle()
 
 	// 텍스처 설정
 	shared_ptr<Texture> tex = GET_SINGLE(Resources)->Load<Texture>(
-		L"Fire", L"..\\Resources\\Texture\\Particle\\Blood.png");
+		L"Blood", L"..\\Resources\\Texture\\Particle\\Blood.png");
 	SetTexture(tex);
 }
 
